@@ -1,0 +1,214 @@
+/* =============================================
+   ODONTOGRAMA VISUAL
+   ============================================= */
+
+.odontogram-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.odontogram-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.odontogram-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.odontogram-row-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.odontogram-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 8px 0;
+}
+
+.tooth-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.tooth-wrapper:hover {
+  background: var(--primary-50);
+}
+
+.tooth-wrapper.selected {
+  background: var(--primary-20);
+  box-shadow: 0 0 0 2px var(--primary);
+  border-radius: var(--radius-md);
+}
+
+.tooth {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  position: relative;
+  transition: all var(--transition-fast);
+  background: var(--bg-input);
+}
+
+.tooth-number {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Colores por condición */
+.tooth.sano {
+  border-color: var(--success);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.tooth.caries {
+  border-color: var(--error);
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.tooth.obturado {
+  border-color: var(--info);
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.tooth.ausente {
+  border-color: var(--text-muted);
+  background: rgba(100, 116, 139, 0.15);
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.tooth.fracturado {
+  border-color: var(--warning);
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.tooth.endodoncia {
+  border-color: #EC4899;
+  background: rgba(236, 72, 153, 0.15);
+  color: #EC4899;
+}
+
+.tooth.corona {
+  border-color: var(--accent);
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--accent);
+}
+
+.tooth.puente {
+  border-color: #06B6D4;
+  background: rgba(6, 182, 212, 0.15);
+  color: #06B6D4;
+}
+
+.tooth.sellante {
+  border-color: #22D3EE;
+  background: rgba(34, 211, 238, 0.15);
+  color: #22D3EE;
+}
+
+.tooth.protesis {
+  border-color: #A78BFA;
+  background: rgba(167, 139, 250, 0.15);
+  color: #A78BFA;
+}
+
+/* Tooth Detail Panel */
+.tooth-detail-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-top: 24px;
+  animation: fadeInUp 0.3s ease;
+}
+
+.tooth-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.tooth-detail-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+/* Odontogram Legend */
+.odontogram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-top: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid;
+}
+
+@media (max-width: 640px) {
+  .tooth {
+    width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+
+  .tooth-number {
+    font-size: 8px;
+  }
+
+  .odontogram-row {
+    gap: 2px;
+  }
+
+  .tooth-wrapper {
+    padding: 2px;
+  }
+}
