@@ -59,13 +59,18 @@ export default function SearchPage() {
       return;
     }
 
-    if (listening) {
-      recognitionRef.current.stop();
+    try {
+      if (listening) {
+        recognitionRef.current.stop();
+        setListening(false);
+      } else {
+        recognitionRef.current.start();
+        setListening(true);
+        toast.info('Escuchando... Diga el número de DNI');
+      }
+    } catch (e) {
+      console.warn('Speech recognition state error:', e);
       setListening(false);
-    } else {
-      recognitionRef.current.start();
-      setListening(true);
-      toast.info('Escuchando... Diga el número de DNI');
     }
   };
 

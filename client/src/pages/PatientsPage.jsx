@@ -101,7 +101,8 @@ export default function PatientsPage() {
         </div>
       ) : (
         <>
-          <div className="table-container">
+          {/* Vista de Tabla (Desktop) */}
+          <div className="table-container desktop-only-view">
             <table className="table">
               <thead>
                 <tr>
@@ -147,6 +148,42 @@ export default function PatientsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Vista de Tarjetas (Móvil) */}
+          <div className="mobile-only-view patient-cards-mobile-list">
+            {patients.map((p) => (
+              <div key={p.id} className="patient-mobile-card">
+                <div className="patient-mobile-card-top">
+                  <div className="patient-avatar-sm">
+                    {p.first_name?.[0]}{p.last_name?.[0]}
+                  </div>
+                  <div className="patient-mobile-info">
+                    <h4 className="patient-mobile-name">{p.first_name} {p.last_name}</h4>
+                    <span className="patient-mobile-dni">DNI: {p.dni}</span>
+                  </div>
+                  <span className="badge badge-info">{p.age ? `${p.age} años` : 'S/E'}</span>
+                </div>
+                <div className="patient-mobile-card-details">
+                  <div><span>Tel:</span> {p.phone || 'No registrado'}</div>
+                  <div><span>Reg:</span> {p.registration_date ? new Date(p.registration_date).toLocaleDateString('es-PE') : '-'}</div>
+                </div>
+                <div className="patient-mobile-card-actions">
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => navigate(`/historial/${p.id}`)}
+                  >
+                    <Eye size={16} /> Historial
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => { setEditingPatient(p); setShowForm(true); }}
+                  >
+                    <Edit size={16} /> Editar
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Paginación */}
