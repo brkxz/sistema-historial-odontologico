@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientService, reniecService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
-import { Search, Mic, MicOff, UserPlus, History, FilePlus, Phone, Mail, MapPin, Calendar, Globe, AlertCircle } from 'lucide-react';
+import { parseVoiceToDni } from '../utils/speechToDni';
+import { Search, Mic, MicOff, UserPlus, History, FilePlus, Phone, Mail, MapPin, Calendar, Globe, AlertCircle, Volume2, Sparkles } from 'lucide-react';
 
 export default function SearchPage() {
   const [dni, setDni] = useState('');
@@ -12,37 +13,43 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [loadingReniec, setLoadingReniec] = useState(false);
   const [listening, setListening] = useState(false);
+  const [voiceHeardText, setVoiceHeardText] = useState('');
   const recognitionRef = useRef(null);
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Inicializar reconocimiento de voz
+  // Inicializar reconocimiento de voz inteligente
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-PE';
       recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.interimResults = true;
 
       recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        // Extraer números del texto hablado
-        const numbers = transcript.replace(/\D/g, '');
-        if (numbers) {
-          setDni(numbers);
-          toast.info(`DNI detectado: ${numbers}`);
-          // Auto-buscar
-          setTimeout(() => searchPatient(numbers), 500);
-        } else {
-          toast.warning('No se detectó un número de DNI');
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          interimTranscript += event.results[i][0].transcript;
         }
-        setListening(false);
+
+        setVoiceHeardText(interimTranscript);
+
+        const detectedDni = parseVoiceToDni(interimTranscript);
+        if (detectedDni && detectedDni.length === 8) {
+          setDni(detectedDni);
+          setListening(false);
+          try { recognition.stop(); } catch (e) {}
+          toast.success(`DNI detectado por voz: ${detectedDni}`);
+          setTimeout(() => searchPatient(detectedDni), 400);
+        }
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (e) => {
         setListening(false);
-        toast.error('Error en el reconocimiento de voz');
+        if (e.error !== 'no-speech') {
+          toast.error('No se pudo captar el audio o permiso denegado');
+        }
       };
 
       recognition.onend = () => {
@@ -213,6 +220,32 @@ export default function SearchPage() {
             )}
           </button>
         </div>
+
+        {/* Modal Interactivo de Escucha de Voz */}
+        {listening && (
+          <div className="voice-listening-overlay" onClick={toggleVoice}>
+            <div className="voice-listening-card" onClick={(e) => e.stopPropagation()}>
+              <div className="voice-pulse-circle">
+                <Mic size={36} className="voice-mic-icon" />
+                <div className="voice-wave wave-1" />
+                <div className="voice-wave wave-2" />
+                <div className="voice-wave wave-3" />
+              </div>
+              <h3 className="voice-listening-title">Escuchando DNI...</h3>
+              <p className="voice-listening-sub">
+                Diga el número claramente (ej: <em>"cuarenta y seis cero dos..."</em> o <em>"7 4 8 3..."</em>)
+              </p>
+              {voiceHeardText && (
+                <div className="voice-transcription-preview">
+                  <Sparkles size={14} /> "{voiceHeardText}"
+                </div>
+              )}
+              <button className="btn btn-secondary btn-sm mt-md" onClick={toggleVoice}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Resultado: Paciente encontrado */}
