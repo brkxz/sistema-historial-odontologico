@@ -252,30 +252,37 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: var(--bg-sidebar);
+  height: 68px;
+  background: rgba(11, 17, 32, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
   z-index: 100;
-  padding: 0 8px;
+  padding: 0 12px;
+  padding-bottom: env(safe-area-inset-bottom, 6px);
   justify-content: space-around;
   align-items: center;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .mobile-nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
   color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   transition: all var(--transition-fast);
   background: none;
   border: none;
   cursor: pointer;
   text-decoration: none;
+  flex: 1;
+  max-width: 72px;
 }
 
 .mobile-nav-item:hover,
@@ -287,9 +294,15 @@
   background: var(--primary-50);
 }
 
+.mobile-nav-item.active svg {
+  transform: scale(1.1);
+  color: var(--primary-light);
+}
+
 .mobile-nav-item svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-fast);
 }
 
 /* Mobile overlay */
@@ -298,6 +311,7 @@
   position: fixed;
   inset: 0;
   background: var(--bg-overlay);
+  backdrop-filter: blur(4px);
   z-index: 99;
 }
 
@@ -308,11 +322,12 @@
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);
+    width: 280px;
   }
 
   .sidebar.open {
     transform: translateX(0);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
   }
 
   .sidebar-overlay.visible {
@@ -332,22 +347,34 @@
   }
 
   .page-content {
-    padding: 16px;
-    padding-bottom: 80px;
+    padding: 14px 12px;
+    padding-bottom: 90px;
   }
 }
 
 @media (max-width: 640px) {
+  .header {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .header-title {
+    font-size: var(--font-size-md);
+  }
+
   .page-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
   }
 
   .page-title {
-    font-size: var(--font-size-xl);
+    font-size: 1.25rem;
   }
 
-  .header {
-    padding: 0 16px;
+  .page-header .btn {
+    width: 100%;
+    justify-content: center;
   }
 }

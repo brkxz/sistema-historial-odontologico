@@ -319,30 +319,77 @@
   font-weight: 500;
 }
 
-.patient-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
+@media (max-width: 640px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
 
-.patient-not-found {
-  max-width: 500px;
-  margin: 32px auto 0;
-  text-align: center;
-  padding: 40px;
-  animation: fadeInUp 0.3s ease;
-}
+  .stat-card {
+    padding: 14px 12px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
 
-.patient-not-found h3 {
-  font-size: var(--font-size-lg);
-  margin-bottom: 8px;
-  color: var(--text-secondary);
-}
+  .stat-card-icon {
+    width: 36px;
+    height: 36px;
+  }
 
-.patient-not-found p {
-  color: var(--text-muted);
-  margin-bottom: 20px;
-  font-size: var(--font-size-sm);
+  .stat-card-info .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .search-section {
+    padding: 16px 0;
+  }
+
+  .search-section h2 {
+    font-size: 1.35rem;
+  }
+
+  .search-box {
+    flex-direction: column;
+    gap: 10px;
+    max-width: 100%;
+  }
+
+  .search-box .btn {
+    width: 100%;
+  }
+
+  .search-box-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .patient-card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .patient-details {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .patient-actions {
+    flex-direction: column;
+  }
+
+  .patient-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-lg);
+  }
 }
 
 /* TREATMENT HISTORY */

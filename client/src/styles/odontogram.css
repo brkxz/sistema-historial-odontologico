@@ -193,22 +193,38 @@
   border: 2px solid;
 }
 
-@media (max-width: 640px) {
-  .tooth {
-    width: 28px;
-    height: 28px;
-    font-size: 9px;
-  }
-
-  .tooth-number {
-    font-size: 8px;
+@media (max-width: 768px) {
+  .odontogram-chart {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 8px;
   }
 
   .odontogram-row {
-    gap: 2px;
+    min-width: 540px;
+    gap: 3px;
+  }
+
+  .tooth {
+    width: 30px;
+    height: 30px;
+    font-size: 10px;
+  }
+
+  .tooth-number {
+    font-size: 9px;
   }
 
   .tooth-wrapper {
     padding: 2px;
+  }
+
+  .tooth-detail {
+    padding: 16px;
+  }
+
+  .odontogram-legend {
+    padding: 12px;
+    gap: 8px;
   }
 }
