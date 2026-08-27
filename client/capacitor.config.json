@@ -1,0 +1,9 @@
+{
+  "appId": "com.hospital.sanramon.odontologia",
+  "appName": "OdontoApp",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}
