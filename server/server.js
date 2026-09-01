@@ -18,6 +18,8 @@ import reniecRoutes from './routes/reniec.js';
 
 // Middleware
 import { authenticateToken } from './middleware/auth.js';
+import { apiLimiter } from './middleware/rateLimiter.js';
+import { sanitizeInputs } from './middleware/sanitize.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,12 +28,31 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // =============================================
-// MIDDLEWARE GLOBAL
+// MIDDLEWARE DE SEGURIDAD
 // =============================================
+
+// Helmet: Headers de seguridad HTTP
 app.use(helmet({
   crossOriginResourcePolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,       // 1 año
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  noSniff: true,
+  xssFilter: true,
 }));
-// CORS dinámico: acepta localhost (dev) y dominio de Vercel (producción)
+
+// CORS: Restringido a orígenes conocidos
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -43,17 +64,36 @@ if (process.env.FRONTEND_URL) {
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Permitir requests sin origin (apps móviles, curl, etc.)
+    // Permitir requests sin origin (apps móviles, Capacitor, curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed) || origin.includes('vercel.app'))) {
+    // Permitir orígenes de Vercel (preview y producción)
+    if (origin.includes('vercel.app')) return callback(null, true);
+    // Verificar contra lista de orígenes permitidos
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       return callback(null, true);
     }
-    callback(null, true); // En producción permitir todos temporalmente
+    // Rechazar orígenes no autorizados
+    console.warn(`⚠️ CORS: Origen no autorizado bloqueado: ${origin}`);
+    callback(new Error('No permitido por CORS'));
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400, // Cache preflight 24h
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+
+// Parseo de body con límites
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+
+// Rate limiting global para toda la API
+app.use('/api', apiLimiter);
+
+// Sanitización global de inputs
+app.use(sanitizeInputs);
+
+// Ocultar tecnología del servidor
+app.disable('x-powered-by');
 
 // =============================================
 // RUTAS DE LA API
@@ -84,6 +124,26 @@ app.get('/api/health', (req, res) => {
 });
 
 // =============================================
+// MANEJO DE ERRORES GLOBAL
+// =============================================
+app.use((err, req, res, next) => {
+  // Error de CORS
+  if (err.message === 'No permitido por CORS') {
+    return res.status(403).json({ error: 'Origen no autorizado' });
+  }
+  // Error de JSON malformado
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'JSON malformado' });
+  }
+  // Error de payload demasiado grande
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Solicitud demasiado grande' });
+  }
+  console.error('Error no manejado:', err);
+  res.status(500).json({ error: 'Error interno del servidor' });
+});
+
+// =============================================
 // INICIAR SERVIDOR
 // =============================================
 async function startServer() {
@@ -104,6 +164,7 @@ async function startServer() {
       console.log(`  Servidor:  http://localhost:${PORT}`);
       console.log(`  API:       http://localhost:${PORT}/api`);
       console.log(`  Estado:    http://localhost:${PORT}/api/health`);
+      console.log('  Seguridad: 🔒 Rate Limit + Helmet + CORS + Sanitize');
       console.log('════════════════════════════════════════════════════');
       console.log('');
     });

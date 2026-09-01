@@ -3,35 +3,139 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/index.js';
 import { generateToken } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
+import { loginLimiter, googleAuthLimiter } from '../middleware/rateLimiter.js';
+import { sanitizeInputs } from '../middleware/sanitize.js';
 
 const router = Router();
 
-// POST /api/auth/login
-router.post('/login', async (req, res) => {
+// =============================================
+// CONSTANTES DE SEGURIDAD
+// =============================================
+const MAX_FAILED_ATTEMPTS = 5;      // Intentos antes del primer bloqueo
+const LOCK_TIME_SHORT = 15 * 60 * 1000;   // 15 minutos
+const MAX_FAILED_ATTEMPTS_LONG = 10; // Intentos antes del bloqueo largo
+const LOCK_TIME_LONG = 60 * 60 * 1000;    // 1 hora
+
+// =============================================
+// HELPERS DE SEGURIDAD
+// =============================================
+
+/**
+ * Verifica si una cuenta está bloqueada.
+ * Retorna { locked: boolean, message?: string }
+ */
+function checkAccountLock(user) {
+  if (user.locked_until && new Date(user.locked_until) > new Date()) {
+    const minutesLeft = Math.ceil((new Date(user.locked_until) - new Date()) / 60000);
+    return {
+      locked: true,
+      message: `Cuenta bloqueada por seguridad. Intente en ${minutesLeft} minuto${minutesLeft > 1 ? 's' : ''}.`,
+    };
+  }
+  return { locked: false };
+}
+
+/**
+ * Registra un intento fallido y bloquea si es necesario.
+ */
+async function registerFailedAttempt(user, req) {
+  user.failed_login_attempts = (user.failed_login_attempts || 0) + 1;
+
+  if (user.failed_login_attempts >= MAX_FAILED_ATTEMPTS_LONG) {
+    // Bloqueo largo (1 hora)
+    user.locked_until = new Date(Date.now() + LOCK_TIME_LONG);
+    console.warn(`🔒 Cuenta "${user.username}" bloqueada 1 hora (${user.failed_login_attempts} intentos fallidos) - IP: ${req.ip}`);
+  } else if (user.failed_login_attempts >= MAX_FAILED_ATTEMPTS) {
+    // Bloqueo corto (15 minutos)
+    user.locked_until = new Date(Date.now() + LOCK_TIME_SHORT);
+    console.warn(`🔒 Cuenta "${user.username}" bloqueada 15 min (${user.failed_login_attempts} intentos fallidos) - IP: ${req.ip}`);
+  }
+
+  await user.save();
+
+  // Registrar en auditoría
+  try {
+    await logAudit(user.id, 'LOGIN_FAILED', 'user', user.id, null, {
+      attempts: user.failed_login_attempts,
+      ip: req.ip,
+      locked: !!user.locked_until,
+    }, req.ip);
+  } catch (e) {
+    // No fallar por error de auditoría
+  }
+}
+
+/**
+ * Resetea los intentos fallidos después de un login exitoso.
+ */
+async function resetFailedAttempts(user) {
+  if (user.failed_login_attempts > 0 || user.locked_until) {
+    user.failed_login_attempts = 0;
+    user.locked_until = null;
+    await user.save();
+  }
+}
+
+// =============================================
+// POST /api/auth/login - Login con credenciales
+// =============================================
+router.post('/login', loginLimiter, sanitizeInputs, async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    // Validar inputs
     if (!username || !password) {
       return res.status(400).json({ error: 'Usuario y contraseña son requeridos' });
+    }
+
+    // Validar longitud (prevenir ataques con payloads gigantes)
+    if (username.length > 50 || password.length > 128) {
+      return res.status(400).json({ error: 'Datos de entrada inválidos' });
     }
 
     // Buscar usuario
     const user = await User.findOne({ where: { username } });
 
     if (!user) {
+      // Respuesta genérica para no revelar si el usuario existe
+      // Agregar delay artificial para prevenir timing attacks
+      await bcrypt.hash('dummy_password', 10);
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
+    // Verificar si la cuenta está bloqueada
+    const lockStatus = checkAccountLock(user);
+    if (lockStatus.locked) {
+      return res.status(423).json({ error: lockStatus.message });
+    }
+
     if (!user.is_active) {
-      return res.status(401).json({ error: 'Usuario desactivado. Contacte al administrador.' });
+      return res.status(401).json({ error: 'Cuenta desactivada. Contacte al administrador.' });
+    }
+
+    // Verificar que sea un usuario local (no social)
+    if (user.auth_provider !== 'local' && !user.password_hash) {
+      return res.status(401).json({ error: 'Esta cuenta usa inicio de sesión con Google. Use el botón de Google.' });
     }
 
     // Verificar contraseña
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+      // Registrar intento fallido
+      await registerFailedAttempt(user, req);
+
+      const attemptsLeft = MAX_FAILED_ATTEMPTS - user.failed_login_attempts;
+      let errorMsg = 'Credenciales incorrectas';
+      if (attemptsLeft > 0 && attemptsLeft <= 2) {
+        errorMsg += `. ${attemptsLeft} intento${attemptsLeft > 1 ? 's' : ''} restante${attemptsLeft > 1 ? 's' : ''} antes del bloqueo.`;
+      }
+
+      return res.status(401).json({ error: errorMsg });
     }
+
+    // Login exitoso - resetear intentos fallidos
+    await resetFailedAttempts(user);
 
     // Generar token
     const token = generateToken(user);
@@ -56,10 +160,11 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// =============================================
 // GET /api/auth/me - Obtener usuario actual
+// =============================================
 router.get('/me', async (req, res) => {
   try {
-    // req.user ya está establecido por el middleware auth
     if (!req.user) {
       return res.status(401).json({ error: 'No autenticado' });
     }
@@ -80,8 +185,10 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// =============================================
 // POST /api/auth/google - Login con Google
-router.post('/google', async (req, res) => {
+// =============================================
+router.post('/google', googleAuthLimiter, sanitizeInputs, async (req, res) => {
   try {
     const { token } = req.body;
 
@@ -98,13 +205,19 @@ router.post('/google', async (req, res) => {
 
     const googleData = await googleResponse.json();
 
-    // Verificar que el token sea para nuestra app
+    // Verificar que el token sea para nuestra app (OBLIGATORIO)
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
-    if (googleClientId && googleClientId !== 'TU_GOOGLE_CLIENT_ID_AQUI' && googleData.aud !== googleClientId) {
+    if (!googleClientId || googleData.aud !== googleClientId) {
+      console.warn(`⚠️ Token de Google con aud incorrecto: ${googleData.aud}`);
       return res.status(401).json({ error: 'Token de Google no autorizado para esta aplicación' });
     }
 
-    const { sub: googleId, email, name, picture } = googleData;
+    // Verificar que el email esté verificado
+    if (googleData.email_verified !== 'true' && googleData.email_verified !== true) {
+      return res.status(401).json({ error: 'El email de Google no está verificado' });
+    }
+
+    const { sub: googleId, email, name } = googleData;
 
     // Buscar usuario existente por provider_id o email
     let user = await User.findOne({ 
@@ -145,6 +258,9 @@ router.post('/google', async (req, res) => {
       return res.status(403).json({ error: msg, pendingApproval: isNewUser });
     }
 
+    // Login exitoso - resetear intentos fallidos
+    await resetFailedAttempts(user);
+
     // Generar token JWT
     const jwtToken = generateToken(user);
 
@@ -169,5 +285,3 @@ router.post('/google', async (req, res) => {
 });
 
 export default router;
-
-
