@@ -44,13 +44,6 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const loginWithFacebook = async (token) => {
-    const data = await authService.loginWithFacebook(token);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    setUser(data.user);
-    return data;
-  };
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -62,7 +55,7 @@ export function AuthProvider({ children }) {
   const isDentist = user?.role === 'odontologo';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, loginWithFacebook, logout, isAdmin, isDentist }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, logout, isAdmin, isDentist }}>
       {children}
     </AuthContext.Provider>
   );

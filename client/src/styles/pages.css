@@ -192,26 +192,8 @@
   transform: translateY(0);
 }
 
-/* Facebook Button */
-.btn-facebook {
-  background: rgba(24, 119, 242, 0.08);
-  color: var(--text-primary);
-  border-color: rgba(24, 119, 242, 0.2);
-}
 
-.btn-facebook::before {
-  background: linear-gradient(135deg, rgba(24, 119, 242, 0.15), rgba(24, 119, 242, 0.05));
-}
 
-.btn-facebook:hover:not(:disabled) {
-  border-color: rgba(24, 119, 242, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(24, 119, 242, 0.2);
-}
-
-.btn-facebook:active:not(:disabled) {
-  transform: translateY(0);
-}
 
 .login-social-hint {
   margin-top: 14px;
