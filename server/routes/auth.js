@@ -121,8 +121,9 @@ router.post('/google', async (req, res) => {
       }
     }
 
+    let isNewUser = false;
     if (!user) {
-      // Crear nuevo usuario
+      // Crear nuevo usuario (inactivo hasta que el admin lo apruebe)
       const username = email ? email.split('@')[0] + '_g' : `google_${googleId.substring(0, 8)}`;
       user = await User.create({
         username,
@@ -132,12 +133,16 @@ router.post('/google', async (req, res) => {
         role: 'odontologo',
         auth_provider: 'google',
         provider_id: googleId,
-        is_active: true,
+        is_active: false,
       });
+      isNewUser = true;
     }
 
     if (!user.is_active) {
-      return res.status(401).json({ error: 'Usuario desactivado. Contacte al administrador.' });
+      const msg = isNewUser
+        ? 'Tu cuenta ha sido registrada y está pendiente de aprobación por el administrador.'
+        : 'Tu cuenta está desactivada. Contacte al administrador.';
+      return res.status(403).json({ error: msg, pendingApproval: isNewUser });
     }
 
     // Generar token JWT
@@ -204,8 +209,9 @@ router.post('/facebook', async (req, res) => {
       }
     }
 
+    let isNewUser = false;
     if (!user) {
-      // Crear nuevo usuario
+      // Crear nuevo usuario (inactivo hasta que el admin lo apruebe)
       const username = email ? email.split('@')[0] + '_fb' : `facebook_${facebookId.substring(0, 8)}`;
       user = await User.create({
         username,
@@ -215,12 +221,16 @@ router.post('/facebook', async (req, res) => {
         role: 'odontologo',
         auth_provider: 'facebook',
         provider_id: facebookId,
-        is_active: true,
+        is_active: false,
       });
+      isNewUser = true;
     }
 
     if (!user.is_active) {
-      return res.status(401).json({ error: 'Usuario desactivado. Contacte al administrador.' });
+      const msg = isNewUser
+        ? 'Tu cuenta ha sido registrada y está pendiente de aprobación por el administrador.'
+        : 'Tu cuenta está desactivada. Contacte al administrador.';
+      return res.status(403).json({ error: msg, pendingApproval: isNewUser });
     }
 
     // Generar token JWT
