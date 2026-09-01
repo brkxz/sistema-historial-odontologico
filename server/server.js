@@ -92,8 +92,8 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('✅ Conexión a la base de datos establecida.');
 
-    // Sincronizar modelos (sin force para no borrar datos)
-    await sequelize.sync();
+    // Sincronizar modelos (alter: true para agregar columnas nuevas sin borrar datos)
+    await sequelize.sync({ alter: true });
     console.log('✅ Modelos sincronizados.');
 
     app.listen(PORT, () => {
