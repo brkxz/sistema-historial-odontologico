@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AIProvider } from './context/AIContext';
 import { ToastProvider } from './components/UI/Toast';
 import Layout from './components/Layout/Layout';
 import LoginPage from './pages/LoginPage';
@@ -60,6 +61,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
+          <AIProvider>
           <Routes>
             {/* Ruta pública: Login */}
             <Route
@@ -95,6 +97,7 @@ function App() {
             {/* Ruta 404 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </AIProvider>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

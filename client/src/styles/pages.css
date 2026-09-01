@@ -103,6 +103,125 @@
   gap: 8px;
 }
 
+/* LOGIN SOCIAL */
+.login-social-section {
+  margin-top: 24px;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.login-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+.login-divider-text {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.login-social-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-social {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-social::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.btn-social:hover::before {
+  opacity: 1;
+}
+
+.btn-social:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Google Button */
+.btn-google {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.btn-google::before {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(234, 67, 53, 0.05));
+}
+
+.btn-google:hover:not(:disabled) {
+  border-color: rgba(66, 133, 244, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(66, 133, 244, 0.15);
+}
+
+.btn-google:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Facebook Button */
+.btn-facebook {
+  background: rgba(24, 119, 242, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(24, 119, 242, 0.2);
+}
+
+.btn-facebook::before {
+  background: linear-gradient(135deg, rgba(24, 119, 242, 0.15), rgba(24, 119, 242, 0.05));
+}
+
+.btn-facebook:hover:not(:disabled) {
+  border-color: rgba(24, 119, 242, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(24, 119, 242, 0.2);
+}
+
+.btn-facebook:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-social-hint {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  line-height: 1.4;
+}
+
 /* DASHBOARD */
 .dashboard-stats {
   display: grid;

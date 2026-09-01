@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useAI } from '../context/AIContext';
 import {
   Users, ClipboardList, CalendarCheck, CalendarClock,
   TrendingUp, Search, FilePlus, ArrowRight
@@ -12,6 +13,7 @@ export default function DashboardPage() {
   const [recentTreatments, setRecentTreatments] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { togglePanel } = useAI();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -142,6 +144,24 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* AI Assistant Card */}
+      <div className="ai-dashboard-card" onClick={togglePanel}>
+        <div className="ai-dashboard-header">
+          <div className="ai-dashboard-icon">🤖</div>
+          <div>
+            <div className="ai-dashboard-title">OdontoIA — Asistente Inteligente</div>
+            <div className="ai-dashboard-subtitle">IA conversacional con voz para asistencia clínica</div>
+          </div>
+        </div>
+        <div className="ai-dashboard-chips">
+          <span className="ai-dashboard-chip">💬 Chat clínico</span>
+          <span className="ai-dashboard-chip">🎙️ Comandos de voz</span>
+          <span className="ai-dashboard-chip">💊 Recetas</span>
+          <span className="ai-dashboard-chip">🦷 Diagnósticos</span>
+          <span className="ai-dashboard-chip">📋 Dictado IA</span>
         </div>
       </div>
     </div>

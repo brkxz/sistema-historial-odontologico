@@ -80,4 +80,171 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// POST /api/auth/google - Login con Google
+router.post('/google', async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ error: 'Token de Google es requerido' });
+    }
+
+    // Verificar token con Google
+    const googleResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+    
+    if (!googleResponse.ok) {
+      return res.status(401).json({ error: 'Token de Google inválido' });
+    }
+
+    const googleData = await googleResponse.json();
+
+    // Verificar que el token sea para nuestra app
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    if (googleClientId && googleClientId !== 'TU_GOOGLE_CLIENT_ID_AQUI' && googleData.aud !== googleClientId) {
+      return res.status(401).json({ error: 'Token de Google no autorizado para esta aplicación' });
+    }
+
+    const { sub: googleId, email, name, picture } = googleData;
+
+    // Buscar usuario existente por provider_id o email
+    let user = await User.findOne({ 
+      where: { provider_id: googleId, auth_provider: 'google' } 
+    });
+
+    if (!user && email) {
+      user = await User.findOne({ where: { email } });
+      if (user) {
+        // Vincular cuenta existente con Google
+        user.auth_provider = 'google';
+        user.provider_id = googleId;
+        await user.save();
+      }
+    }
+
+    if (!user) {
+      // Crear nuevo usuario
+      const username = email ? email.split('@')[0] + '_g' : `google_${googleId.substring(0, 8)}`;
+      user = await User.create({
+        username,
+        password_hash: null,
+        full_name: name || 'Usuario Google',
+        email: email || null,
+        role: 'odontologo',
+        auth_provider: 'google',
+        provider_id: googleId,
+        is_active: true,
+      });
+    }
+
+    if (!user.is_active) {
+      return res.status(401).json({ error: 'Usuario desactivado. Contacte al administrador.' });
+    }
+
+    // Generar token JWT
+    const jwtToken = generateToken(user);
+
+    // Registrar auditoría
+    await logAudit(user.id, 'LOGIN_GOOGLE', 'user', user.id, null, null, req.ip);
+
+    res.json({
+      token: jwtToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        full_name: user.full_name,
+        email: user.email,
+        role: user.role,
+        specialty: user.specialty,
+      },
+    });
+  } catch (error) {
+    console.error('Error en login con Google:', error);
+    res.status(500).json({ error: 'Error al autenticar con Google' });
+  }
+});
+
+// POST /api/auth/facebook - Login con Facebook
+router.post('/facebook', async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ error: 'Token de Facebook es requerido' });
+    }
+
+    // Verificar token con Facebook Graph API
+    const fbResponse = await fetch(
+      `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`
+    );
+
+    if (!fbResponse.ok) {
+      return res.status(401).json({ error: 'Token de Facebook inválido' });
+    }
+
+    const fbData = await fbResponse.json();
+
+    if (fbData.error) {
+      return res.status(401).json({ error: 'Token de Facebook inválido' });
+    }
+
+    const { id: facebookId, name, email } = fbData;
+
+    // Buscar usuario existente por provider_id o email
+    let user = await User.findOne({ 
+      where: { provider_id: facebookId, auth_provider: 'facebook' } 
+    });
+
+    if (!user && email) {
+      user = await User.findOne({ where: { email } });
+      if (user) {
+        // Vincular cuenta existente con Facebook
+        user.auth_provider = 'facebook';
+        user.provider_id = facebookId;
+        await user.save();
+      }
+    }
+
+    if (!user) {
+      // Crear nuevo usuario
+      const username = email ? email.split('@')[0] + '_fb' : `facebook_${facebookId.substring(0, 8)}`;
+      user = await User.create({
+        username,
+        password_hash: null,
+        full_name: name || 'Usuario Facebook',
+        email: email || null,
+        role: 'odontologo',
+        auth_provider: 'facebook',
+        provider_id: facebookId,
+        is_active: true,
+      });
+    }
+
+    if (!user.is_active) {
+      return res.status(401).json({ error: 'Usuario desactivado. Contacte al administrador.' });
+    }
+
+    // Generar token JWT
+    const jwtToken = generateToken(user);
+
+    // Registrar auditoría
+    await logAudit(user.id, 'LOGIN_FACEBOOK', 'user', user.id, null, null, req.ip);
+
+    res.json({
+      token: jwtToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        full_name: user.full_name,
+        email: user.email,
+        role: user.role,
+        specialty: user.specialty,
+      },
+    });
+  } catch (error) {
+    console.error('Error en login con Facebook:', error);
+    res.status(500).json({ error: 'Error al autenticar con Facebook' });
+  }
+});
+
 export default router;
+

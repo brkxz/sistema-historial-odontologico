@@ -68,6 +68,8 @@ const api = {
 // =============================================
 export const authService = {
   login: (username, password) => api.post('/auth/login', { username, password }),
+  loginWithGoogle: (token) => api.post('/auth/google', { token }),
+  loginWithFacebook: (token) => api.post('/auth/facebook', { token }),
   getMe: () => api.get('/auth/me'),
 };
 

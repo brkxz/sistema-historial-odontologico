@@ -18,7 +18,17 @@ const User = sequelize.define('User', {
   },
   password_hash: {
     type: DataTypes.STRING(255),
+    allowNull: true, // Nullable para usuarios que inician con Google/Facebook
+  },
+  auth_provider: {
+    type: DataTypes.ENUM('local', 'google', 'facebook'),
     allowNull: false,
+    defaultValue: 'local',
+  },
+  provider_id: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    unique: true,
   },
   full_name: {
     type: DataTypes.STRING(150),

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useAI } from '../../context/AIContext';
+import AIAssistant from '../AI/AIAssistant';
 import {
   LayoutDashboard, Search, UserPlus, ClipboardList,
   History, Users, BarChart3, Settings, LogOut, Menu, X,
@@ -31,6 +33,13 @@ export default function Layout() {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { setCurrentPage } = useAI();
+
+  // Actualizar contexto de la IA con la página actual
+  useEffect(() => {
+    const item = navItems.find((n) => n.path === location.pathname);
+    setCurrentPage(item?.label || location.pathname);
+  }, [location.pathname, setCurrentPage]);
 
   const handleLogout = () => {
     logout();
@@ -183,6 +192,9 @@ export default function Layout() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Asistente IA */}
+      <AIAssistant />
     </div>
   );
 }

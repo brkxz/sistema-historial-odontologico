@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { treatmentService, patientService, teethService } from '../services/api';
+import { getClinicalSuggestion } from '../services/aiService';
 import { useToast } from '../components/UI/Toast';
 import { useAuth } from '../context/AuthContext';
-import { Save, X, Printer, Search, CheckCircle } from 'lucide-react';
+import { useAI } from '../context/AIContext';
+import { Save, X, Printer, Search, CheckCircle, Mic, Layers, UserCheck, Sparkles, Bot } from 'lucide-react';
 
 export default function TreatmentPage() {
   const [searchParams] = useSearchParams();
@@ -13,6 +15,9 @@ export default function TreatmentPage() {
   const [searchDni, setSearchDni] = useState('');
   const [allTeeth, setAllTeeth] = useState([]);
   const [selectedTeeth, setSelectedTeeth] = useState([]);
+  const [activeArchTab, setActiveArchTab] = useState('all'); // 'all', 'upper', 'lower'
+  const [isListening, setIsListening] = useState(false);
+  const [dictatingField, setDictatingField] = useState(null); // 'reason', 'procedure', 'observations'
   const [form, setForm] = useState({
     treatment_date: new Date().toISOString().split('T')[0],
     reason: '',
@@ -23,10 +28,13 @@ export default function TreatmentPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savedTreatment, setSavedTreatment] = useState(null);
+  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   const navigate = useNavigate();
   const toast = useToast();
   const { user } = useAuth();
+  const { setCurrentPatient, apiKeyConfigured } = useAI();
 
   useEffect(() => {
     loadTeeth();
@@ -48,6 +56,7 @@ export default function TreatmentPage() {
     try {
       const data = await patientService.getById(id);
       setPatient(data.patient);
+      setCurrentPatient(data.patient);
     } catch {
       toast.error('Error al cargar paciente');
     }
@@ -58,9 +67,56 @@ export default function TreatmentPage() {
     try {
       const data = await patientService.searchByDni(searchDni.trim());
       setPatient(data.patient);
+      setCurrentPatient(data.patient);
       toast.success(`Paciente encontrado: ${data.patient.first_name} ${data.patient.last_name}`);
     } catch {
       toast.error('Paciente no encontrado');
+    }
+  };
+
+  // Dictado clínico por voz para campos de texto
+  const startDictation = (field) => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      toast.warning('Dictado por voz no disponible en este dispositivo');
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-PE';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    setDictatingField(field);
+    setIsListening(true);
+    toast.info('🎙️ Hable ahora... Dictando notas clínicas');
+
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      setForm((prev) => ({
+        ...prev,
+        [field]: prev[field] ? `${prev[field]}. ${text}` : text,
+      }));
+      setIsListening(false);
+      setDictatingField(null);
+      toast.success('Texto añadido');
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+      setDictatingField(null);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      setDictatingField(null);
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      setIsListening(false);
+      setDictatingField(null);
     }
   };
 
@@ -70,7 +126,17 @@ export default function TreatmentPage() {
       if (exists) {
         return prev.filter((t) => t.tooth_id !== tooth.id);
       }
-      return [...prev, { tooth_id: tooth.id, tooth_number: tooth.tooth_number, name: tooth.name, condition: 'caries', surface: '', notes: '' }];
+      return [
+        ...prev,
+        {
+          tooth_id: tooth.id,
+          tooth_number: tooth.tooth_number,
+          name: tooth.name,
+          condition: 'caries',
+          surface: 'Oclusal',
+          notes: '',
+        },
+      ];
     });
   };
 
@@ -96,7 +162,10 @@ export default function TreatmentPage() {
         patient_id: patient.id,
         ...form,
         teeth: selectedTeeth.map(({ tooth_id, condition, surface, notes }) => ({
-          tooth_id, condition, surface, notes,
+          tooth_id,
+          condition,
+          surface,
+          notes,
         })),
       });
 
@@ -121,26 +190,26 @@ export default function TreatmentPage() {
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Atención Odontológica</title>
+        <title>Atención Odontológica - Hospital San Ramón</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1a1a1a; }
           .header { text-align: center; border-bottom: 3px solid #0D9488; padding-bottom: 20px; margin-bottom: 30px; }
-          .header h1 { color: #0D9488; font-size: 22px; margin-bottom: 4px; }
-          .header p { color: #666; font-size: 13px; }
+          .header h1 { color: #0D9488; font-size: 20px; margin-bottom: 4px; }
+          .header p { color: #666; font-size: 12px; }
           .section { margin-bottom: 24px; }
-          .section-title { font-size: 14px; font-weight: 700; color: #0D9488; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid #e5e5e5; padding-bottom: 6px; }
-          .field { display: flex; margin-bottom: 8px; }
-          .field-label { width: 180px; font-weight: 600; color: #555; font-size: 13px; }
-          .field-value { flex: 1; font-size: 13px; }
+          .section-title { font-size: 13px; font-weight: 700; color: #0D9488; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid #e5e5e5; padding-bottom: 6px; }
+          .field { display: flex; margin-bottom: 8px; font-size: 13px; }
+          .field-label { width: 180px; font-weight: 600; color: #555; }
+          .field-value { flex: 1; }
           .footer { margin-top: 60px; display: flex; justify-content: space-between; }
           .signature { text-align: center; padding-top: 40px; border-top: 1px solid #333; width: 200px; font-size: 12px; }
         </style>
       </head>
       <body>
         <div class="header">
-          <h1>🦷 HISTORIAL DE ATENCIÓN ODONTOLÓGICA</h1>
-          <p>Clínica Dental - Sistema de Historial Digital</p>
+          <h1>🏥 HOSPITAL SAN RAMÓN — RED DE SALUD CHANCHAMAYO</h1>
+          <p>Área de Odontología • Ficha Clínica de Atención</p>
         </div>
         <div class="section">
           <div class="section-title">Datos del Paciente</div>
@@ -152,15 +221,15 @@ export default function TreatmentPage() {
           <div class="section-title">Datos de la Atención</div>
           <div class="field"><span class="field-label">Fecha:</span><span class="field-value">${new Date(form.treatment_date).toLocaleDateString('es-PE')}</span></div>
           <div class="field"><span class="field-label">Motivo de Consulta:</span><span class="field-value">${form.reason}</span></div>
-          <div class="field"><span class="field-label">Diente(s):</span><span class="field-value">${selectedTeeth.map(t => t.tooth_number + ' - ' + t.name).join(', ') || 'No especificado'}</span></div>
+          <div class="field"><span class="field-label">Diente(s) Tratados:</span><span class="field-value">${selectedTeeth.map(t => '#' + t.tooth_number + ' (' + t.condition + ')').join(', ') || 'General'}</span></div>
           <div class="field"><span class="field-label">Procedimiento:</span><span class="field-value">${form.procedure_performed || '-'}</span></div>
-          <div class="field"><span class="field-label">Observaciones:</span><span class="field-value">${form.observations || '-'}</span></div>
+          <div class="field"><span class="field-label">Observaciones/Receta:</span><span class="field-value">${form.observations || '-'}</span></div>
           <div class="field"><span class="field-label">Próxima Cita:</span><span class="field-value">${form.next_appointment ? new Date(form.next_appointment).toLocaleDateString('es-PE') : 'No programada'}</span></div>
-          <div class="field"><span class="field-label">Odontólogo:</span><span class="field-value">${user?.full_name}</span></div>
+          <div class="field"><span class="field-label">Odontólogo:</span><span class="field-value">${user?.full_name || 'Dr. Odontólogo'}</span></div>
         </div>
         <div class="footer">
           <div class="signature">Firma del Paciente</div>
-          <div class="signature">Firma del Odontólogo<br/>${user?.full_name}</div>
+          <div class="signature">Firma y Sello del Odontólogo<br/>${user?.full_name || ''}</div>
         </div>
         <script>window.onload = () => window.print();</script>
       </body>
@@ -170,25 +239,38 @@ export default function TreatmentPage() {
     printWindow.document.close();
   };
 
-  // Vista de atención guardada exitosamente
+  // Vista de éxito al guardar
   if (saved) {
     return (
       <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
-        <div className="card animate-in">
+        <div className="card animate-in p-lg">
           <CheckCircle size={64} color="var(--success)" style={{ margin: '0 auto 16px' }} />
           <h2 style={{ marginBottom: '8px' }}>¡Atención Registrada!</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-            La atención de <strong>{patient?.first_name} {patient?.last_name}</strong> ha sido guardada correctamente
+            La atención de <strong>{patient?.first_name} {patient?.last_name}</strong> ha sido guardada en la nube
           </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="treatment-saved-actions">
             <button className="btn btn-primary" onClick={() => navigate(`/historial/${patient.id}`)}>
-              Ver Historial
+              Ver Historial Completo
             </button>
             <button className="btn btn-secondary" onClick={() => savedTreatment && printTreatment(savedTreatment)}>
-              <Printer size={18} /> Imprimir Atención
+              <Printer size={18} /> Imprimir Ficha
             </button>
-            <button className="btn btn-success" onClick={() => { setSaved(false); setForm({ treatment_date: new Date().toISOString().split('T')[0], reason: '', procedure_performed: '', observations: '', next_appointment: '' }); setSelectedTeeth([]); }}>
-              Nueva Atención
+            <button
+              className="btn btn-success"
+              onClick={() => {
+                setSaved(false);
+                setForm({
+                  treatment_date: new Date().toISOString().split('T')[0],
+                  reason: '',
+                  procedure_performed: '',
+                  observations: '',
+                  next_appointment: '',
+                });
+                setSelectedTeeth([]);
+              }}
+            >
+              Registrar Otra Atención
             </button>
           </div>
         </div>
@@ -196,59 +278,248 @@ export default function TreatmentPage() {
     );
   }
 
-  // Agrupar dientes por cuadrante para selección
-  const quadrants = {
-    superior_derecho: allTeeth.filter((t) => t.quadrant === 'superior_derecho').sort((a, b) => b.tooth_number - a.tooth_number),
-    superior_izquierdo: allTeeth.filter((t) => t.quadrant === 'superior_izquierdo').sort((a, b) => a.tooth_number - b.tooth_number),
-    inferior_izquierdo: allTeeth.filter((t) => t.quadrant === 'inferior_izquierdo').sort((a, b) => b.tooth_number - a.tooth_number),
-    inferior_derecho: allTeeth.filter((t) => t.quadrant === 'inferior_derecho').sort((a, b) => a.tooth_number - b.tooth_number),
-  };
+  // Cuadrantes dentales
+  const upperTeeth = [
+    ...allTeeth.filter((t) => t.quadrant === 'superior_derecho').sort((a, b) => b.tooth_number - a.tooth_number),
+    ...allTeeth.filter((t) => t.quadrant === 'superior_izquierdo').sort((a, b) => a.tooth_number - b.tooth_number),
+  ];
+  const lowerTeeth = [
+    ...allTeeth.filter((t) => t.quadrant === 'inferior_izquierdo').sort((a, b) => b.tooth_number - a.tooth_number),
+    ...allTeeth.filter((t) => t.quadrant === 'inferior_derecho').sort((a, b) => a.tooth_number - b.tooth_number),
+  ];
 
   return (
-    <div className="treatment-form">
-      <h1 className="page-title">Nueva Atención</h1>
-      <p className="page-subtitle mb-lg">Registrar una nueva atención odontológica</p>
+    <div className="treatment-page-wrapper">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Nueva Atención</h1>
+          <p className="page-subtitle">Registrar consulta, diagnóstico y procedimiento clínico</p>
+        </div>
+      </div>
 
-      {/* Selección de paciente */}
-      <div className="card mb-lg treatment-form-section">
-        <h3><Search size={18} /> Paciente</h3>
+      {/* 1. Selección de Paciente */}
+      <div className="card mb-md p-md treatment-card-section">
+        <h3 className="treatment-section-header"><UserCheck size={18} /> Paciente a Atender</h3>
         {patient ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div className="patient-avatar" style={{ width: 44, height: 44, fontSize: 'var(--font-size-md)' }}>
-                {patient.first_name?.[0]}{patient.last_name?.[0]}
-              </div>
-              <div>
-                <div style={{ fontWeight: 700 }}>{patient.first_name} {patient.last_name}</div>
-                <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                  DNI: {patient.dni} • Edad: {patient.age || '-'}
-                </div>
-              </div>
+          <div className="patient-selected-box">
+            <div className="patient-avatar-sm">
+              {patient.first_name?.[0]}{patient.last_name?.[0]}
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => setPatient(null)}>Cambiar</button>
+            <div className="patient-selected-info">
+              <div className="patient-selected-name">{patient.first_name} {patient.last_name}</div>
+              <div className="patient-selected-meta">DNI: {patient.dni} • Edad: {patient.age || 'S/E'} años</div>
+            </div>
+            <button className="btn btn-ghost btn-sm" onClick={() => setPatient(null)}>
+              Cambiar
+            </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="treatment-search-row">
             <input
               type="text"
+              inputMode="numeric"
               className="form-input"
-              style={{ flex: 1 }}
-              placeholder="Ingrese DNI del paciente..."
+              placeholder="Ingrese DNI del paciente (8 dígitos)..."
               value={searchDni}
               onChange={(e) => setSearchDni(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && searchPatient()}
             />
-            <button className="btn btn-primary" onClick={searchPatient}>Buscar</button>
+            <button className="btn btn-primary" onClick={searchPatient}>
+              <Search size={18} /> Buscar
+            </button>
           </div>
         )}
       </div>
 
-      {/* Formulario de atención */}
-      <div className="card mb-lg treatment-form-section">
-        <h3>📋 Datos de la Atención</h3>
+      {/* 2. Selector Táctil de Dientes */}
+      <div className="card mb-md p-md treatment-card-section">
+        <div className="teeth-selector-header">
+          <div>
+            <h3 className="treatment-section-header">🦷 Dientes Involucrados</h3>
+            <p className="teeth-selector-sub">Toca las piezas tratadas en esta sesión ({selectedTeeth.length} seleccionadas)</p>
+          </div>
+          <div className="arch-toggle-pills">
+            <button
+              className={`pill-btn ${activeArchTab === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveArchTab('all')}
+            >
+              Todos (32)
+            </button>
+            <button
+              className={`pill-btn ${activeArchTab === 'upper' ? 'active' : ''}`}
+              onClick={() => setActiveArchTab('upper')}
+            >
+              Superior
+            </button>
+            <button
+              className={`pill-btn ${activeArchTab === 'lower' ? 'active' : ''}`}
+              onClick={() => setActiveArchTab('lower')}
+            >
+              Inferior
+            </button>
+          </div>
+        </div>
+
+        {/* Scroll táctil de dientes */}
+        <div className="treatment-teeth-scroll">
+          {(activeArchTab === 'all' || activeArchTab === 'upper') && (
+            <div className="treatment-teeth-row">
+              <span className="arch-label-micro">Arcada Superior:</span>
+              <div className="teeth-chips-flex">
+                {upperTeeth.map((tooth) => {
+                  const isSelected = selectedTeeth.some((t) => t.tooth_id === tooth.id);
+                  return (
+                    <button
+                      key={tooth.id}
+                      type="button"
+                      className={`treatment-tooth-chip ${isSelected ? 'selected' : ''}`}
+                      onClick={() => toggleTooth(tooth)}
+                    >
+                      <span className="tooth-chip-num">{tooth.tooth_number}</span>
+                      <span className="tooth-chip-type">{tooth.type?.slice(0, 3)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {(activeArchTab === 'all' || activeArchTab === 'lower') && (
+            <div className="treatment-teeth-row mt-sm">
+              <span className="arch-label-micro">Arcada Inferior:</span>
+              <div className="teeth-chips-flex">
+                {lowerTeeth.map((tooth) => {
+                  const isSelected = selectedTeeth.some((t) => t.tooth_id === tooth.id);
+                  return (
+                    <button
+                      key={tooth.id}
+                      type="button"
+                      className={`treatment-tooth-chip ${isSelected ? 'selected' : ''}`}
+                      onClick={() => toggleTooth(tooth)}
+                    >
+                      <span className="tooth-chip-num">{tooth.tooth_number}</span>
+                      <span className="tooth-chip-type">{tooth.type?.slice(0, 3)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Detalle de Dientes Seleccionados */}
+        {selectedTeeth.length > 0 && (
+          <div className="selected-teeth-list-mobile mt-md">
+            {selectedTeeth.map((st) => (
+              <div key={st.tooth_id} className="selected-tooth-item-card">
+                <div className="selected-tooth-top">
+                  <span className="badge badge-info">Pieza #{st.tooth_number}</span>
+                  <span className="selected-tooth-name">{st.name}</span>
+                  <button
+                    className="btn btn-ghost btn-icon btn-sm"
+                    onClick={() => toggleTooth({ id: st.tooth_id })}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="selected-tooth-inputs">
+                  <select
+                    className="form-select"
+                    value={st.condition}
+                    onChange={(e) => updateToothDetail(st.tooth_id, 'condition', e.target.value)}
+                  >
+                    <option value="sano">Sano / Profilaxis</option>
+                    <option value="caries">Caries</option>
+                    <option value="obturado">Obturado / Resina</option>
+                    <option value="endodoncia">Endodoncia</option>
+                    <option value="corona">Corona</option>
+                    <option value="ausente">Extracción / Ausente</option>
+                    <option value="sellante">Sellante</option>
+                    <option value="fracturado">Fracturado</option>
+                    <option value="protesis">Prótesis</option>
+                  </select>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Superficie (ej. Oclusal, Vestibular)"
+                    value={st.surface}
+                    onChange={(e) => updateToothDetail(st.tooth_id, 'surface', e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Formulario Clínico */}
+      <div className="card mb-md p-md treatment-card-section">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <h3 className="treatment-section-header">📋 Registro de Procedimiento</h3>
+          {apiKeyConfigured && (
+            <button
+              className="ai-suggest-btn"
+              onClick={async () => {
+                if (!form.reason && selectedTeeth.length === 0) {
+                  toast.warning('Ingresa un motivo o selecciona dientes para obtener sugerencias');
+                  return;
+                }
+                setAiLoading(true);
+                try {
+                  const teethStr = selectedTeeth.map(t => `#${t.tooth_number} (${t.condition})`).join(', ');
+                  const result = await getClinicalSuggestion(
+                    form.reason || 'Consulta general',
+                    teethStr || 'General',
+                    patient?.age
+                  );
+                  setAiSuggestion(result);
+                } catch {
+                  toast.error('Error al obtener sugerencia IA');
+                } finally {
+                  setAiLoading(false);
+                }
+              }}
+              disabled={aiLoading}
+            >
+              {aiLoading ? (
+                <><div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Analizando...</>
+              ) : (
+                <><Sparkles size={14} /> Sugerencia IA</>
+              )}
+            </button>
+          )}
+        </div>
+
+        {aiSuggestion && (
+          <div className="ai-suggestion-result">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, color: 'var(--accent-light)', fontWeight: 700, fontSize: 'var(--font-size-xs)' }}>
+              <Bot size={14} /> SUGERENCIA DE ODONTOIA
+            </div>
+            {aiSuggestion}
+            <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ fontSize: 11 }}
+                onClick={() => {
+                  setForm(prev => ({ ...prev, procedure_performed: prev.procedure_performed ? `${prev.procedure_performed}\n${aiSuggestion}` : aiSuggestion }));
+                  toast.success('Sugerencia aplicada al procedimiento');
+                }}
+              >
+                Aplicar a Procedimiento
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ fontSize: 11 }}
+                onClick={() => setAiSuggestion('')}
+              >
+                Descartar
+              </button>
+            </div>
+          </div>
+        )}
         <div className="form-grid">
           <div className="form-group">
-            <label className="form-label">Fecha *</label>
+            <label className="form-label">Fecha de Atención *</label>
             <input
               type="date"
               className="form-input"
@@ -256,8 +527,9 @@ export default function TreatmentPage() {
               onChange={(e) => setForm({ ...form, treatment_date: e.target.value })}
             />
           </div>
+
           <div className="form-group">
-            <label className="form-label">Próxima Cita</label>
+            <label className="form-label">Próxima Cita / Control</label>
             <input
               type="date"
               className="form-input"
@@ -265,30 +537,63 @@ export default function TreatmentPage() {
               onChange={(e) => setForm({ ...form, next_appointment: e.target.value })}
             />
           </div>
+
           <div className="form-group full-width">
-            <label className="form-label">Motivo de Consulta *</label>
+            <div className="field-label-with-voice">
+              <label className="form-label">Motivo de Consulta y Síntomas *</label>
+              <button
+                type="button"
+                className={`voice-mini-btn ${isListening && dictatingField === 'reason' ? 'listening' : ''}`}
+                onClick={() => startDictation('reason')}
+                title="Dictar por voz"
+              >
+                <Mic size={14} /> Dictar
+              </button>
+            </div>
             <input
               type="text"
               className="form-input"
-              placeholder="Ej: Dolor en molar superior, limpieza dental..."
+              placeholder="Ej: Dolor pulsátil en molar con frío, revisión semestral..."
               value={form.reason}
               onChange={(e) => setForm({ ...form, reason: e.target.value })}
             />
           </div>
+
           <div className="form-group full-width">
-            <label className="form-label">Procedimiento Realizado</label>
+            <div className="field-label-with-voice">
+              <label className="form-label">Procedimiento Realizado</label>
+              <button
+                type="button"
+                className={`voice-mini-btn ${isListening && dictatingField === 'procedure_performed' ? 'listening' : ''}`}
+                onClick={() => startDictation('procedure_performed')}
+                title="Dictar por voz"
+              >
+                <Mic size={14} /> Dictar
+              </button>
+            </div>
             <textarea
               className="form-textarea"
-              placeholder="Describa el procedimiento realizado..."
+              placeholder="Describa el tratamiento, materiales (3M, ionómero) o medicación utilizada..."
               value={form.procedure_performed}
               onChange={(e) => setForm({ ...form, procedure_performed: e.target.value })}
             />
           </div>
+
           <div className="form-group full-width">
-            <label className="form-label">Observaciones</label>
+            <div className="field-label-with-voice">
+              <label className="form-label">Observaciones, Receta e Indicaciones</label>
+              <button
+                type="button"
+                className={`voice-mini-btn ${isListening && dictatingField === 'observations' ? 'listening' : ''}`}
+                onClick={() => startDictation('observations')}
+                title="Dictar por voz"
+              >
+                <Mic size={14} /> Dictar
+              </button>
+            </div>
             <textarea
               className="form-textarea"
-              placeholder="Observaciones adicionales..."
+              placeholder="Fármacos recetados, posología (ej: Amoxicilina 500mg c/8h) o cuidados post-atención..."
               value={form.observations}
               onChange={(e) => setForm({ ...form, observations: e.target.value })}
             />
@@ -296,115 +601,30 @@ export default function TreatmentPage() {
         </div>
       </div>
 
-      {/* Selección de dientes */}
-      <div className="card mb-lg treatment-form-section">
-        <h3>🦷 Diente(s) Atendido(s)</h3>
-        <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '16px' }}>
-          Seleccione los dientes involucrados en la atención (click para seleccionar/deseleccionar)
-        </p>
-
-        {/* Mini odontograma para selección */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div className="odontogram-row-label">Superior</div>
-          <div className="odontogram-row">
-            {[...quadrants.superior_derecho, ...quadrants.superior_izquierdo].map((tooth) => {
-              const isSelected = selectedTeeth.some((t) => t.tooth_id === tooth.id);
-              return (
-                <div
-                  key={tooth.id}
-                  className={`tooth-wrapper ${isSelected ? 'selected' : ''}`}
-                  onClick={() => toggleTooth(tooth)}
-                  title={`${tooth.tooth_number} - ${tooth.name}`}
-                >
-                  <div className={`tooth ${isSelected ? 'caries' : ''}`}>
-                    {tooth.tooth_number}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="odontogram-divider" />
-          <div className="odontogram-row">
-            {[...quadrants.inferior_izquierdo.reverse(), ...quadrants.inferior_derecho.reverse()].map((tooth) => {
-              const isSelected = selectedTeeth.some((t) => t.tooth_id === tooth.id);
-              return (
-                <div
-                  key={tooth.id}
-                  className={`tooth-wrapper ${isSelected ? 'selected' : ''}`}
-                  onClick={() => toggleTooth(tooth)}
-                  title={`${tooth.tooth_number} - ${tooth.name}`}
-                >
-                  <div className={`tooth ${isSelected ? 'caries' : ''}`}>
-                    {tooth.tooth_number}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="odontogram-row-label">Inferior</div>
-        </div>
-
-        {/* Detalle de dientes seleccionados */}
-        {selectedTeeth.length > 0 && (
-          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h4 style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
-              Dientes seleccionados ({selectedTeeth.length}):
-            </h4>
-            {selectedTeeth.map((st) => (
-              <div
-                key={st.tooth_id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px',
-                  background: 'var(--bg-input)',
-                  borderRadius: 'var(--radius-md)',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <span className="badge badge-info">#{st.tooth_number}</span>
-                <span style={{ fontSize: 'var(--font-size-sm)', flex: '0 0 120px' }}>{st.name}</span>
-                <select
-                  className="form-select"
-                  style={{ flex: 1, minWidth: '140px', padding: '6px 10px', fontSize: 'var(--font-size-xs)' }}
-                  value={st.condition}
-                  onChange={(e) => updateToothDetail(st.tooth_id, 'condition', e.target.value)}
-                >
-                  <option value="sano">Sano</option>
-                  <option value="caries">Caries</option>
-                  <option value="obturado">Obturado</option>
-                  <option value="ausente">Ausente</option>
-                  <option value="fracturado">Fracturado</option>
-                  <option value="endodoncia">Endodoncia</option>
-                  <option value="corona">Corona</option>
-                  <option value="puente">Puente</option>
-                  <option value="sellante">Sellante</option>
-                  <option value="protesis">Prótesis</option>
-                </select>
-                <button
-                  className="btn btn-ghost btn-icon btn-sm"
-                  onClick={() => toggleTooth({ id: st.tooth_id })}
-                  title="Quitar"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Botones de acción */}
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <button className="btn btn-primary btn-lg" onClick={() => handleSubmit(false)} disabled={saving}>
+      {/* 4. Botones de Acción Móviles */}
+      <div className="treatment-mobile-action-bar">
+        <button
+          type="button"
+          className="btn btn-primary btn-lg action-btn-full"
+          onClick={() => handleSubmit(false)}
+          disabled={saving}
+        >
           {saving ? <div className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }} /> : <><Save size={18} /> Guardar Atención</>}
         </button>
-        <button className="btn btn-success btn-lg" onClick={() => handleSubmit(true)} disabled={saving}>
-          <Printer size={18} /> Guardar e Imprimir
+        <button
+          type="button"
+          className="btn btn-success btn-lg action-btn-full"
+          onClick={() => handleSubmit(true)}
+          disabled={saving}
+        >
+          <Printer size={18} /> Guardar e Imprimir Ficha
         </button>
-        <button className="btn btn-secondary btn-lg" onClick={() => navigate(-1)}>
-          <X size={18} /> Cancelar
+        <button
+          type="button"
+          className="btn btn-ghost btn-lg action-btn-full"
+          onClick={() => navigate(-1)}
+        >
+          Cancelar
         </button>
       </div>
     </div>
