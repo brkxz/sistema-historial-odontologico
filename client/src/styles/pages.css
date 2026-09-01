@@ -760,6 +760,226 @@
   gap: 8px;
 }
 
+/* =============================================
+   TOOTH SELECTOR - Selector de Dientes Premium
+   ============================================= */
+.teeth-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.treatment-section-header {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teeth-selector-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+}
+
+/* Arch toggle pills */
+.arch-toggle-pills {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.pill-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pill-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pill-btn.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Teeth scroll container */
+.treatment-teeth-scroll {
+  padding: 4px 0;
+}
+
+.treatment-teeth-row {
+  margin-bottom: 12px;
+}
+
+.arch-label-micro {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+/* Teeth chips grid */
+.teeth-chips-flex {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 4px;
+}
+
+@media (max-width: 768px) {
+  .teeth-chips-flex {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .teeth-chips-flex {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+}
+
+/* Individual tooth chip */
+.treatment-tooth-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 2px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 52px;
+  gap: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.treatment-tooth-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 9px;
+}
+
+.treatment-tooth-chip:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.treatment-tooth-chip:hover::before {
+  opacity: 1;
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+.treatment-tooth-chip:active {
+  transform: translateY(0);
+}
+
+/* Selected state */
+.treatment-tooth-chip.selected {
+  background: rgba(var(--primary-rgb), 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15),
+              0 2px 8px rgba(var(--primary-rgb), 0.2);
+}
+
+.treatment-tooth-chip.selected .tooth-chip-num {
+  color: var(--primary);
+}
+
+.treatment-tooth-chip.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 8px;
+  color: var(--primary);
+  font-weight: 900;
+}
+
+/* Tooth number */
+.tooth-chip-num {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* Tooth type label */
+.tooth-chip-type {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+/* Selected teeth detail cards */
+.selected-teeth-list-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.selected-tooth-item-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.selected-tooth-item-card:hover {
+  border-color: rgba(var(--primary-rgb), 0.3);
+}
+
+.selected-tooth-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.selected-tooth-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.treatment-card-section {
+  border-radius: 16px;
+}
+
+
 /* Print styles */
 .print-content {
   display: none;
