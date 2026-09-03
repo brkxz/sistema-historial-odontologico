@@ -75,6 +75,18 @@ export function AIProvider({ children }) {
   }, []);
 
   /**
+   * Agregar mensajes locales sin llamar a la IA (para comandos de navegación)
+   */
+  const addLocalMessages = useCallback((userText, assistantText) => {
+    const ts = Date.now();
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', content: userText, timestamp: ts },
+      { role: 'assistant', content: assistantText, timestamp: ts + 1 },
+    ]);
+  }, []);
+
+  /**
    * Toggle panel abierto/cerrado
    */
   const togglePanel = useCallback(() => {
@@ -93,6 +105,7 @@ export function AIProvider({ children }) {
       isThinking,
       sendChat,
       clearChat,
+      addLocalMessages,
       
       // Contexto
       currentPatient,

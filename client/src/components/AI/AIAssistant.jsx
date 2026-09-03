@@ -28,7 +28,7 @@ const QUICK_PROMPTS = [
 export default function AIAssistant() {
   const {
     isOpen, setIsOpen, togglePanel,
-    messages, isThinking, sendChat, clearChat,
+    messages, isThinking, sendChat, clearChat, addLocalMessages,
     currentPatient, ttsEnabled, setTtsEnabled,
     apiKeyConfigured, processVoiceCommand,
   } = useAI();
@@ -114,18 +114,19 @@ export default function AIAssistant() {
     const command = processVoiceCommand(msg);
 
     if (command.type === 'navigate') {
-      // Mostrar confirmación inmediata sin llamar a la IA
       const confirmMsg = command.confirm || `✅ Navegando a ${command.label}...`;
-      await sendChat(`Denty, ${msg}`);
+      addLocalMessages(msg, confirmMsg);
       navigate(command.route);
       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
       return confirmMsg;
     }
 
     if (command.type === 'search_dni') {
+      const confirmMsg = `🔍 Buscando paciente con DNI ${command.dni}...`;
+      addLocalMessages(msg, confirmMsg);
       navigate('/buscar');
-      await sendChat(`Buscar paciente con DNI ${command.dni}`);
-      return;
+      if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+      return confirmMsg;
     }
 
     // Chat normal con IA
