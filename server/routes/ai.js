@@ -7,7 +7,7 @@ const router = Router();
 router.use(authenticateToken);
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.1-8b-instant'; // Rápido, gratis, 14,400 req/día
+const GROQ_MODEL = 'llama3-8b-8192'; // Groq free tier - disponible para todos
 
 // POST /api/ai/chat - Proxy seguro para Groq API (OpenAI-compatible)
 router.post('/chat', async (req, res) => {
