@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { treatmentService, patientService, teethService } from '../services/api';
-import { getClinicalSuggestion } from '../services/aiService';
+import { getClinicalSuggestion, formatClinicalNotes } from '../services/aiService';
 import { useToast } from '../components/UI/Toast';
 import { useAuth } from '../context/AuthContext';
 import { useAI } from '../context/AIContext';
-import { Save, X, Printer, Search, CheckCircle, Mic, Layers, UserCheck, Sparkles, Bot } from 'lucide-react';
+import { useVoice } from '../hooks/useVoice';
+import { useSoundFeedback } from '../hooks/useSoundFeedback';
+import { Save, X, Printer, Search, CheckCircle, Mic, MicOff, Layers, UserCheck, Sparkles, Bot, Wand2 } from 'lucide-react';
 
 export default function TreatmentPage() {
   const [searchParams] = useSearchParams();
@@ -16,8 +18,9 @@ export default function TreatmentPage() {
   const [allTeeth, setAllTeeth] = useState([]);
   const [selectedTeeth, setSelectedTeeth] = useState([]);
   const [activeArchTab, setActiveArchTab] = useState('all'); // 'all', 'upper', 'lower'
-  const [isListening, setIsListening] = useState(false);
-  const [dictatingField, setDictatingField] = useState(null); // 'reason', 'procedure', 'observations'
+  const [dictatingField, setDictatingField] = useState(null); // 'reason', 'procedure_performed', 'observations'
+  const [dictationPreview, setDictationPreview] = useState(''); // Preview en tiempo real del dictado
+  const [isFormatting, setIsFormatting] = useState(null); // Campo que se está formateando con IA
   const [form, setForm] = useState({
     treatment_date: new Date().toISOString().split('T')[0],
     reason: '',
@@ -35,6 +38,8 @@ export default function TreatmentPage() {
   const toast = useToast();
   const { user } = useAuth();
   const { setCurrentPatient, apiKeyConfigured } = useAI();
+  const { isListening, interimTranscript, startListening, stopListening, audioLevel } = useVoice();
+  const { playStartSound, playStopSound, playConfirmSound } = useSoundFeedback();
 
   useEffect(() => {
     loadTeeth();
@@ -74,51 +79,68 @@ export default function TreatmentPage() {
     }
   };
 
-  // Dictado clínico por voz para campos de texto
-  const startDictation = (field) => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      toast.warning('Dictado por voz no disponible en este dispositivo');
+  // Dictado clínico por voz mejorado (usa hook useVoice compartido)
+  const startDictation = useCallback((field) => {
+    // Si ya estamos dictando este campo, detener
+    if (isListening && dictatingField === field) {
+      stopListening();
+      playStopSound();
+      setDictatingField(null);
+      setDictationPreview('');
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'es-PE';
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    // Si estamos dictando otro campo, detener primero
+    if (isListening) {
+      stopListening();
+    }
 
     setDictatingField(field);
-    setIsListening(true);
-    toast.info('🎙️ Hable ahora... Dictando notas clínicas');
+    setDictationPreview('');
+    playStartSound();
+    toast.info('🎙️ Hable ahora... Dictado continuo activado');
 
-    recognition.onresult = (event) => {
-      const text = event.results[0][0].transcript;
-      setForm((prev) => ({
-        ...prev,
-        [field]: prev[field] ? `${prev[field]}. ${text}` : text,
-      }));
-      setIsListening(false);
-      setDictatingField(null);
-      toast.success('Texto añadido');
+    startListening({
+      continuous: true,
+      autoRestart: true,
+      silenceTimeout: 6000,
+      onInterim: (text) => {
+        setDictationPreview(text);
+      },
+      onResult: (text) => {
+        playConfirmSound();
+        setForm((prev) => ({
+          ...prev,
+          [field]: prev[field] ? `${prev[field]}. ${text}` : text,
+        }));
+        setDictationPreview('');
+      },
+    });
+  }, [isListening, dictatingField, startListening, stopListening, playStartSound, playStopSound, playConfirmSound, toast]);
+
+  // Detener dictado cuando el componente se desmonta
+  useEffect(() => {
+    return () => {
+      stopListening();
     };
+  }, [stopListening]);
 
-    recognition.onerror = () => {
-      setIsListening(false);
-      setDictatingField(null);
-    };
+  // Auto-formateo de notas clínicas con IA
+  const handleFormatWithAI = useCallback(async (field) => {
+    const text = form[field];
+    if (!text || !apiKeyConfigured) return;
 
-    recognition.onend = () => {
-      setIsListening(false);
-      setDictatingField(null);
-    };
-
+    setIsFormatting(field);
     try {
-      recognition.start();
-    } catch (e) {
-      setIsListening(false);
-      setDictatingField(null);
+      const formatted = await formatClinicalNotes(text, field);
+      setForm((prev) => ({ ...prev, [field]: formatted }));
+      toast.success('Texto formateado por IA');
+    } catch {
+      toast.error('Error al formatear con IA');
+    } finally {
+      setIsFormatting(null);
     }
-  };
+  }, [form, apiKeyConfigured, toast]);
 
   const toggleTooth = (tooth) => {
     setSelectedTeeth((prev) => {
@@ -541,14 +563,27 @@ export default function TreatmentPage() {
           <div className="form-group full-width">
             <div className="field-label-with-voice">
               <label className="form-label">Motivo de Consulta y Síntomas *</label>
-              <button
-                type="button"
-                className={`voice-mini-btn ${isListening && dictatingField === 'reason' ? 'listening' : ''}`}
-                onClick={() => startDictation('reason')}
-                title="Dictar por voz"
-              >
-                <Mic size={14} /> Dictar
-              </button>
+              <div className="voice-field-actions">
+                {form.reason && apiKeyConfigured && (
+                  <button
+                    type="button"
+                    className={`voice-format-btn ${isFormatting === 'reason' ? 'formatting' : ''}`}
+                    onClick={() => handleFormatWithAI('reason')}
+                    disabled={isFormatting !== null}
+                    title="Formatear con IA"
+                  >
+                    <Wand2 size={12} /> {isFormatting === 'reason' ? 'Formateando...' : 'IA'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={`voice-mini-btn ${isListening && dictatingField === 'reason' ? 'listening' : ''}`}
+                  onClick={() => startDictation('reason')}
+                  title={isListening && dictatingField === 'reason' ? 'Detener dictado' : 'Dictar por voz'}
+                >
+                  {isListening && dictatingField === 'reason' ? <><MicOff size={14} /> Detener</> : <><Mic size={14} /> Dictar</>}
+                </button>
+              </div>
             </div>
             <input
               type="text"
@@ -557,19 +592,38 @@ export default function TreatmentPage() {
               value={form.reason}
               onChange={(e) => setForm({ ...form, reason: e.target.value })}
             />
+            {isListening && dictatingField === 'reason' && dictationPreview && (
+              <div className="dictation-live-preview">
+                <div className="dictation-live-dot" />
+                <span>{dictationPreview}</span>
+              </div>
+            )}
           </div>
 
           <div className="form-group full-width">
             <div className="field-label-with-voice">
               <label className="form-label">Procedimiento Realizado</label>
-              <button
-                type="button"
-                className={`voice-mini-btn ${isListening && dictatingField === 'procedure_performed' ? 'listening' : ''}`}
-                onClick={() => startDictation('procedure_performed')}
-                title="Dictar por voz"
-              >
-                <Mic size={14} /> Dictar
-              </button>
+              <div className="voice-field-actions">
+                {form.procedure_performed && apiKeyConfigured && (
+                  <button
+                    type="button"
+                    className={`voice-format-btn ${isFormatting === 'procedure_performed' ? 'formatting' : ''}`}
+                    onClick={() => handleFormatWithAI('procedure_performed')}
+                    disabled={isFormatting !== null}
+                    title="Formatear con IA"
+                  >
+                    <Wand2 size={12} /> {isFormatting === 'procedure_performed' ? 'Formateando...' : 'IA'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={`voice-mini-btn ${isListening && dictatingField === 'procedure_performed' ? 'listening' : ''}`}
+                  onClick={() => startDictation('procedure_performed')}
+                  title={isListening && dictatingField === 'procedure_performed' ? 'Detener dictado' : 'Dictar por voz'}
+                >
+                  {isListening && dictatingField === 'procedure_performed' ? <><MicOff size={14} /> Detener</> : <><Mic size={14} /> Dictar</>}
+                </button>
+              </div>
             </div>
             <textarea
               className="form-textarea"
@@ -577,19 +631,38 @@ export default function TreatmentPage() {
               value={form.procedure_performed}
               onChange={(e) => setForm({ ...form, procedure_performed: e.target.value })}
             />
+            {isListening && dictatingField === 'procedure_performed' && dictationPreview && (
+              <div className="dictation-live-preview">
+                <div className="dictation-live-dot" />
+                <span>{dictationPreview}</span>
+              </div>
+            )}
           </div>
 
           <div className="form-group full-width">
             <div className="field-label-with-voice">
               <label className="form-label">Observaciones, Receta e Indicaciones</label>
-              <button
-                type="button"
-                className={`voice-mini-btn ${isListening && dictatingField === 'observations' ? 'listening' : ''}`}
-                onClick={() => startDictation('observations')}
-                title="Dictar por voz"
-              >
-                <Mic size={14} /> Dictar
-              </button>
+              <div className="voice-field-actions">
+                {form.observations && apiKeyConfigured && (
+                  <button
+                    type="button"
+                    className={`voice-format-btn ${isFormatting === 'observations' ? 'formatting' : ''}`}
+                    onClick={() => handleFormatWithAI('observations')}
+                    disabled={isFormatting !== null}
+                    title="Formatear con IA"
+                  >
+                    <Wand2 size={12} /> {isFormatting === 'observations' ? 'Formateando...' : 'IA'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={`voice-mini-btn ${isListening && dictatingField === 'observations' ? 'listening' : ''}`}
+                  onClick={() => startDictation('observations')}
+                  title={isListening && dictatingField === 'observations' ? 'Detener dictado' : 'Dictar por voz'}
+                >
+                  {isListening && dictatingField === 'observations' ? <><MicOff size={14} /> Detener</> : <><Mic size={14} /> Dictar</>}
+                </button>
+              </div>
             </div>
             <textarea
               className="form-textarea"
@@ -597,6 +670,12 @@ export default function TreatmentPage() {
               value={form.observations}
               onChange={(e) => setForm({ ...form, observations: e.target.value })}
             />
+            {isListening && dictatingField === 'observations' && dictationPreview && (
+              <div className="dictation-live-preview">
+                <div className="dictation-live-dot" />
+                <span>{dictationPreview}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -15,7 +15,9 @@ export function AIProvider({ children }) {
   const [currentPatient, setCurrentPatient] = useState(null);
   const [currentPage, setCurrentPage] = useState('');
   const [ttsEnabled, setTtsEnabled] = useState(false);
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(!!localStorage.getItem('gemini_api_key'));
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(
+    !!(localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY)
+  );
 
   /**
    * Enviar un mensaje al asistente IA

@@ -1,16 +1,19 @@
 // ============================================================
 // AIAssistant - Componente Principal del Asistente IA
-// Chat flotante con voz bidireccional
+// Chat flotante con voz bidireccional + Modo Voz Fullscreen
 // ============================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAI } from '../../context/AIContext';
 import { useVoice } from '../../hooks/useVoice';
+import { useSoundFeedback } from '../../hooks/useSoundFeedback';
+import { useWakeWord } from '../../hooks/useWakeWord';
 import { validateApiKey } from '../../services/aiService';
+import VoiceOverlay from './VoiceOverlay';
 import {
   X, Send, Mic, MicOff, Volume2, VolumeX,
-  Settings, Trash2, Sparkles, Bot, ChevronRight
+  Settings, Trash2, Sparkles, Bot, ChevronRight, AudioLines, Ear
 } from 'lucide-react';
 
 const QUICK_PROMPTS = [
@@ -33,15 +36,38 @@ export default function AIAssistant() {
   const {
     isListening, isSpeaking, interimTranscript, voiceSupported,
     ttsSupported, startListening, stopListening, speak, stopSpeaking,
+    audioLevel,
   } = useVoice();
+
+  const { playStartSound, playStopSound, playConfirmSound, playSendSound } = useSoundFeedback();
 
   const [inputText, setInputText] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [validatingKey, setValidatingKey] = useState(false);
+  const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
+  const [lastVoiceResponse, setLastVoiceResponse] = useState('');
+  const [wakeWordEnabled, setWakeWordEnabled] = useState(
+    () => localStorage.getItem('odonto_wake_word') === 'true'
+  );
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+
+  // ---- Wake Word: "Oye Denty" ----
+  const { isWakeListening, wakeWordSupported } = useWakeWord({
+    enabled: wakeWordEnabled && !voiceOverlayOpen && !isListening,
+    onWakeWord: () => {
+      playStartSound();
+      setVoiceOverlayOpen(true);
+    },
+  });
+
+  // Persistir preferencia de wake word
+  const toggleWakeWord = useCallback((value) => {
+    setWakeWordEnabled(value);
+    localStorage.setItem('odonto_wake_word', value ? 'true' : 'false');
+  }, []);
 
   // Auto-scroll al final de los mensajes
   useEffect(() => {
@@ -57,6 +83,25 @@ export default function AIAssistant() {
     }
   }, [isOpen, showSettings]);
 
+  // ---- Hotkey Global: Ctrl+Shift+V ----
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl+Shift+V → Toggle Voice Overlay
+      if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+        e.preventDefault();
+        setVoiceOverlayOpen(prev => !prev);
+      }
+      // Escape → Cerrar voice overlay
+      if (e.key === 'Escape' && voiceOverlayOpen) {
+        e.preventDefault();
+        setVoiceOverlayOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [voiceOverlayOpen]);
+
   /**
    * Enviar mensaje
    */
@@ -65,6 +110,7 @@ export default function AIAssistant() {
     if (!msg || isThinking) return;
 
     setInputText('');
+    playSendSound();
 
     // Procesar como comando de voz
     const command = processVoiceCommand(msg);
@@ -88,24 +134,53 @@ export default function AIAssistant() {
     if (ttsEnabled && response && !response.startsWith('⚙️') && !response.startsWith('❌')) {
       speak(response, { rate: 1.05 });
     }
-  }, [inputText, isThinking, processVoiceCommand, sendChat, navigate, ttsEnabled, speak]);
+
+    return response;
+  }, [inputText, isThinking, processVoiceCommand, sendChat, navigate, ttsEnabled, speak, playSendSound]);
 
   /**
-   * Manejar voz en el chat
+   * Manejar voz en el chat (inline)
    */
-  const handleVoiceChat = () => {
+  const handleVoiceChat = useCallback(() => {
     if (isListening) {
       stopListening();
+      playStopSound();
       return;
     }
 
+    playStartSound();
     startListening({
       continuous: false,
       onResult: (text) => {
+        playConfirmSound();
         handleSend(text);
       },
     });
-  };
+  }, [isListening, startListening, stopListening, handleSend, playStartSound, playStopSound, playConfirmSound]);
+
+  /**
+   * Manejar voz desde VoiceOverlay (modo conversación)
+   */
+  const handleVoiceOverlayStart = useCallback(() => {
+    playStartSound();
+    startListening({
+      continuous: true,
+      autoRestart: true,
+      silenceTimeout: 5000,
+      onResult: async (text) => {
+        playConfirmSound();
+        const response = await handleSend(text);
+        if (response) {
+          setLastVoiceResponse(response);
+        }
+      },
+    });
+  }, [startListening, handleSend, playStartSound, playConfirmSound]);
+
+  const handleVoiceOverlayStop = useCallback(() => {
+    stopListening();
+    playStopSound();
+  }, [stopListening, playStopSound]);
 
   /**
    * Hablar un mensaje del asistente
@@ -131,6 +206,7 @@ export default function AIAssistant() {
       setApiKey(apiKeyInput.trim());
       setShowSettings(false);
       setApiKeyInput('');
+      playConfirmSound();
     } else {
       alert('La API key no es válida. Verifica que la copiaste correctamente.');
     }
@@ -150,12 +226,13 @@ export default function AIAssistant() {
     <>
       {/* FAB Button */}
       <button
-        className={`ai-fab ${isOpen ? 'open' : ''}`}
+        className={`ai-fab ${isOpen ? 'open' : ''} ${isWakeListening ? 'wake-active' : ''}`}
         onClick={togglePanel}
-        title="Asistente IA OdontoIA"
+        title={isWakeListening ? 'OdontoIA — Escuchando "Oye Denty"' : 'Asistente IA OdontoIA'}
         id="ai-assistant-fab"
       >
         {!isOpen && <div className="ai-fab-pulse" />}
+        {isWakeListening && !isOpen && <div className="ai-fab-wake-badge"><Ear size={10} /></div>}
         <span className="ai-fab-icon">
           {isOpen ? <X size={24} /> : '🤖'}
         </span>
@@ -177,6 +254,16 @@ export default function AIAssistant() {
             <span>Asistente Inteligente</span>
           </div>
           <div className="ai-header-actions">
+            {/* Botón Modo Voz */}
+            {voiceSupported && (
+              <button
+                className="ai-header-btn ai-voice-mode-btn"
+                onClick={() => setVoiceOverlayOpen(true)}
+                title="Modo Conversación por Voz (Ctrl+Shift+V)"
+              >
+                <AudioLines size={16} />
+              </button>
+            )}
             {ttsSupported && (
               <button
                 className={`ai-header-btn ${ttsEnabled ? 'active' : ''}`}
@@ -250,6 +337,39 @@ export default function AIAssistant() {
               </div>
             </div>
 
+            <div className="ai-settings-group">
+              <label>Activación por Voz</label>
+              <div className="ai-toggle-row">
+                <span>
+                  <Ear size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                  Decir <strong>"Oye Denty"</strong> para activar
+                </span>
+                <label className="ai-toggle">
+                  <input
+                    type="checkbox"
+                    checked={wakeWordEnabled}
+                    onChange={(e) => toggleWakeWord(e.target.checked)}
+                  />
+                  <div className="ai-toggle-track" />
+                  <div className="ai-toggle-thumb" />
+                </label>
+              </div>
+              {wakeWordEnabled && (
+                <div className="hint" style={{ marginTop: 6 }}>
+                  {isWakeListening ? '🟢 Escuchando en segundo plano...' : '⏳ Iniciando detector...'}
+                  <br />El micrófono permanece activo mientras esta opción esté habilitada.
+                </div>
+              )}
+            </div>
+
+            <div className="ai-settings-group">
+              <label>Atajo de teclado</label>
+              <div className="ai-settings-shortcut-info">
+                <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>
+                <span>Abrir modo conversación por voz</span>
+              </div>
+            </div>
+
             <button
               className="ai-settings-save-btn"
               onClick={handleSaveApiKey}
@@ -306,6 +426,24 @@ export default function AIAssistant() {
                       </button>
                     </p>
                   )}
+
+                  {/* Voice Mode Card */}
+                  {voiceSupported && (
+                    <div
+                      className="ai-voice-mode-card"
+                      onClick={() => setVoiceOverlayOpen(true)}
+                    >
+                      <div className="ai-voice-mode-card-icon">
+                        <AudioLines size={20} />
+                      </div>
+                      <div className="ai-voice-mode-card-text">
+                        <strong>Modo Conversación por Voz</strong>
+                        <span>Habla con OdontoIA en modo manos libres</span>
+                      </div>
+                      <ChevronRight size={16} className="ai-voice-mode-card-arrow" />
+                    </div>
+                  )}
+
                   <div className="ai-quick-actions">
                     {QUICK_PROMPTS.map((prompt) => (
                       <button
@@ -352,15 +490,20 @@ export default function AIAssistant() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Voice Indicator */}
+            {/* Voice Indicator (mejorado con audio level) */}
             {isListening && (
               <div className="ai-voice-indicator">
                 <div className="ai-voice-bars">
-                  <div className="ai-voice-bar" />
-                  <div className="ai-voice-bar" />
-                  <div className="ai-voice-bar" />
-                  <div className="ai-voice-bar" />
-                  <div className="ai-voice-bar" />
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="ai-voice-bar"
+                      style={{
+                        height: `${6 + audioLevel * 20 * Math.sin((i / 7) * Math.PI)}px`,
+                        transition: 'height 0.1s ease',
+                      }}
+                    />
+                  ))}
                 </div>
                 <span>
                   {interimTranscript || 'Escuchando...'}
@@ -402,6 +545,25 @@ export default function AIAssistant() {
           </>
         )}
       </div>
+
+      {/* Voice Overlay (Fullscreen Mode) */}
+      <VoiceOverlay
+        isOpen={voiceOverlayOpen}
+        onClose={() => setVoiceOverlayOpen(false)}
+        onSend={handleSend}
+        isListening={isListening}
+        isSpeaking={isSpeaking}
+        isThinking={isThinking}
+        audioLevel={audioLevel}
+        interimTranscript={interimTranscript}
+        lastResponse={lastVoiceResponse}
+        voiceSupported={voiceSupported}
+        onStartListening={handleVoiceOverlayStart}
+        onStopListening={handleVoiceOverlayStop}
+        onStopSpeaking={stopSpeaking}
+        ttsEnabled={ttsEnabled}
+        onToggleTts={() => setTtsEnabled(!ttsEnabled)}
+      />
     </>
   );
 }

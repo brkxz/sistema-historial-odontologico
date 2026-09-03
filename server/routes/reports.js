@@ -105,7 +105,7 @@ router.get('/treatments-by-dentist', async (req, res) => {
       include: [
         { model: User, as: 'dentist', attributes: ['full_name'] },
       ],
-      group: ['dentist_id'],
+      group: ['Treatment.dentist_id', 'dentist.id', 'dentist.full_name'],
       raw: true,
       nest: true,
     });

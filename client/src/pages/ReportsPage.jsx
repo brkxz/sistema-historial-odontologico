@@ -19,14 +19,28 @@ export default function ReportsPage() {
   const loadReports = async () => {
     setLoading(true);
     try {
-      const [summaryData, byDateData, byDentistData] = await Promise.all([
+      // Cargar cada reporte independientemente para que un error no afecte a los demás
+      const [summaryResult, byDateResult, byDentistResult] = await Promise.allSettled([
         reportService.getSummary(),
         reportService.getTreatmentsByDate(startDate, endDate),
         reportService.getTreatmentsByDentist(startDate, endDate),
       ]);
-      setSummary(summaryData);
-      setTreatmentsByDate(byDateData.treatments || []);
-      setTreatmentsByDentist(byDentistData.treatments || []);
+
+      if (summaryResult.status === 'fulfilled') {
+        setSummary(summaryResult.value);
+      }
+      if (byDateResult.status === 'fulfilled') {
+        setTreatmentsByDate(byDateResult.value?.treatments || []);
+      }
+      if (byDentistResult.status === 'fulfilled') {
+        setTreatmentsByDentist(byDentistResult.value?.treatments || []);
+      }
+
+      // Solo mostrar error si todos fallaron
+      const allFailed = [summaryResult, byDateResult, byDentistResult].every(r => r.status === 'rejected');
+      if (allFailed) {
+        toast.error('Error al cargar reportes. Verifica tu conexión.');
+      }
     } catch (error) {
       toast.error('Error al cargar reportes');
     } finally {
