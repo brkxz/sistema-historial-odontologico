@@ -7,7 +7,7 @@ const router = Router();
 router.use(authenticateToken);
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant'; // Groq free - 30 RPM, rápido
+const GROQ_MODEL = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b'; // Modelo activo en Groq (rápido y con excelente razonamiento clínico)
 
 // POST /api/ai/chat - Proxy seguro para Groq API (OpenAI-compatible)
 router.post('/chat', async (req, res) => {
