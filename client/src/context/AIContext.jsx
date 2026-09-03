@@ -3,7 +3,8 @@
 // Maneja estado del chat, configuración y contexto
 // ============================================================
 
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { sendMessage, parseVoiceCommand, checkAIStatus } from '../services/aiService';
 
 const AIContext = createContext(null);
@@ -16,6 +17,8 @@ export function AIProvider({ children }) {
   const [currentPage, setCurrentPage] = useState('');
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+  const navigate = useNavigate();
+  const pendingActionRef = useRef(null);
 
   // Verificar estado de la IA al cargar
   useEffect(() => {
@@ -32,18 +35,24 @@ export function AIProvider({ children }) {
 
     try {
       const allMessages = [...messages, newUserMsg];
-      // Solo enviar las últimas 10 mensajes para mantener contexto manejable
       const recentMessages = allMessages.slice(-10);
 
-      const response = await sendMessage(recentMessages, {
+      const result = await sendMessage(recentMessages, {
         currentPage: currentPage || context.currentPage,
         currentPatient: currentPatient || context.currentPatient,
         doctorName: context.doctorName,
       });
 
-      const assistantMsg = { role: 'assistant', content: response, timestamp: Date.now() };
+      // result = { text, action }
+      const assistantMsg = { role: 'assistant', content: result.text, timestamp: Date.now() };
       setMessages(prev => [...prev, assistantMsg]);
-      return response;
+
+      // Ejecutar acción si la IA lo indicó
+      if (result.action?.type === 'navigate') {
+        setTimeout(() => navigate(result.action.route), 400);
+      }
+
+      return result.text;
     } catch (error) {
       let errorMsg;
       if (error.message === 'API_KEY_MISSING') {
@@ -58,7 +67,7 @@ export function AIProvider({ children }) {
     } finally {
       setIsThinking(false);
     }
-  }, [messages, currentPage, currentPatient]);
+  }, [messages, currentPage, currentPatient, navigate]);
 
   /**
    * Procesar un comando de voz
