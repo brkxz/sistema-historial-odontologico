@@ -114,13 +114,16 @@ export default function AIAssistant() {
     const command = processVoiceCommand(msg);
 
     if (command.type === 'navigate') {
+      // Mostrar confirmación inmediata sin llamar a la IA
+      const confirmMsg = command.confirm || `✅ Navegando a ${command.label}...`;
+      await sendChat(`Denty, ${msg}`);
       navigate(command.route);
-      await sendChat(`Quiero ir a ${command.label}`);
-      return;
+      if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+      return confirmMsg;
     }
 
     if (command.type === 'search_dni') {
-      navigate(`/buscar`);
+      navigate('/buscar');
       await sendChat(`Buscar paciente con DNI ${command.dni}`);
       return;
     }

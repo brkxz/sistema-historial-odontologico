@@ -154,27 +154,103 @@ Devuelve SOLO el texto corregido, sin explicaciones.`;
 }
 
 /**
- * Interpreta un comando de voz y determina la acción a realizar
+ * Interpreta un comando de voz/texto y determina la acción a realizar
  */
 export function parseVoiceCommand(transcript) {
   const text = transcript.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-  // Comandos de navegación
+  // Comandos de navegación con muchos sinónimos en lenguaje natural
   const navCommands = [
-    { patterns: ['buscar paciente', 'buscar dni', 'busqueda'], route: '/buscar' },
-    { patterns: ['nueva atencion', 'registrar atencion', 'nuevo tratamiento'], route: '/nueva-atencion' },
-    { patterns: ['historial', 'ver historial'], route: '/historial' },
-    { patterns: ['odontograma', 'ver odontograma'], route: '/odontograma' },
-    { patterns: ['reportes', 'ver reportes', 'estadisticas'], route: '/reportes' },
-    { patterns: ['pacientes', 'ver pacientes', 'lista pacientes'], route: '/pacientes' },
-    { patterns: ['panel', 'inicio', 'dashboard', 'ir al inicio'], route: '/' },
-    { patterns: ['usuarios', 'gestion usuarios'], route: '/usuarios' },
+    {
+      route: '/buscar',
+      label: 'Buscar Paciente',
+      confirm: '🔍 ¡Claro! Te llevo a la búsqueda de pacientes.',
+      patterns: [
+        'buscar paciente', 'buscar dni', 'busqueda', 'quiero buscar',
+        'necesito buscar', 'busca al paciente', 'buscar historial',
+        'encontrar paciente', 'buscar un paciente', 'ir a buscar',
+        'buscar a', 'quiero encontrar', 'busca paciente',
+      ],
+    },
+    {
+      route: '/nueva-atencion',
+      label: 'Nueva Atención',
+      confirm: '📋 ¡Perfecto! Abriendo el formulario para registrar una nueva atención.',
+      patterns: [
+        'nueva atencion', 'registrar atencion', 'nuevo tratamiento',
+        'registrar tratamiento', 'agregar atencion', 'nueva consulta',
+        'registrar consulta', 'quiero registrar', 'registra una atencion',
+        'hacer una atencion', 'anotar atencion', 'crear atencion',
+        'registrar paciente', 'nueva visita', 'agregar tratamiento',
+        'ingresar atencion', 'quiero anotar', 'atender paciente',
+      ],
+    },
+    {
+      route: '/historial',
+      label: 'Historial',
+      confirm: '📂 ¡Aquí vamos! Abriendo el historial de atenciones.',
+      patterns: [
+        'historial', 'ver historial', 'atenciones anteriores',
+        'consultas anteriores', 'tratamientos anteriores', 'ver atenciones',
+        'historico', 'ver registros', 'ir al historial', 'abrir historial',
+      ],
+    },
+    {
+      route: '/odontograma',
+      label: 'Odontograma',
+      confirm: '🦷 Abriendo el odontograma interactivo.',
+      patterns: [
+        'odontograma', 'ver odontograma', 'mapa dental', 'dientes',
+        'abrir odontograma', 'ir al odontograma', 'diagrama dental',
+      ],
+    },
+    {
+      route: '/reportes',
+      label: 'Reportes',
+      confirm: '📊 Abriendo la sección de reportes y estadísticas.',
+      patterns: [
+        'reportes', 'ver reportes', 'estadisticas', 'informe',
+        'ver estadisticas', 'ir a reportes', 'abrir reportes', 'graficas',
+      ],
+    },
+    {
+      route: '/pacientes',
+      label: 'Lista de Pacientes',
+      confirm: '👥 Mostrando la lista completa de pacientes.',
+      patterns: [
+        'pacientes', 'ver pacientes', 'lista pacientes', 'todos los pacientes',
+        'ir a pacientes', 'abrir pacientes', 'ver lista',
+      ],
+    },
+    {
+      route: '/',
+      label: 'Inicio',
+      confirm: '🏠 Regresando al inicio.',
+      patterns: [
+        'panel', 'inicio', 'dashboard', 'ir al inicio', 'pagina principal',
+        'ir al panel', 'volver al inicio', 'home',
+      ],
+    },
+    {
+      route: '/usuarios',
+      label: 'Usuarios',
+      confirm: '👤 Abriendo la gestión de usuarios.',
+      patterns: [
+        'usuarios', 'gestion usuarios', 'administrar usuarios',
+        'ver usuarios', 'agregar usuario',
+      ],
+    },
   ];
 
   for (const cmd of navCommands) {
     for (const pattern of cmd.patterns) {
       if (text.includes(pattern)) {
-        return { type: 'navigate', route: cmd.route, label: cmd.patterns[0] };
+        return {
+          type: 'navigate',
+          route: cmd.route,
+          label: cmd.label,
+          confirm: cmd.confirm,
+        };
       }
     }
   }
