@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Panel Principal', section: 'general' },
+  { path: '/', icon: LayoutDashboard, label: 'Inicio', section: 'general' },
   { path: '/buscar', icon: Search, label: 'Buscar Paciente', section: 'general' },
   { path: '/pacientes', icon: Users, label: 'Pacientes', section: 'general' },
   { path: '/nueva-atencion', icon: FilePlus, label: 'Nueva Atención', section: 'atenciones' },
@@ -166,8 +166,8 @@ export default function Layout() {
             <h2 className="header-title">{getPageTitle()}</h2>
           </div>
           <div className="header-right">
-            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-              {user?.full_name}
+            <span className="header-user-name">
+              {user?.full_name?.split(' ')[0]}
             </span>
           </div>
         </header>
