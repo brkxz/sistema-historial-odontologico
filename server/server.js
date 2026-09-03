@@ -15,6 +15,7 @@ import odontogramRoutes from './routes/odontogram.js';
 import userRoutes from './routes/users.js';
 import reportRoutes from './routes/reports.js';
 import reniecRoutes from './routes/reniec.js';
+import aiRoutes from './routes/ai.js';
 
 // Middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -105,6 +106,7 @@ app.use('/api/odontogram', odontogramRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/reniec', reniecRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Ruta protegida para obtener dientes
 app.get('/api/teeth', authenticateToken, async (req, res) => {

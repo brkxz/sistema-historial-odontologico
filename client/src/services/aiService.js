@@ -1,12 +1,9 @@
 // ============================================================
-// Servicio de IA - Conexión con Google Gemini API
-// Asistente Odontológico Inteligente
+// Servicio de IA - Proxy seguro a través del backend
+// La API key de Gemini se mantiene SOLO en el servidor
 // ============================================================
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-
-// La API key se toma de la variable de entorno (configurada en Vercel)
-const getApiKey = () => import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gemini_api_key') || '';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const SYSTEM_PROMPT = `Eres "OdontoIA", un asistente de inteligencia artificial especializado en odontología clínica. 
 Trabajas dentro del Sistema de Historial Odontológico Digital del Hospital San Ramón en Chanchamayo, Perú.
@@ -22,7 +19,7 @@ Reglas:
 - Responde SIEMPRE en español
 - Sé conciso pero completo (máximo 3-4 párrafos)
 - Usa terminología odontológica profesional
-- Si te preguntan sobre navegación, indica las rutas: Panel Principal (/), Buscar Paciente (/buscar), Pacientes (/pacientes), Nueva Atención (/nueva-atencion), Historial (/historial), Odontograma (/odontograma), Reportes (/reportes)
+- Si te preguntan sobre navegación, indica las rutas: Inicio (/), Buscar Paciente (/buscar), Pacientes (/pacientes), Nueva Atención (/nueva-atencion), Historial (/historial), Odontograma (/odontograma), Reportes (/reportes)
 - Nunca inventes datos de pacientes reales
 - Si no estás seguro de algo médico, indícalo claramente
 - Incluye emojis relevantes para hacer la conversación más amigable
@@ -35,15 +32,22 @@ Contexto del sistema:
 - Formato de fecha: dd/mm/yyyy (Perú)`;
 
 /**
- * Envía un mensaje al modelo Gemini y retorna la respuesta
+ * Obtener token de autenticación
+ */
+function getAuthToken() {
+  return localStorage.getItem('token') || '';
+}
+
+/**
+ * Envía un mensaje al backend que hace proxy a Gemini
  */
 export async function sendMessage(messages, context = {}) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error('API_KEY_MISSING');
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('No autenticado');
   }
 
-  // Construir el prompt con contexto
+  // Construir contexto adicional
   let contextInfo = '';
   if (context.currentPage) {
     contextInfo += `\n[Página actual: ${context.currentPage}]`;
@@ -71,32 +75,21 @@ export async function sendMessage(messages, context = {}) {
     }))
   ];
 
-  const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+  const response = await fetch(`${API_BASE}/ai/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents,
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
-      safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-      ]
-    })
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ contents }),
   });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    if (response.status === 400 && err?.error?.message?.includes('API key')) {
-      throw new Error('API_KEY_INVALID');
+    if (response.status === 503) {
+      throw new Error('API_KEY_MISSING');
     }
-    throw new Error(err?.error?.message || 'Error al comunicarse con la IA');
+    throw new Error(err?.error || 'Error al comunicarse con la IA');
   }
 
   const data = await response.json();
@@ -107,6 +100,23 @@ export async function sendMessage(messages, context = {}) {
   }
 
   return text;
+}
+
+/**
+ * Verifica si la IA está configurada en el servidor
+ */
+export async function checkAIStatus() {
+  try {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE}/ai/status`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    return data.configured;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -179,30 +189,10 @@ export function parseVoiceCommand(transcript) {
   return { type: 'chat', content: transcript };
 }
 
-/**
- * Verifica si la API key es válida
- */
-export async function validateApiKey(key) {
-  try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${key}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: 'Hola' }] }],
-        generationConfig: { maxOutputTokens: 10 }
-      })
-    });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
 export default {
   sendMessage,
   getClinicalSuggestion,
   formatClinicalNotes,
   parseVoiceCommand,
-  validateApiKey,
-  getApiKey,
+  checkAIStatus,
 };

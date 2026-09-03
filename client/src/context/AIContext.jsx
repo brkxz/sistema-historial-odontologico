@@ -3,8 +3,8 @@
 // Maneja estado del chat, configuración y contexto
 // ============================================================
 
-import { createContext, useContext, useState, useCallback } from 'react';
-import { sendMessage, parseVoiceCommand } from '../services/aiService';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { sendMessage, parseVoiceCommand, checkAIStatus } from '../services/aiService';
 
 const AIContext = createContext(null);
 
@@ -15,9 +15,12 @@ export function AIProvider({ children }) {
   const [currentPatient, setCurrentPatient] = useState(null);
   const [currentPage, setCurrentPage] = useState('');
   const [ttsEnabled, setTtsEnabled] = useState(false);
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(
-    !!(localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY)
-  );
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+
+  // Verificar estado de la IA al cargar
+  useEffect(() => {
+    checkAIStatus().then(configured => setApiKeyConfigured(configured));
+  }, []);
 
   /**
    * Enviar un mensaje al asistente IA
@@ -44,9 +47,7 @@ export function AIProvider({ children }) {
     } catch (error) {
       let errorMsg;
       if (error.message === 'API_KEY_MISSING') {
-        errorMsg = '⚙️ Necesitas configurar tu API Key de Google Gemini para usar el asistente IA. Haz clic en el ícono ⚙️ arriba para configurarla.';
-      } else if (error.message === 'API_KEY_INVALID') {
-        errorMsg = '❌ La API Key no es válida. Verifica que sea correcta en la configuración.';
+        errorMsg = '⚙️ El servicio de IA no está configurado. Contacta al administrador del sistema.';
       } else {
         errorMsg = `⚠️ Error: ${error.message}. Intenta de nuevo.`;
       }
@@ -80,19 +81,6 @@ export function AIProvider({ children }) {
     setIsOpen(prev => !prev);
   }, []);
 
-  /**
-   * Configurar API key
-   */
-  const setApiKey = useCallback((key) => {
-    if (key) {
-      localStorage.setItem('gemini_api_key', key);
-      setApiKeyConfigured(true);
-    } else {
-      localStorage.removeItem('gemini_api_key');
-      setApiKeyConfigured(false);
-    }
-  }, []);
-
   return (
     <AIContext.Provider value={{
       // Estado del panel
@@ -118,7 +106,6 @@ export function AIProvider({ children }) {
       
       // Config
       apiKeyConfigured,
-      setApiKey,
       
       // Voz
       processVoiceCommand,

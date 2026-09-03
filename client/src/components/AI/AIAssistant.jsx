@@ -9,7 +9,7 @@ import { useAI } from '../../context/AIContext';
 import { useVoice } from '../../hooks/useVoice';
 import { useSoundFeedback } from '../../hooks/useSoundFeedback';
 import { useWakeWord } from '../../hooks/useWakeWord';
-import { validateApiKey } from '../../services/aiService';
+
 import VoiceOverlay from './VoiceOverlay';
 import {
   X, Send, Mic, MicOff, Volume2, VolumeX,
@@ -30,7 +30,7 @@ export default function AIAssistant() {
     isOpen, setIsOpen, togglePanel,
     messages, isThinking, sendChat, clearChat,
     currentPatient, ttsEnabled, setTtsEnabled,
-    apiKeyConfigured, setApiKey, processVoiceCommand,
+    apiKeyConfigured, processVoiceCommand,
   } = useAI();
 
   const {
@@ -43,8 +43,6 @@ export default function AIAssistant() {
 
   const [inputText, setInputText] = useState('');
   const [showSettings, setShowSettings] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
-  const [validatingKey, setValidatingKey] = useState(false);
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   const [lastVoiceResponse, setLastVoiceResponse] = useState('');
   const [wakeWordEnabled, setWakeWordEnabled] = useState(
@@ -193,24 +191,7 @@ export default function AIAssistant() {
     }
   };
 
-  /**
-   * Guardar API key
-   */
-  const handleSaveApiKey = async () => {
-    if (!apiKeyInput.trim()) return;
-    setValidatingKey(true);
-    const isValid = await validateApiKey(apiKeyInput.trim());
-    setValidatingKey(false);
 
-    if (isValid) {
-      setApiKey(apiKeyInput.trim());
-      setShowSettings(false);
-      setApiKeyInput('');
-      playConfirmSound();
-    } else {
-      alert('La API key no es válida. Verifica que la copiaste correctamente.');
-    }
-  };
 
   /**
    * Formatear timestamp
