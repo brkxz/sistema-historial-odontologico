@@ -7,7 +7,7 @@ const router = Router();
 router.use(authenticateToken);
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama3-8b-8192'; // Groq free tier - disponible para todos
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant'; // Groq free - 30 RPM, rápido
 
 // POST /api/ai/chat - Proxy seguro para Groq API (OpenAI-compatible)
 router.post('/chat', async (req, res) => {
