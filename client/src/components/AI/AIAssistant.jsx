@@ -36,7 +36,7 @@ export default function AIAssistant() {
   const {
     isListening, isSpeaking, interimTranscript, voiceSupported,
     ttsSupported, startListening, stopListening, speak, stopSpeaking,
-    audioLevel,
+    audioLevel, availableVoices, selectedVoiceURI, selectVoice,
   } = useVoice();
 
   const { playStartSound, playStopSound, playConfirmSound, playSendSound } = useSoundFeedback();
@@ -306,6 +306,21 @@ export default function AIAssistant() {
                   <div className="ai-toggle-thumb" />
                 </label>
               </div>
+              {ttsEnabled && availableVoices.length > 0 && (
+                <select
+                  className="ai-voice-select"
+                  value={selectedVoiceURI}
+                  onChange={(e) => selectVoice(e.target.value)}
+                  style={{ marginTop: 8, width: '100%' }}
+                >
+                  <option value="">🔊 Voz automática (español)</option>
+                  {availableVoices.map(v => (
+                    <option key={v.voiceURI} value={v.voiceURI}>
+                      {v.name} ({v.lang})
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="ai-settings-group">

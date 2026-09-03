@@ -502,6 +502,27 @@
   transform: none;
 }
 
+/* Voice selector dropdown */
+.ai-voice-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  color: var(--text-primary, #fff);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ai-voice-select:focus {
+  border-color: rgba(139, 92, 246, 0.6);
+}
+.ai-voice-select option {
+  background: #1e1e2e;
+  color: #fff;
+}
+
 /* Voice listening overlay in chat */
 .ai-voice-indicator {
   display: flex;

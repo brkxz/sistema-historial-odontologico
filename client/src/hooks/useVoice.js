@@ -111,6 +111,11 @@ export function useVoice() {
   const continuousModeRef = useRef(false);
   const shouldRestartRef = useRef(false);
 
+  const [availableVoices, setAvailableVoices] = useState([]);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState(
+    () => localStorage.getItem('odonto_voice_uri') || ''
+  );
+
   // Verificar soporte al montar
   useEffect(() => {
     const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
@@ -119,6 +124,15 @@ export function useVoice() {
 
     if ('speechSynthesis' in window) {
       synthRef.current = window.speechSynthesis;
+
+      // Cargar voces disponibles (puede ser async en algunos navegadores)
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+        setAvailableVoices(spanishVoices.length > 0 ? spanishVoices : voices.slice(0, 10));
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
     return () => {
@@ -201,7 +215,13 @@ export function useVoice() {
   const getSpanishVoice = useCallback(() => {
     if (!synthRef.current) return null;
     const voices = synthRef.current.getVoices();
-    
+
+    // Si el usuario seleccionó una voz, usarla
+    if (selectedVoiceURI) {
+      const selected = voices.find(v => v.voiceURI === selectedVoiceURI);
+      if (selected) return selected;
+    }
+
     // Priorizar voces en español latinoamericano
     const preferredVoice = voices.find(v => 
       v.lang === 'es-PE' || v.lang === 'es-419' || v.lang === 'es-MX'
@@ -213,6 +233,18 @@ export function useVoice() {
     if (spanishVoice) return spanishVoice;
 
     return voices[0] || null;
+  }, [selectedVoiceURI]);
+
+  /**
+   * Seleccionar una voz por su URI y persistirla
+   */
+  const selectVoice = useCallback((voiceURI) => {
+    setSelectedVoiceURI(voiceURI);
+    if (voiceURI) {
+      localStorage.setItem('odonto_voice_uri', voiceURI);
+    } else {
+      localStorage.removeItem('odonto_voice_uri');
+    }
   }, []);
 
   // ---- Speech-to-Text ----
@@ -471,18 +503,23 @@ export function useVoice() {
     interimTranscript,
     voiceSupported,
     ttsSupported,
-    audioLevel,   // NUEVO: nivel de audio 0-1 para waveform
-    
+    audioLevel,
+
+    // Voces disponibles
+    availableVoices,
+    selectedVoiceURI,
+    selectVoice,
+
     // Acciones STT
     startListening,
     stopListening,
     toggleListening,
-    
+
     // Acciones TTS
     speak,
     stopSpeaking,
-    
-    // Utilidades (exportadas para uso externo)
+
+    // Utilidades
     cleanTextForTTS,
   };
 }
