@@ -303,21 +303,11 @@ export default function AIAssistant() {
             <h4>⚙️ Configuración del Asistente</h4>
 
             <div className="ai-settings-group">
-              <label>API Key de Google Gemini</label>
-              <input
-                type="password"
-                placeholder="Ingresa tu API key aquí..."
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveApiKey()}
-              />
+              <label>Estado de la IA</label>
               <div className="hint">
-                Obtén tu key gratis en{' '}
-                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
-                  aistudio.google.com/apikey
-                </a>
-                <br />
-                Estado: {apiKeyConfigured ? '✅ Configurada' : '❌ No configurada'}
+                {apiKeyConfigured
+                  ? '✅ OdontoIA está activa y lista para usar'
+                  : '❌ API no configurada — Contacta al administrador'}
               </div>
             </div>
 
@@ -369,14 +359,6 @@ export default function AIAssistant() {
                 <span>Abrir modo conversación por voz</span>
               </div>
             </div>
-
-            <button
-              className="ai-settings-save-btn"
-              onClick={handleSaveApiKey}
-              disabled={validatingKey || !apiKeyInput.trim()}
-            >
-              {validatingKey ? 'Validando...' : '💾 Guardar API Key'}
-            </button>
 
             <button
               className="ai-settings-save-btn"

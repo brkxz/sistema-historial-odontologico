@@ -5,8 +5,8 @@
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-// La API key se toma de la variable de entorno, con localStorage como fallback
-const getApiKey = () => localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || '';
+// La API key se toma de la variable de entorno (configurada en Vercel)
+const getApiKey = () => import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gemini_api_key') || '';
 
 const SYSTEM_PROMPT = `Eres "OdontoIA", un asistente de inteligencia artificial especializado en odontología clínica. 
 Trabajas dentro del Sistema de Historial Odontológico Digital del Hospital San Ramón en Chanchamayo, Perú.
