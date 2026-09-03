@@ -109,13 +109,14 @@ export function useWakeWord({ onWakeWord, enabled = false } = {}) {
 
     recognition.onend = () => {
       setIsWakeListening(false);
+      recognitionRef.current = null;
       // Auto-reiniciar si sigue habilitado
       if (enabledRef.current) {
         restartTimerRef.current = setTimeout(() => {
-          if (enabledRef.current && !recognitionRef.current) {
+          if (enabledRef.current) {
             startWakeWordListener();
           }
-        }, 300);
+        }, 500);
       }
     };
 
