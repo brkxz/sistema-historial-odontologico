@@ -1,6 +1,6 @@
 // ============================================================
 // Servicio de IA - Proxy seguro a través del backend
-// La API key de Gemini se mantiene SOLO en el servidor
+// La API key de Groq se mantiene SOLO en el servidor
 // ============================================================
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -18,6 +18,9 @@ Rutas disponibles:
 - Odontograma: [ACTION:navigate:/odontograma]
 - Reportes: [ACTION:navigate:/reportes]
 - Lista Pacientes: [ACTION:navigate:/pacientes]
+- Usuarios del sistema: [ACTION:navigate:/usuarios]
+- Mi perfil / cambiar contraseña: [ACTION:navigate:/perfil]
+- Logs de auditoría: [ACTION:navigate:/auditoria]
 - Inicio: [ACTION:navigate:/]
 
 Ejemplos de cuándo usar acción:
@@ -25,6 +28,8 @@ Ejemplos de cuándo usar acción:
 - "busca al paciente", "quiero buscar", "DNI..." → [ACTION:navigate:/buscar]
 - "ver historial", "atenciones anteriores" → [ACTION:navigate:/historial]
 - "quiero ver los reportes" → [ACTION:navigate:/reportes]
+- "mi perfil", "cambiar mi contraseña", "editar mi cuenta" → [ACTION:navigate:/perfil]
+- "ver auditoría", "logs del sistema", "ver registros de actividad" → [ACTION:navigate:/auditoria]
 
 TÚ SÍ PUEDES navegar. NUNCA digas que no tienes acceso a la interfaz.
 
@@ -78,7 +83,7 @@ export async function sendMessage(messages, context = {}) {
     },
     {
       role: 'model',
-      parts: [{ text: '¡Hola Doctor! 👋 Soy OdontoIA, tu asistente odontológico inteligente. Estoy aquí para ayudarte con diagnósticos, tratamientos, recetas y cualquier consulta clínica. ¿En qué puedo asistirte?' }]
+      parts: [{ text: '¡Hola Doctor! 👋 Soy Denty, tu asistente odontológico inteligente. Estoy aquí para ayudarte con diagnósticos, tratamientos, recetas y cualquier consulta clínica. ¿En qué puedo asistirte?' }]
     },
     ...messages.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
@@ -259,6 +264,25 @@ export function parseVoiceCommand(transcript) {
       patterns: [
         'usuarios', 'gestion usuarios', 'administrar usuarios',
         'ver usuarios', 'agregar usuario',
+      ],
+    },
+    {
+      route: '/perfil',
+      label: 'Mi Perfil',
+      confirm: '👤 Abriendo tu perfil de usuario.',
+      patterns: [
+        'mi perfil', 'ver perfil', 'editar perfil', 'perfil de usuario',
+        'cambiar contrasena', 'cambiar clave', 'cambiar password',
+        'editar mi cuenta', 'mi cuenta', 'configurar perfil',
+      ],
+    },
+    {
+      route: '/auditoria',
+      label: 'Auditoría',
+      confirm: '📋 Abriendo los logs de auditoría del sistema.',
+      patterns: [
+        'auditoria', 'ver auditoria', 'logs del sistema', 'registros de actividad',
+        'historial de actividad', 'log de auditoria', 'ver logs',
       ],
     },
   ];

@@ -16,6 +16,7 @@ import userRoutes from './routes/users.js';
 import reportRoutes from './routes/reports.js';
 import reniecRoutes from './routes/reniec.js';
 import aiRoutes from './routes/ai.js';
+import auditRoutes from './routes/audit.js';
 
 // Middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -107,6 +108,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/reniec', reniecRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/audit', auditRoutes);
 
 // Ruta protegida para obtener dientes
 app.get('/api/teeth', authenticateToken, async (req, res) => {
@@ -154,9 +156,10 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('✅ Conexión a la base de datos establecida.');
 
-    // Sincronizar modelos (alter: true para agregar columnas nuevas sin borrar datos)
-    await sequelize.sync({ alter: true });
-    console.log('✅ Modelos sincronizados.');
+    // Sincronizar modelos
+    const isDev = process.env.NODE_ENV !== 'production';
+    await sequelize.sync(isDev ? { alter: true } : {});
+    console.log(`✅ Modelos sincronizados (${isDev ? 'desarrollo - alter' : 'producción - safe'}).`);
 
     app.listen(PORT, () => {
       console.log('');

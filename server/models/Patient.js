@@ -56,6 +56,26 @@ const Patient = sequelize.define('Patient', {
       isEmail: true,
     },
   },
+  medical_history: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Antecedentes médicos: enfermedades sistémicas, cirugías previas, etc.',
+  },
+  allergies: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Alergias conocidas: medicamentos, materiales dentales, látex, etc.',
+  },
+  medications: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Medicamentos que toma actualmente',
+  },
+  blood_type: {
+    type: DataTypes.STRING(5),
+    allowNull: true,
+    comment: 'Tipo de sangre: A+, A-, B+, B-, AB+, AB-, O+, O-',
+  },
   registration_date: {
     type: DataTypes.DATEONLY,
     allowNull: false,

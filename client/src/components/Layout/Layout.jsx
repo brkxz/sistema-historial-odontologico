@@ -6,7 +6,7 @@ import AIAssistant from '../AI/AIAssistant';
 import {
   LayoutDashboard, Search, UserPlus, ClipboardList,
   History, Users, BarChart3, Settings, LogOut, Menu, X,
-  Stethoscope, Home, FilePlus
+  Stethoscope, Home, FilePlus, User, ScrollText
 } from 'lucide-react';
 
 const navItems = [
@@ -18,6 +18,7 @@ const navItems = [
   { path: '/odontograma', icon: Stethoscope, label: 'Odontograma', section: 'atenciones' },
   { path: '/reportes', icon: BarChart3, label: 'Reportes', section: 'admin' },
   { path: '/usuarios', icon: UserPlus, label: 'Usuarios', section: 'admin', adminOnly: true },
+  { path: '/auditoria', icon: ScrollText, label: 'Auditoría', section: 'admin', adminOnly: true },
 ];
 
 const mobileNavItems = [
@@ -142,8 +143,15 @@ export default function Layout() {
 
         {/* User info */}
         <div className="sidebar-user">
-          <div className="sidebar-user-avatar">{getInitials(user?.full_name)}</div>
-          <div className="sidebar-user-info">
+          <div
+            className="sidebar-user-avatar"
+            onClick={() => navigate('/perfil')}
+            style={{ cursor: 'pointer' }}
+            title="Ver mi perfil"
+          >
+            {getInitials(user?.full_name)}
+          </div>
+          <div className="sidebar-user-info" style={{ cursor: 'pointer' }} onClick={() => navigate('/perfil')}>
             <div className="sidebar-user-name">{user?.full_name}</div>
             <div className="sidebar-user-role">
               {user?.role === 'admin' ? 'Administrador' : 'Odontólogo'}

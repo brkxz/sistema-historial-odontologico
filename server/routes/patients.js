@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { Op } from 'sequelize';
-import { Patient, User, Treatment } from '../models/index.js';
+import { Patient, User, Treatment, sequelize } from '../models/index.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 
@@ -17,11 +17,13 @@ router.get('/', async (req, res) => {
 
     let where = {};
     if (search) {
+      // iLike es case-insensitive en PostgreSQL; like para SQLite
+      const likeOp = sequelize.getDialect() === 'postgres' ? Op.iLike : Op.like;
       where = {
         [Op.or]: [
-          { dni: { [Op.like]: `%${search}%` } },
-          { first_name: { [Op.like]: `%${search}%` } },
-          { last_name: { [Op.like]: `%${search}%` } },
+          { dni: { [likeOp]: `%${search}%` } },
+          { first_name: { [likeOp]: `%${search}%` } },
+          { last_name: { [likeOp]: `%${search}%` } },
         ],
       };
     }
@@ -103,7 +105,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/patients - Crear paciente
 router.post('/', async (req, res) => {
   try {
-    const { dni, first_name, last_name, birth_date, age, gender, phone, address, email } = req.body;
+    const { dni, first_name, last_name, birth_date, age, gender, phone, address, email, medical_history, allergies, medications, blood_type } = req.body;
 
     // Validaciones
     if (!dni || !first_name || !last_name) {
@@ -126,6 +128,10 @@ router.post('/', async (req, res) => {
       phone,
       address,
       email,
+      medical_history,
+      allergies,
+      medications,
+      blood_type,
       registration_date: new Date().toISOString().split('T')[0],
       registered_by: req.user.id,
     });
@@ -153,7 +159,7 @@ router.put('/:id', async (req, res) => {
     }
 
     const oldValues = patient.toJSON();
-    const { dni, first_name, last_name, birth_date, age, gender, phone, address, email } = req.body;
+    const { dni, first_name, last_name, birth_date, age, gender, phone, address, email, medical_history, allergies, medications, blood_type } = req.body;
 
     // Verificar DNI único si se cambia
     if (dni && dni !== patient.dni) {
@@ -173,6 +179,10 @@ router.put('/:id', async (req, res) => {
       phone: phone !== undefined ? phone : patient.phone,
       address: address !== undefined ? address : patient.address,
       email: email !== undefined ? email : patient.email,
+      medical_history: medical_history !== undefined ? medical_history : patient.medical_history,
+      allergies: allergies !== undefined ? allergies : patient.allergies,
+      medications: medications !== undefined ? medications : patient.medications,
+      blood_type: blood_type !== undefined ? blood_type : patient.blood_type,
     });
 
     // Auditoría

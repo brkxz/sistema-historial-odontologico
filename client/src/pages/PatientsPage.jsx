@@ -246,6 +246,10 @@ function PatientForm({ patient, prefilledDni, onClose, onSaved }) {
     phone: patient?.phone || '',
     address: patient?.address || prefilledAddress || '',
     email: patient?.email || '',
+    medical_history: patient?.medical_history || '',
+    allergies: patient?.allergies || '',
+    medications: patient?.medications || '',
+    blood_type: patient?.blood_type || '',
   });
   const [saving, setSaving] = useState(false);
   const [consultingReniec, setConsultingReniec] = useState(false);
@@ -543,6 +547,63 @@ function PatientForm({ patient, prefilledDni, onClose, onSaved }) {
               />
             </div>
           </div>
+
+            {/* Sección: Antecedentes Médicos */}
+            <div style={{ borderTop: '1px solid var(--border)', margin: '8px 24px 0', paddingTop: '20px' }}>
+              <h3 style={{ fontSize: 'var(--font-size-md)', color: 'var(--text-primary)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                🏥 Antecedentes Médicos
+              </h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label className="form-label">Tipo de Sangre</label>
+                  <select name="blood_type" className="form-select" value={form.blood_type} onChange={handleChange}>
+                    <option value="">Seleccionar</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Alergias</label>
+                  <input
+                    type="text"
+                    name="allergies"
+                    className="form-input"
+                    value={form.allergies}
+                    onChange={handleChange}
+                    placeholder="Ej: Penicilina, Látex, Lidocaína..."
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label className="form-label">Medicamentos Actuales</label>
+                  <input
+                    type="text"
+                    name="medications"
+                    className="form-input"
+                    value={form.medications}
+                    onChange={handleChange}
+                    placeholder="Medicamentos que toma actualmente..."
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label className="form-label">Historial Médico</label>
+                  <textarea
+                    name="medical_history"
+                    className="form-input"
+                    value={form.medical_history}
+                    onChange={handleChange}
+                    placeholder="Enfermedades sistémicas, cirugías previas, diabetes, hipertensión, embarazo..."
+                    rows={3}
+                    style={{ resize: 'vertical', minHeight: '80px' }}
+                  />
+                </div>
+              </div>
+            </div>
 
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>

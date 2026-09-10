@@ -1426,6 +1426,113 @@
   cursor: not-allowed;
 }
 
+/* ── Botón de dictado por voz ── Premium Design ── */
+.voice-mini-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: linear-gradient(135deg, #0D9488 0%, #0EA5E9 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-family);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* Shimmer de luz que cruza el botón */
+.voice-mini-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,0.25) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 0s;
+}
+
+.voice-mini-btn:hover::before {
+  transform: translateX(120%);
+  transition: transform 0.5s ease;
+}
+
+.voice-mini-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5);
+  filter: brightness(1.1);
+}
+
+.voice-mini-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Ícono mic dentro del botón */
+.voice-mini-btn svg {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px rgba(255,255,255,0.4));
+}
+
+/* ── Estado GRABANDO ── */
+.voice-mini-btn.listening {
+  background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
+  box-shadow: 0 2px 12px rgba(239, 68, 68, 0.5);
+  gap: 8px;
+  padding: 4px 12px 4px 10px;
+}
+
+.voice-mini-btn.listening:hover {
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+  filter: brightness(1.08);
+}
+
+/* Barras de ecualizador animadas (reemplazan al ícono al escuchar) */
+.voice-mini-btn .voice-bars {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.voice-mini-btn.listening .voice-bars {
+  display: flex;
+}
+
+.voice-mini-btn.listening svg {
+  display: none;
+}
+
+.voice-mini-btn .voice-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.9);
+  animation: eq-bar 0.8s ease-in-out infinite alternate;
+}
+
+.voice-mini-btn .voice-bar:nth-child(1) { height: 5px;  animation-delay: 0s; }
+.voice-mini-btn .voice-bar:nth-child(2) { height: 11px; animation-delay: 0.15s; }
+.voice-mini-btn .voice-bar:nth-child(3) { height: 7px;  animation-delay: 0.07s; }
+.voice-mini-btn .voice-bar:nth-child(4) { height: 13px; animation-delay: 0.25s; }
+
+@keyframes eq-bar {
+  0%   { transform: scaleY(0.3); opacity: 0.6; }
+  100% { transform: scaleY(1);   opacity: 1;   }
+}
+
+
+
 .dictation-live-preview {
   display: flex;
   align-items: center;

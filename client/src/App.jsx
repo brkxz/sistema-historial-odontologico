@@ -12,6 +12,9 @@ import HistoryPage from './pages/HistoryPage';
 import OdontogramPage from './pages/OdontogramPage';
 import ReportsPage from './pages/ReportsPage';
 import UsersPage from './pages/UsersPage';
+import ProfilePage from './pages/ProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
+import AuditPage from './pages/AuditPage';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children }) {
@@ -92,10 +95,12 @@ function App() {
               <Route path="odontograma" element={<OdontogramPage />} />
               <Route path="reportes" element={<ReportsPage />} />
               <Route path="usuarios" element={<UsersPage />} />
+              <Route path="perfil" element={<ProfilePage />} />
+              <Route path="auditoria" element={<AuditPage />} />
             </Route>
 
             {/* Ruta 404 */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </AIProvider>
         </ToastProvider>

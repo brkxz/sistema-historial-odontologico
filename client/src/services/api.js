@@ -11,13 +11,23 @@ const getHeaders = () => {
 
 // Helper para manejar respuestas
 const handleResponse = async (response) => {
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    // La respuesta no es JSON (502, 503, HTML de error, etc.)
+    if (!response.ok) {
+      throw new Error('El servidor no está disponible. Intente más tarde.');
+    }
+    throw new Error('Respuesta inesperada del servidor');
+  }
 
   if (!response.ok) {
     if (response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
+      throw new Error(data.error || 'Sesión expirada. Inicie sesión nuevamente.');
     }
     throw new Error(data.error || 'Error en la solicitud');
   }
@@ -70,6 +80,9 @@ export const authService = {
   login: (username, password) => api.post('/auth/login', { username, password }),
   loginWithGoogle: (token) => api.post('/auth/google', { token }),
   getMe: () => api.get('/auth/me'),
+  changePassword: (current_password, new_password) =>
+    api.post('/auth/change-password', { current_password, new_password }),
+  updateProfile: (data) => api.put('/auth/profile', data),
 };
 
 // =============================================
@@ -136,6 +149,22 @@ export const teethService = {
 // =============================================
 export const reniecService = {
   consultarDni: (dni) => api.get(`/reniec/dni/${dni}`),
+};
+
+// =============================================
+// AUDITORÍA
+// =============================================
+export const auditService = {
+  getLogs: (params = {}) => {
+    const { page = 1, limit = 30, action, entity, user_id, start_date, end_date } = params;
+    const query = new URLSearchParams({ page, limit });
+    if (action) query.append('action', action);
+    if (entity) query.append('entity', entity);
+    if (user_id) query.append('user_id', user_id);
+    if (start_date) query.append('start_date', start_date);
+    if (end_date) query.append('end_date', end_date);
+    return api.get(`/audit?${query.toString()}`);
+  },
 };
 
 export default api;

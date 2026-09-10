@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { User } from '../models/index.js';
-import { generateToken } from '../middleware/auth.js';
+import { generateToken, authenticateToken } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import { loginLimiter, googleAuthLimiter } from '../middleware/rateLimiter.js';
 import { sanitizeInputs } from '../middleware/sanitize.js';
@@ -163,12 +163,8 @@ router.post('/login', loginLimiter, sanitizeInputs, async (req, res) => {
 // =============================================
 // GET /api/auth/me - Obtener usuario actual
 // =============================================
-router.get('/me', async (req, res) => {
+router.get('/me', authenticateToken, async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ error: 'No autenticado' });
-    }
-
     res.json({
       user: {
         id: req.user.id,
@@ -181,6 +177,99 @@ router.get('/me', async (req, res) => {
     });
   } catch (error) {
     console.error('Error al obtener usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// POST /api/auth/change-password - Cambiar contraseña
+// =============================================
+router.post('/change-password', authenticateToken, sanitizeInputs, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'La contraseña actual y la nueva son requeridas' });
+    }
+
+    // Validar longitud de nueva contraseña
+    if (new_password.length < 6) {
+      return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    }
+
+    if (new_password.length > 128) {
+      return res.status(400).json({ error: 'La contraseña es demasiado larga' });
+    }
+
+    // Obtener usuario con password_hash
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Verificar que sea usuario local
+    if (user.auth_provider !== 'local' || !user.password_hash) {
+      return res.status(400).json({ error: 'Los usuarios con inicio de sesión social no pueden cambiar contraseña aquí' });
+    }
+
+    // Verificar contraseña actual
+    const isValid = await bcrypt.compare(current_password, user.password_hash);
+    if (!isValid) {
+      return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+    }
+
+    // Actualizar contraseña
+    user.password_hash = await bcrypt.hash(new_password, 12);
+    await user.save();
+
+    // Auditoría
+    await logAudit(user.id, 'CHANGE_PASSWORD', 'user', user.id, null, null, req.ip);
+
+    res.json({ message: 'Contraseña actualizada correctamente' });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// =============================================
+// PUT /api/auth/profile - Actualizar perfil propio
+// =============================================
+router.put('/profile', authenticateToken, sanitizeInputs, async (req, res) => {
+  try {
+    const { full_name, email, specialty } = req.body;
+
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const updateData = {};
+    if (full_name && full_name.trim()) updateData.full_name = full_name.trim();
+    if (email !== undefined) updateData.email = email || null;
+    if (specialty !== undefined) updateData.specialty = specialty || null;
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No se proporcionaron datos para actualizar' });
+    }
+
+    const oldValues = { full_name: user.full_name, email: user.email, specialty: user.specialty };
+    await user.update(updateData);
+
+    await logAudit(user.id, 'UPDATE', 'user', user.id, oldValues, updateData, req.ip);
+
+    res.json({
+      user: {
+        id: user.id,
+        username: user.username,
+        full_name: user.full_name,
+        email: user.email,
+        role: user.role,
+        specialty: user.specialty,
+      },
+    });
+  } catch (error) {
+    console.error('Error al actualizar perfil:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -285,3 +374,4 @@ router.post('/google', googleAuthLimiter, sanitizeInputs, async (req, res) => {
 });
 
 export default router;
+

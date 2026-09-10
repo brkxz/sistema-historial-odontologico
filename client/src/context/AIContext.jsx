@@ -9,9 +9,20 @@ import { sendMessage, parseVoiceCommand, checkAIStatus } from '../services/aiSer
 
 const AIContext = createContext(null);
 
+const STORAGE_KEY = 'odonto_chat_history';
+const MAX_STORED_MESSAGES = 50;
+
 export function AIProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    // Cargar historial persistido al iniciar
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isThinking, setIsThinking] = useState(false);
   const [currentPatient, setCurrentPatient] = useState(null);
   const [currentPage, setCurrentPage] = useState('');
@@ -24,6 +35,17 @@ export function AIProvider({ children }) {
   useEffect(() => {
     checkAIStatus().then(configured => setApiKeyConfigured(configured));
   }, []);
+
+  // Persistir historial de chat en localStorage
+  useEffect(() => {
+    try {
+      // Guardar solo los últimos MAX_STORED_MESSAGES mensajes
+      const toStore = messages.slice(-MAX_STORED_MESSAGES);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    } catch {
+      // localStorage lleno u otro error — ignorar silenciosamente
+    }
+  }, [messages]);
 
   /**
    * Enviar un mensaje al asistente IA
@@ -77,10 +99,11 @@ export function AIProvider({ children }) {
   }, []);
 
   /**
-   * Limpiar historial de chat
+   * Limpiar historial de chat (también borra del localStorage)
    */
   const clearChat = useCallback(() => {
     setMessages([]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }, []);
 
   /**

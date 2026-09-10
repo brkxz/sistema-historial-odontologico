@@ -52,8 +52,11 @@ router.post('/chat', async (req, res) => {
 
     const data = await response.json();
 
-    // Convertir respuesta Groq → formato Gemini (que espera el cliente)
-    const text = data?.choices?.[0]?.message?.content || '';
+    // Groq/Qwen puede incluir <think>...</think> en el contenido (modo reasoning)
+    // Lo eliminamos antes de enviar al cliente para una experiencia limpia
+    let text = data?.choices?.[0]?.message?.content || '';
+    text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
     res.json({
       candidates: [{
         content: {

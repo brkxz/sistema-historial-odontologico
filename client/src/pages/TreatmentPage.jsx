@@ -581,7 +581,19 @@ export default function TreatmentPage() {
                   onClick={() => startDictation('reason')}
                   title={isListening && dictatingField === 'reason' ? 'Detener dictado' : 'Dictar por voz'}
                 >
-                  {isListening && dictatingField === 'reason' ? <><MicOff size={14} /> Detener</> : <><Mic size={14} /> Dictar</>}
+                  {isListening && dictatingField === 'reason' ? (
+                    <>
+                      <span className="voice-bars">
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                      </span>
+                      Detener
+                    </>
+                  ) : (
+                    <><Mic size={13} /> Dictar</>
+                  )}
                 </button>
               </div>
             </div>
@@ -621,7 +633,19 @@ export default function TreatmentPage() {
                   onClick={() => startDictation('procedure_performed')}
                   title={isListening && dictatingField === 'procedure_performed' ? 'Detener dictado' : 'Dictar por voz'}
                 >
-                  {isListening && dictatingField === 'procedure_performed' ? <><MicOff size={14} /> Detener</> : <><Mic size={14} /> Dictar</>}
+                  {isListening && dictatingField === 'procedure_performed' ? (
+                    <>
+                      <span className="voice-bars">
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                      </span>
+                      Detener
+                    </>
+                  ) : (
+                    <><Mic size={13} /> Dictar</>
+                  )}
                 </button>
               </div>
             </div>
@@ -660,7 +684,19 @@ export default function TreatmentPage() {
                   onClick={() => startDictation('observations')}
                   title={isListening && dictatingField === 'observations' ? 'Detener dictado' : 'Dictar por voz'}
                 >
-                  {isListening && dictatingField === 'observations' ? <><MicOff size={14} /> Detener</> : <><Mic size={14} /> Dictar</>}
+                  {isListening && dictatingField === 'observations' ? (
+                    <>
+                      <span className="voice-bars">
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                        <span className="voice-bar" />
+                      </span>
+                      Detener
+                    </>
+                  ) : (
+                    <><Mic size={13} /> Dictar</>
+                  )}
                 </button>
               </div>
             </div>
