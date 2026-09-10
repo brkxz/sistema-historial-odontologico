@@ -7,7 +7,8 @@ const router = Router();
 router.use(authenticateToken);
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b'; // Modelo activo en Groq (rápido y con excelente razonamiento clínico)
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant'; // Modelo con límites más generosos en free tier
+const GROQ_MAX_TOKENS = parseInt(process.env.GROQ_MAX_TOKENS || '800'); // Dentro del límite OTPM del free tier
 
 // POST /api/ai/chat - Proxy seguro para Groq API (OpenAI-compatible)
 router.post('/chat', async (req, res) => {
@@ -38,7 +39,7 @@ router.post('/chat', async (req, res) => {
         model: GROQ_MODEL,
         messages,
         temperature: 0.7,
-        max_tokens: 2048,
+        max_tokens: GROQ_MAX_TOKENS,
       }),
     });
 
