@@ -46,7 +46,7 @@ export default function AIAssistant() {
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   const [lastVoiceResponse, setLastVoiceResponse] = useState('');
   const [wakeWordEnabled, setWakeWordEnabled] = useState(
-    () => localStorage.getItem('odonto_wake_word') === 'true'
+    () => localStorage.getItem('odonto_wake_word') !== 'false' // activo por defecto
   );
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -403,22 +403,9 @@ export default function AIAssistant() {
                   </p>
                   {!apiKeyConfigured && (
                     <p style={{ color: 'var(--warning)', fontSize: '12px', marginBottom: 12 }}>
-                      ⚠️ Configura tu API Key de Gemini para activar la IA.
+                      ⚠️ El servicio de IA no está disponible en este momento.
                       <br />
-                      <button
-                        onClick={() => setShowSettings(true)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--primary-light)',
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                          padding: 0,
-                          fontSize: 'inherit'
-                        }}
-                      >
-                        Ir a configuración →
-                      </button>
+                      <span style={{ opacity: 0.7 }}>Verifica la configuración del servidor o intenta más tarde.</span>
                     </p>
                   )}
 
