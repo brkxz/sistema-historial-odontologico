@@ -41,38 +41,6 @@ const PROVIDERS = [
   },
 
   {
-    name: 'Gemini',
-    enabled: () => !!process.env.GEMINI_API_KEY,
-    call: async (messages) => {
-      const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-
-      // Convertir mensajes OpenAI → formato Gemini (contents/parts)
-      const contents = messages.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      }));
-
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents }),
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(`Gemini ${res.status}: ${err?.error?.message || 'error desconocido'}`);
-      }
-
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      return text.trim();
-    },
-  },
-
-  {
     name: 'OpenRouter',
     enabled: () => !!process.env.OPENROUTER_API_KEY,
     call: async (messages) => {
