@@ -59,6 +59,10 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
+  'https://localhost',        // Capacitor Android (androidScheme: https)
+  'capacitor://localhost',    // Capacitor Android (androidScheme: capacitor)
+  'ionic://localhost',        // Ionic/Capacitor iOS
+  'http://localhost',         // Capacitor genérico
 ];
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
@@ -66,10 +70,12 @@ if (process.env.FRONTEND_URL) {
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Permitir requests sin origin (apps móviles, Capacitor, curl)
+    // Permitir requests sin origin (curl, Postman, algunos contextos móviles)
     if (!origin) return callback(null, true);
     // Permitir orígenes de Vercel (preview y producción)
     if (origin.includes('vercel.app')) return callback(null, true);
+    // Permitir localhost en cualquier puerto (Capacitor, dev)
+    if (origin.includes('localhost')) return callback(null, true);
     // Verificar contra lista de orígenes permitidos
     if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       return callback(null, true);
