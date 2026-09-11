@@ -53,24 +53,27 @@ export default function AIAssistant() {
   const navigate = useNavigate();
 
   // ---- Wake Word: "Oye Denty" ----
-  const { isWakeListening, wakeWordSupported, startWakeWordListener } = useWakeWord({
+  const { isWakeListening, wakeWordSupported } = useWakeWord({
     enabled: wakeWordEnabled && !voiceOverlayOpen && !isListening,
     onWakeWord: () => {
       playStartSound();
-      // Abrir el chat (no el overlay fullscreen) para que se vea la app
+      // Abrir el chat para que se vea la app
       if (!isOpen) setIsOpen(true);
-      // Iniciar escucha inline
-      startListening({
-        continuous: false,
-        onResult: async (text) => {
-          playConfirmSound();
-          const response = await handleSend(text);
-          // Hablar la respuesta si TTS está activo
-          if (ttsEnabled && response && !response.startsWith('⚙️') && !response.startsWith('⚠️')) {
-            speak(response, { rate: 1.05 });
-          }
-        },
-      });
+      // Delay necesario: el reconocimiento de wake word debe cerrarse
+      // completamente antes de iniciar uno nuevo, o el navegador lo ignora
+      setTimeout(() => {
+        startListening({
+          continuous: false,
+          onResult: async (text) => {
+            playConfirmSound();
+            const response = await handleSend(text);
+            // Hablar la respuesta si TTS está activo
+            if (ttsEnabled && response && !response.startsWith('⚙️') && !response.startsWith('⚠️')) {
+              speak(response, { rate: 1.05 });
+            }
+          },
+        });
+      }, 400);
     },
   });
 
