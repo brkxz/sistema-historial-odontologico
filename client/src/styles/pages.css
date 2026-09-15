@@ -704,100 +704,125 @@
 }
 
 @media (max-width: 640px) {
-  /* Home page mobile */
+  /* ── Home page ── */
   .home-page {
-    gap: 20px;
-    padding: 4px 0 24px;
+    gap: 16px;
+    padding: 4px 0 20px;
   }
 
   .home-hero {
-    padding: 28px 16px 24px;
-    border-radius: var(--radius-lg);
+    padding: 24px 16px 20px;
+    border-radius: var(--radius-md);
+    margin: 0 -4px;
   }
 
   .home-hero-icon {
-    font-size: 44px;
-    margin-bottom: 12px;
+    font-size: 40px;
+    margin-bottom: 10px;
   }
 
   .home-greeting {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
   }
 
   .home-date {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .home-stats {
     gap: 8px;
     padding: 0 2px 2px;
+    margin: 0 -4px;
   }
 
   .home-stat-card {
-    min-width: 90px;
-    padding: 12px 8px;
+    min-width: 85px;
+    padding: 12px 6px;
+    border-radius: var(--radius-md);
   }
 
   .home-stat-icon {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
   }
 
   .home-stat-value {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+  }
+
+  .home-stat-label {
+    font-size: 9px;
   }
 
   .home-summary-card {
-    padding: 18px 14px;
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
   }
 
   .home-summary-num {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 
   .home-summary-text {
     font-size: 11px;
   }
 
-  /* Reports / generic dashboard mobile */
+  /* ── Dashboard / Reports ── */
   .dashboard-stats {
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 
   .stat-card {
     padding: 14px 12px;
     flex-direction: column-reverse;
     gap: 8px;
+    border-radius: var(--radius-md);
   }
 
   .stat-card-icon {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
   }
 
   .stat-card-info .stat-value {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+  }
+
+  .stat-card-info h3 {
+    font-size: 10px;
   }
 
   .dashboard-grid {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
   }
 
-  /* Search mobile */
+  /* ── Search page ── */
   .search-section {
-    padding: 16px 0;
+    padding: 12px 0;
   }
 
   .search-section h2 {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
+  }
+
+  .search-section p {
+    font-size: var(--font-size-sm);
+    margin-bottom: 20px;
   }
 
   .search-box {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     max-width: 100%;
+  }
+
+  .search-box .form-input {
+    font-size: 16px;
+    padding: 14px 16px;
+    letter-spacing: 3px;
+    text-align: center;
   }
 
   .search-box .btn {
@@ -810,20 +835,31 @@
     width: 100%;
   }
 
-  /* Patient mobile */
+  /* ── Patient cards ── */
   .patient-card-header {
     flex-direction: column;
     text-align: center;
     gap: 8px;
   }
 
+  .patient-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: var(--font-size-lg);
+  }
+
+  .patient-name {
+    font-size: var(--font-size-lg);
+  }
+
   .patient-details {
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .patient-actions {
     flex-direction: column;
+    gap: 8px;
   }
 
   .patient-actions .btn {
@@ -831,14 +867,73 @@
     justify-content: center;
   }
 
+  /* ── Tables ── */
   .table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-md);
+    margin: 0 -4px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  /* ── Treatment cards ── */
+  .treatment-card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .treatment-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .treatment-card-body {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .treatment-form {
+    max-width: 100%;
+  }
+
+  .treatment-form-section h3 {
+    font-size: var(--font-size-sm);
+  }
+
+  /* ── Profile ── */
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    font-size: 1.2rem;
+  }
+
+  /* ── Login ── */
+  .login-card {
+    padding: 28px 20px;
     border-radius: var(--radius-lg);
   }
 
-  .card {
-    padding: 16px;
+  .login-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .login-header h1 {
+    font-size: var(--font-size-lg);
   }
 }
 

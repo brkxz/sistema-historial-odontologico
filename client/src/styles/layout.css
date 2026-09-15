@@ -1,13 +1,17 @@
 /* =============================================
    LAYOUT - Sidebar, Header, Content
+   Responsive Native-App Design
    ============================================= */
 
 .app-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
 }
 
-/* Sidebar */
+/* =============================================
+   SIDEBAR (Desktop)
+   ============================================= */
 .sidebar {
   width: var(--sidebar-width);
   background: var(--bg-sidebar);
@@ -19,7 +23,7 @@
   left: 0;
   bottom: 0;
   z-index: 100;
-  transition: all var(--transition);
+  transition: transform var(--transition), box-shadow var(--transition);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -91,6 +95,7 @@
   background: none;
   width: 100%;
   text-align: left;
+  position: relative;
 }
 
 .sidebar-link:hover {
@@ -161,11 +166,14 @@
   text-transform: capitalize;
 }
 
-/* Header */
+/* =============================================
+   HEADER
+   ============================================= */
 .header {
   height: var(--header-height);
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -207,17 +215,25 @@
   cursor: pointer;
   padding: 8px;
   border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
 }
 
 .menu-toggle:hover {
   background: var(--primary-50);
 }
 
-/* Main Content */
+.menu-toggle:active {
+  transform: scale(0.92);
+}
+
+/* =============================================
+   MAIN CONTENT
+   ============================================= */
 .main-content {
   flex: 1;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+  min-height: 100dvh;
   transition: margin-left var(--transition);
 }
 
@@ -251,24 +267,25 @@
   margin-top: 4px;
 }
 
-/* Mobile Bottom Nav */
+/* =============================================
+   MOBILE BOTTOM NAV — Native App Style
+   ============================================= */
 .mobile-nav {
   display: none;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 68px;
-  background: rgba(11, 17, 32, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border);
+  background: rgba(11, 17, 32, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 100;
-  padding: 0 12px;
-  padding-bottom: env(safe-area-inset-bottom, 6px);
   justify-content: space-around;
-  align-items: center;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  align-items: stretch;
+  /* Safe area for notched phones */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.5);
 }
 
 .mobile-nav-item {
@@ -276,64 +293,84 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 8px 12px;
-  border-radius: var(--radius-lg);
+  gap: 2px;
+  padding: 8px 4px 6px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  transition: all var(--transition-fast);
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
   background: none;
   border: none;
   cursor: pointer;
   text-decoration: none;
   flex: 1;
-  max-width: 72px;
-}
-
-.mobile-nav-item:hover,
-.mobile-nav-item.active {
-  color: var(--primary-light);
-}
-
-.mobile-nav-item.active {
-  background: var(--primary-50);
-}
-
-.mobile-nav-item.active svg {
-  transform: scale(1.1);
-  color: var(--primary-light);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-nav-item svg {
-  width: 20px;
-  height: 20px;
-  transition: transform var(--transition-fast);
+  width: 22px;
+  height: 22px;
+  transition: all 0.2s ease;
+  stroke-width: 1.8;
 }
 
-/* Mobile overlay */
+.mobile-nav-item.active {
+  color: var(--primary-light);
+}
+
+.mobile-nav-item.active svg {
+  color: var(--primary-light);
+  transform: scale(1.08);
+  stroke-width: 2.2;
+}
+
+/* Active indicator dot */
+.mobile-nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  box-shadow: 0 0 6px var(--primary);
+}
+
+/* =============================================
+   SIDEBAR OVERLAY (Mobile)
+   ============================================= */
 .sidebar-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: var(--bg-overlay);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 99;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.sidebar-overlay.visible {
+  display: block;
+  opacity: 1;
 }
 
 /* =============================================
-   RESPONSIVE
+   RESPONSIVE — Tablet (≤1024px)
    ============================================= */
-
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);
     width: 280px;
+    box-shadow: none;
   }
 
   .sidebar.open {
     transform: translateX(0);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.6);
   }
 
   .sidebar-overlay.visible {
@@ -353,38 +390,84 @@
   }
 
   .page-content {
-    padding: 14px 12px;
-    padding-bottom: 100px;
+    padding: 16px 14px;
+    /* Bottom padding for nav bar + safe area */
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 8px));
   }
 }
 
+/* =============================================
+   RESPONSIVE — Mobile (≤640px)
+   ============================================= */
 @media (max-width: 640px) {
+  /* Compact header like native apps */
   .header {
-    height: 56px;
-    padding: 0 12px;
+    height: 52px;
+    padding: 0 14px;
+    background: rgba(15, 23, 42, 0.92);
   }
 
   .header-title {
     font-size: var(--font-size-md);
+    font-weight: 700;
+  }
+
+  .header-user-name {
+    display: none;
+  }
+
+  /* Page content — tighter but breathable */
+  .page-content {
+    padding: 12px 12px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 8px));
   }
 
   .page-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 16px;
   }
 
   .page-title {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
 
   .page-header .btn {
     width: 100%;
     justify-content: center;
   }
+}
 
-  .header-user-name {
-    display: none;
+/* =============================================
+   RESPONSIVE — Small Mobile (≤380px)
+   ============================================= */
+@media (max-width: 380px) {
+  .header {
+    height: 48px;
+    padding: 0 10px;
+  }
+
+  .header-title {
+    font-size: 14px;
+  }
+
+  .page-content {
+    padding: 10px 8px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 8px));
+  }
+
+  .page-title {
+    font-size: 1.1rem;
+  }
+
+  .mobile-nav-item {
+    font-size: 9px;
+    padding: 6px 2px 4px;
+  }
+
+  .mobile-nav-item svg {
+    width: 20px;
+    height: 20px;
   }
 }

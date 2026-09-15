@@ -25,8 +25,8 @@ const mobileNavItems = [
   { path: '/', icon: Home, label: 'Inicio' },
   { path: '/buscar', icon: Search, label: 'Buscar' },
   { path: '/nueva-atencion', icon: FilePlus, label: 'Atención' },
-  { path: '/historial', icon: History, label: 'Historial' },
-  { path: '/reportes', icon: BarChart3, label: 'Reportes' },
+  { path: '/pacientes', icon: Users, label: 'Pacientes' },
+  { path: '/perfil', icon: User, label: 'Perfil' },
 ];
 
 export default function Layout() {
