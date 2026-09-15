@@ -185,13 +185,13 @@ export default function OdontogramPage() {
                 className={`tab-btn ${activeTab === 'upper' ? 'active' : ''}`}
                 onClick={() => setActiveTab('upper')}
               >
-                🦷 Superior (16)
+                Superior (16)
               </button>
               <button
                 className={`tab-btn ${activeTab === 'lower' ? 'active' : ''}`}
                 onClick={() => setActiveTab('lower')}
               >
-                🦷 Inferior (16)
+                Inferior (16)
               </button>
             </div>
 

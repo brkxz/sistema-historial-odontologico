@@ -98,7 +98,7 @@ export default function TreatmentPage() {
     setDictatingField(field);
     setDictationPreview('');
     playStartSound();
-    toast.info('🎙️ Hable ahora... Dictado continuo activado');
+    toast.info('Hable ahora... Dictado continuo activado');
 
     startListening({
       continuous: true,
@@ -230,7 +230,7 @@ export default function TreatmentPage() {
       </head>
       <body>
         <div class="header">
-          <h1>🏥 HOSPITAL SAN RAMÓN — RED DE SALUD CHANCHAMAYO</h1>
+          <h1>HOSPITAL SAN RAMÓN — RED DE SALUD CHANCHAMAYO</h1>
           <p>Área de Odontología • Ficha Clínica de Atención</p>
         </div>
         <div class="section">
@@ -357,7 +357,7 @@ export default function TreatmentPage() {
       <div className="card mb-md p-md treatment-card-section">
         <div className="teeth-selector-header">
           <div>
-            <h3 className="treatment-section-header">🦷 Dientes Involucrados</h3>
+            <h3 className="treatment-section-header">Dientes Involucrados</h3>
             <p className="teeth-selector-sub">Toca las piezas tratadas en esta sesión ({selectedTeeth.length} seleccionadas)</p>
           </div>
           <div className="arch-toggle-pills">
@@ -477,7 +477,7 @@ export default function TreatmentPage() {
       {/* 3. Formulario Clínico */}
       <div className="card mb-md p-md treatment-card-section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <h3 className="treatment-section-header">📋 Registro de Procedimiento</h3>
+          <h3 className="treatment-section-header">Registro de Procedimiento</h3>
           {apiKeyConfigured && (
             <button
               className="ai-suggest-btn"

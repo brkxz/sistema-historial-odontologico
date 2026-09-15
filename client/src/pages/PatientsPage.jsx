@@ -551,7 +551,7 @@ function PatientForm({ patient, prefilledDni, onClose, onSaved }) {
             {/* Sección: Antecedentes Médicos */}
             <div style={{ borderTop: '1px solid var(--border)', margin: '8px 24px 0', paddingTop: '20px' }}>
               <h3 style={{ fontSize: 'var(--font-size-md)', color: 'var(--text-primary)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                🏥 Antecedentes Médicos
+                Antecedentes Médicos
               </h3>
               <div className="form-grid">
                 <div className="form-group">

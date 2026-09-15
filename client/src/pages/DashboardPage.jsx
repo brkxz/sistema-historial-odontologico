@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { reportService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import {
-  Users, Activity, TrendingUp, CalendarCheck, CalendarClock
+  Users, Activity, TrendingUp, CalendarCheck, CalendarClock, Stethoscope, BarChart3
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -60,7 +60,7 @@ export default function DashboardPage() {
       <div className="home-hero">
         <div className="home-hero-glow" />
         <div className="home-hero-content">
-          <div className="home-hero-icon">🦷</div>
+          <div className="home-hero-icon"><Stethoscope size={44} strokeWidth={1.5} /></div>
           <h1 className="home-greeting">
             {getGreeting()}, Dr. {user?.full_name?.split(' ')[0]}
           </h1>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
 
       {/* Resumen del Día */}
       <div className="home-summary-card">
-        <h2 className="home-summary-title">📊 Resumen del Día</h2>
+        <h2 className="home-summary-title">Resumen del Día</h2>
         <div className="home-summary-grid">
           <div className="home-summary-item">
             <span className="home-summary-num">{stats?.todayTreatments || 0}</span>

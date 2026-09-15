@@ -17,12 +17,12 @@ import {
 } from 'lucide-react';
 
 const QUICK_PROMPTS = [
-  '💊 Receta post-extracción',
-  '🦷 Tratamiento para caries profunda',
-  '📋 Redactar observaciones clínicas',
-  '⚕️ Contraindicaciones amoxicilina',
-  '🔍 ¿Cómo registro una atención?',
-  '📊 Diferencias entre resinas',
+  'Receta post-extracción',
+  'Tratamiento para caries profunda',
+  'Redactar observaciones clínicas',
+  'Contraindicaciones amoxicilina',
+  '¿Cómo registro una atención?',
+  'Diferencias entre resinas',
 ];
 
 export default function AIAssistant() {
@@ -236,7 +236,7 @@ export default function AIAssistant() {
         {!isOpen && <div className="ai-fab-pulse" />}
         {isWakeListening && !isOpen && <div className="ai-fab-wake-badge"><Ear size={10} /></div>}
         <span className="ai-fab-icon">
-          {isOpen ? <X size={24} /> : '🤖'}
+          {isOpen ? <X size={24} /> : <Bot size={20} />}
         </span>
       </button>
 
@@ -250,7 +250,7 @@ export default function AIAssistant() {
       <div className={`ai-panel ${isOpen ? 'open' : ''}`}>
         {/* Header */}
         <div className="ai-panel-header">
-          <div className="ai-panel-avatar">🤖</div>
+          <div className="ai-panel-avatar"><Bot size={20} /></div>
           <div className="ai-panel-title">
             <h3>OdontoIA</h3>
             <span>Asistente Inteligente</span>
@@ -302,14 +302,14 @@ export default function AIAssistant() {
         {/* Settings View */}
         {showSettings ? (
           <div className="ai-settings">
-            <h4>⚙️ Configuración del Asistente</h4>
+            <h4>Configuración del Asistente</h4>
 
             <div className="ai-settings-group">
               <label>Estado de la IA</label>
               <div className="hint">
                 {apiKeyConfigured
-                  ? '✅ OdontoIA está activa y lista para usar'
-                  : '❌ API no configurada — Contacta al administrador'}
+                  ? 'OdontoIA está activa y lista para usar'
+                  : 'API no configurada — Contacta al administrador'}
               </div>
             </div>
 
@@ -334,7 +334,7 @@ export default function AIAssistant() {
                   onChange={(e) => selectVoice(e.target.value)}
                   style={{ marginTop: 8, width: '100%' }}
                 >
-                  <option value="">🔊 Voz automática (español)</option>
+                  <option value="">Voz automática (español)</option>
                   {availableVoices.map(v => (
                     <option key={v.voiceURI} value={v.voiceURI}>
                       {v.name} ({v.lang})
@@ -363,7 +363,7 @@ export default function AIAssistant() {
               </div>
               {wakeWordEnabled && (
                 <div className="hint" style={{ marginTop: 6 }}>
-                  {isWakeListening ? '🟢 Escuchando en segundo plano...' : '⏳ Iniciando detector...'}
+                  {isWakeListening ? 'Escuchando en segundo plano...' : 'Iniciando detector...'}
                   <br />El micrófono permanece activo mientras esta opción esté habilitada.
                 </div>
               )}
@@ -399,7 +399,7 @@ export default function AIAssistant() {
             <div className="ai-messages">
               {messages.length === 0 ? (
                 <div className="ai-welcome">
-                  <span className="ai-welcome-icon">🦷✨</span>
+                  <span className="ai-welcome-icon"><Sparkles size={32} /></span>
                   <h4>¡Hola, Doctor!</h4>
                   <p>
                     Soy <strong>OdontoIA</strong>, tu asistente inteligente. 

@@ -181,7 +181,7 @@ export default function SearchPage() {
   return (
     <div>
       <div className="search-section">
-        <h2>🔍 Buscar Paciente</h2>
+        <h2>Buscar Paciente</h2>
         <p>Ingrese el número de DNI del paciente para consultar su información e historial</p>
 
         <div className="search-box">

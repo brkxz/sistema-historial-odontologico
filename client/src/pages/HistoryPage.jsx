@@ -71,7 +71,7 @@ export default function HistoryPage() {
       </head>
       <body>
         <div class="header">
-          <h1>🦷 HISTORIAL DE ATENCIÓN ODONTOLÓGICA</h1>
+          <h1>HISTORIAL DE ATENCIÓN ODONTOLÓGICA</h1>
           <p>Clínica Dental - Sistema de Historial Digital</p>
         </div>
         <div class="section">

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
-import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, LogIn, AlertCircle, Stethoscope } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 // SVG Icon para Google
@@ -161,7 +161,7 @@ export default function LoginPage() {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <div className="login-icon">🦷</div>
+            <div className="login-icon"><Stethoscope size={28} color="white" /></div>
             <h1>Historial Odontológico</h1>
             <p>Sistema de Gestión Digital</p>
           </div>

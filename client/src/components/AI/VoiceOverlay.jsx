@@ -5,7 +5,7 @@
 // ============================================================
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Mic, MicOff, Square, Volume2, VolumeX } from 'lucide-react';
+import { X, Mic, MicOff, Square, Volume2, VolumeX, Bot, Stethoscope } from 'lucide-react';
 
 /**
  * Barra individual del waveform que reacciona al nivel de audio
@@ -154,10 +154,10 @@ export default function VoiceOverlay({
 
   const getStateIcon = () => {
     switch (currentState) {
-      case 'listening': return '🎙️';
-      case 'processing': return '🧠';
-      case 'speaking': return '🔊';
-      default: return '🦷';
+      case 'listening': return <Mic size={28} />;
+      case 'processing': return <Stethoscope size={28} />;
+      case 'speaking': return <Volume2 size={28} />;
+      default: return <Bot size={28} />;
     }
   };
 
@@ -171,7 +171,7 @@ export default function VoiceOverlay({
       {/* Header */}
       <div className="voice-overlay-header">
         <div className="voice-overlay-header-left">
-          <span className="voice-overlay-logo">🤖</span>
+          <span className="voice-overlay-logo"><Bot size={20} /></span>
           <div>
             <h3>OdontoIA</h3>
             <span className="voice-overlay-status">Modo Conversación por Voz</span>
@@ -241,7 +241,7 @@ export default function VoiceOverlay({
         {showResponse && lastResponse && !isThinking && (
           <div className="voice-overlay-response">
             <div className="voice-overlay-response-header">
-              <span>🤖 OdontoIA</span>
+              <span>OdontoIA</span>
               {isSpeaking && (
                 <button
                   className="voice-overlay-stop-speak-btn"

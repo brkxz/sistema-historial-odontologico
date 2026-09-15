@@ -81,7 +81,7 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">🦷</div>
+          <div className="sidebar-logo-icon"><Stethoscope size={20} color="white" /></div>
           <div className="sidebar-logo-text">
             Odontología Digital
             <span>Sistema de Historial</span>
