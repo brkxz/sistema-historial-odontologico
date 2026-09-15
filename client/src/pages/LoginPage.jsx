@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
 import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 // SVG Icon para Google
 const GoogleIcon = () => (
@@ -26,9 +27,11 @@ export default function LoginPage() {
   const toast = useToast();
 
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const isNative = Capacitor.isNativePlatform();
 
-  // Cargar SDK de Google Identity Services
+  // Cargar SDK de Google Identity Services solo en web (no en APK)
   useEffect(() => {
+    if (isNative) return; // En Android nativo no necesitamos el SDK web
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'TU_GOOGLE_CLIENT_ID_AQUI') return;
 
     const script = document.createElement('script');
@@ -38,9 +41,11 @@ export default function LoginPage() {
     document.head.appendChild(script);
 
     return () => {
-      document.head.removeChild(script);
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
-  }, [GOOGLE_CLIENT_ID]);
+  }, [GOOGLE_CLIENT_ID, isNative]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,19 +68,46 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = useCallback(async () => {
+  // Login con Google nativo (APK Android)
+  const handleGoogleLoginNative = useCallback(async () => {
+    setError('');
+    setSocialLoading('google');
+    try {
+      const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+      await GoogleAuth.initialize({
+        clientId: GOOGLE_CLIENT_ID,
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+      });
+      const googleUser = await GoogleAuth.signIn();
+      const idToken = googleUser?.authentication?.idToken;
+      if (!idToken) throw new Error('No se pudo obtener el token de Google');
+      await loginWithGoogle(idToken);
+      toast.success('¡Bienvenido! Sesión iniciada con Google');
+      navigate('/');
+    } catch (err) {
+      if (err?.message?.includes('canceled') || err?.message?.includes('cancelled') || err?.message?.includes('sign_in_cancelled')) {
+        // El usuario canceló, no mostrar error
+      } else {
+        setError(err.message || 'Error al iniciar sesión con Google');
+      }
+    } finally {
+      setSocialLoading('');
+    }
+  }, [GOOGLE_CLIENT_ID, loginWithGoogle, navigate, toast]);
+
+  // Login con Google en el navegador web (SDK GSI)
+  const handleGoogleLoginWeb = useCallback(async () => {
     setError('');
     setSocialLoading('google');
 
     try {
-      // Verificar si el SDK de Google está cargado
       if (!window.google?.accounts?.id) {
-        setError('El SDK de Google no se ha cargado. Verifica tu GOOGLE_CLIENT_ID.');
+        setError('El SDK de Google no se ha cargado. Verifica tu conexión o GOOGLE_CLIENT_ID.');
         setSocialLoading('');
         return;
       }
 
-      // Usar el flujo de One Tap / popup de Google
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: async (response) => {
@@ -91,10 +123,8 @@ export default function LoginPage() {
         },
       });
 
-      // Mostrar el popup de selección de cuenta
       window.google.accounts.id.prompt((notification) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // Si One Tap no se muestra, usar el botón renderizado como fallback
           const googleBtn = document.createElement('div');
           googleBtn.id = 'google-signin-fallback';
           googleBtn.style.display = 'none';
@@ -105,10 +135,9 @@ export default function LoginPage() {
             size: 'large',
           });
 
-          // Simular click
           const btn = googleBtn.querySelector('[role="button"]');
           if (btn) btn.click();
-          
+
           setTimeout(() => {
             if (document.getElementById('google-signin-fallback')) {
               document.body.removeChild(googleBtn);
@@ -122,6 +151,10 @@ export default function LoginPage() {
       setSocialLoading('');
     }
   }, [GOOGLE_CLIENT_ID, loginWithGoogle, navigate, toast]);
+
+  // Selecciona el handler correcto según la plataforma
+  const handleGoogleLogin = isNative ? handleGoogleLoginNative : handleGoogleLoginWeb;
+
 
   return (
     <div className="login-page">

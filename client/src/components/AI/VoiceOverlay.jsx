@@ -113,12 +113,17 @@ export default function VoiceOverlay({
     }
   }, [lastResponse]);
 
-  // Auto-iniciar escucha al abrir (si no está escuchando ya)
+  // Auto-iniciar escucha al abrir (con delay suficiente para móvil)
   useEffect(() => {
     if (isOpen && !isListening && !isSpeaking && !isThinking && voiceSupported) {
+      // ★ Delay más largo para que en móvil el micrófono se libere
+      // del wake word listener antes de iniciar nuevo reconocimiento
       const timer = setTimeout(() => {
-        onStartListening();
-      }, 500);
+        // Verificar que sigue abierto antes de iniciar
+        if (isOpen && !isListening && !isSpeaking && !isThinking) {
+          onStartListening();
+        }
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);

@@ -269,9 +269,17 @@ export function useVoice() {
 
     if (!voiceSupported) return false;
 
-    // Detener si ya está escuchando
+    // ★ Detener reconocimiento anterior y esperar a que termine
+    // En móvil, si no esperamos, el nuevo start() falla silenciosamente
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch {}
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+
+    // Limpiar timers anteriores
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
     }
 
     continuousModeRef.current = continuous;

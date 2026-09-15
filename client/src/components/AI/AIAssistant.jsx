@@ -54,13 +54,14 @@ export default function AIAssistant() {
 
   // ---- Wake Word: "Oye Denty" ----
   const { isWakeListening, wakeWordSupported } = useWakeWord({
-    enabled: wakeWordEnabled && !voiceOverlayOpen && !isListening,
+    enabled: wakeWordEnabled && !voiceOverlayOpen && !isListening && !isSpeaking,
     onWakeWord: () => {
       playStartSound();
       // Abrir el chat para que se vea la app
       if (!isOpen) setIsOpen(true);
-      // Delay necesario: el reconocimiento de wake word debe cerrarse
-      // completamente antes de iniciar uno nuevo, o el navegador lo ignora
+      // ★ Delay largo (800ms) para que el micrófono se libere
+      // completamente en Android antes de iniciar nuevo reconocimiento.
+      // Sin este delay, el navegador móvil ignora el nuevo start().
       setTimeout(() => {
         startListening({
           continuous: false,
@@ -73,7 +74,7 @@ export default function AIAssistant() {
             }
           },
         });
-      }, 400);
+      }, 800);
     },
   });
 
