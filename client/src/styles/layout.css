@@ -1,22 +1,22 @@
 /* =============================================
    LAYOUT - Sidebar, Header, Content
-   Responsive Native-App Design (OdontoDesign)
+   OdontoDesign Aurora v3 — Premium Responsive
    ============================================= */
 
 .app-layout {
   display: flex;
   min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  min-height: 100dvh;
   background: var(--bg-dark);
 }
 
 /* =============================================
-   SIDEBAR (Desktop)
+   SIDEBAR (Desktop) — Frosted Glass Panel
    ============================================= */
 .sidebar {
   width: var(--sidebar-width);
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(7, 11, 20, 0.95), rgba(10, 16, 32, 0.98));
+  border-right: 1px solid rgba(45, 212, 191, 0.08);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -27,6 +27,18 @@
   transition: transform var(--transition), box-shadow var(--transition);
   overflow-y: auto;
   overflow-x: hidden;
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(45, 212, 191, 0.2), transparent 30%, transparent 70%, rgba(139, 92, 246, 0.15));
+  pointer-events: none;
 }
 
 .sidebar-logo {
@@ -106,9 +118,10 @@
 }
 
 .sidebar-link.active {
-  background: linear-gradient(135deg, rgba(13, 148, 136, 0.16), rgba(14, 165, 233, 0.08));
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.14), rgba(14, 165, 233, 0.08));
   color: var(--primary-light);
   font-weight: 700;
+  border: 1px solid rgba(45, 212, 191, 0.12);
 }
 
 .sidebar-link.active::before {
@@ -118,21 +131,22 @@
   top: 50%;
   transform: translateY(-50%);
   width: 4px;
-  height: 24px;
+  height: 26px;
   background: var(--gradient-primary);
-  border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 10px var(--primary);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 0 16px rgba(45, 212, 191, 0.6), 0 0 32px rgba(13, 148, 136, 0.3);
 }
 
 .sidebar-link svg {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  transition: transform var(--transition-fast);
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .sidebar-link:hover svg {
-  transform: scale(1.08);
+  transform: scale(1.12);
+  color: var(--primary-light);
 }
 
 .sidebar-user {
@@ -184,10 +198,10 @@
    ============================================= */
 .header {
   height: var(--header-height);
-  background: rgba(9, 13, 22, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(6, 10, 19, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -196,6 +210,7 @@
   top: 0;
   z-index: 50;
   padding-top: env(safe-area-inset-top, 0px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
 }
 
 .header-left {
@@ -271,7 +286,7 @@
   font-size: var(--font-size-2xl);
   font-weight: 800;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--text-primary) 30%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, var(--text-primary) 20%, var(--primary-light) 80%, #06B6D4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -292,15 +307,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(9, 13, 22, 0.92);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 10, 19, 0.92);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-top: 1px solid rgba(45, 212, 191, 0.08);
   z-index: 100;
   justify-content: space-around;
   align-items: stretch;
   padding-bottom: env(safe-area-inset-bottom, 8px);
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 -6px 40px rgba(0, 0, 0, 0.7), 0 -1px 0 rgba(45, 212, 191, 0.05);
 }
 
 .mobile-nav-item {
@@ -337,20 +352,27 @@
 
 .mobile-nav-item.active svg {
   color: var(--primary-light);
-  transform: translateY(-2px) scale(1.12);
-  stroke-width: 2.2;
+  transform: translateY(-3px) scale(1.18);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 6px rgba(45, 212, 191, 0.5));
 }
 
-/* Active indicator dot */
+/* Active indicator dot with glow */
 .mobile-nav-item.active::after {
   content: '';
   position: absolute;
-  top: 4px;
-  width: 5px;
-  height: 5px;
+  top: 3px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--primary-light);
-  box-shadow: 0 0 8px var(--primary);
+  box-shadow: 0 0 10px rgba(45, 212, 191, 0.7), 0 0 20px rgba(45, 212, 191, 0.3);
+  animation: navDotPulse 2s ease-in-out infinite;
+}
+
+@keyframes navDotPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(45, 212, 191, 0.7), 0 0 20px rgba(45, 212, 191, 0.3); }
+  50% { opacity: 0.7; box-shadow: 0 0 16px rgba(45, 212, 191, 0.9), 0 0 30px rgba(45, 212, 191, 0.5); }
 }
 
 /* =============================================
