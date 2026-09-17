@@ -4,6 +4,7 @@
   "description": "Sistema de Historial Odontológico Digital",
   "private": true,
   "scripts": {
+    "build": "npm --prefix client install && npm --prefix client run build",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
     "seed": "cd server && npm run seed",
