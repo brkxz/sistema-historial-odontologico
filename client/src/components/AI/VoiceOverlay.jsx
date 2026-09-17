@@ -254,6 +254,20 @@ export default function VoiceOverlay({
             <p>{lastResponse}</p>
           </div>
         )}
+
+        {/* Chips de Comandos Sugeridos para Guía del Usuario */}
+        {!lastResponse && !isThinking && !isSpeaking && (
+          <div className="voice-overlay-quick-tips">
+            <span className="voice-overlay-tips-title">💡 Comandos que puedes decir:</span>
+            <div className="voice-overlay-tips-chips">
+              <button type="button" onClick={() => onSend('Nueva atención')}>"Nueva atención"</button>
+              <button type="button" onClick={() => onSend('Buscar paciente')}>"Buscar paciente"</button>
+              <button type="button" onClick={() => onSend('Marcar caries en pieza 16')}>"Marcar caries pieza 16"</button>
+              <button type="button" onClick={() => onSend('Ver odontograma')}>"Ver odontograma"</button>
+              <button type="button" onClick={() => onSend('Dosis de amoxicilina')}>"Dosis de amoxicilina"</button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer Hint */}

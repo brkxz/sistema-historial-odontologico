@@ -18,6 +18,13 @@ const WAKE_PHRASES = [
   'oye denthy',
   'hola denty',
   'hola denti',
+  'ok denty',
+  'ok denti',
+  'denty',
+  'asistente denty',
+  'asistente denti',
+  'oye identi',
+  'oye el denty',
 ];
 
 // Umbral mínimo de confianza para aceptar un resultado (0-1)

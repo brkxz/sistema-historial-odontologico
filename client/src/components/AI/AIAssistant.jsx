@@ -146,6 +146,42 @@ export default function AIAssistant() {
       return confirmMsg;
     }
 
+    if (command.type === 'odontogram_mark') {
+      const confirmMsg = command.confirm || `🦷 Marcando pieza ${command.toothNumber} con ${command.condition}...`;
+      addLocalMessages(msg, confirmMsg);
+      // Notificar a OdontogramPage si está activa o navegar hacia ella
+      window.dispatchEvent(new CustomEvent('odonto_voice_mark', { detail: { tooth: command.toothNumber, condition: command.condition } }));
+      if (window.location.pathname !== '/odontograma') {
+        navigate('/odontograma');
+      }
+      if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+      return confirmMsg;
+    }
+
+    if (command.type === 'action_submit_treatment') {
+      const confirmMsg = command.confirm || '💾 Guardando atención...';
+      addLocalMessages(msg, confirmMsg);
+      window.dispatchEvent(new CustomEvent('odonto_voice_submit_treatment'));
+      if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+      return confirmMsg;
+    }
+
+    if (command.type === 'action_print_treatment') {
+      const confirmMsg = command.confirm || '🖨️ Imprimiendo ficha...';
+      addLocalMessages(msg, confirmMsg);
+      window.dispatchEvent(new CustomEvent('odonto_voice_print_treatment'));
+      if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+      return confirmMsg;
+    }
+
+    if (command.type === 'action_reset_treatment') {
+      const confirmMsg = command.confirm || '🧹 Formulario limpiado.';
+      addLocalMessages(msg, confirmMsg);
+      window.dispatchEvent(new CustomEvent('odonto_voice_reset_treatment'));
+      if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+      return confirmMsg;
+    }
+
     // Chat normal con IA
     const response = await sendChat(msg);
 

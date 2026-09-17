@@ -15,28 +15,40 @@ const PROVIDERS = [
     name: 'Groq',
     enabled: () => !!process.env.GROQ_API_KEY,
     call: async (messages) => {
-      const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+      const primaryModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+      const fallbackModels = [primaryModel, 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
       const maxTokens = parseInt(process.env.GROQ_MAX_TOKENS || '1000');
 
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: maxTokens }),
-      });
+      let lastGroqError = null;
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(`Groq ${res.status}: ${err?.error?.message || 'error desconocido'}`);
+      for (const model of fallbackModels) {
+        try {
+          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+            },
+            body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: maxTokens }),
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(`Groq [${model}] ${res.status}: ${err?.error?.message || 'error desconocido'}`);
+          }
+
+          const data = await res.json();
+          let text = data?.choices?.[0]?.message?.content || '';
+          // Eliminar bloques <think>...</think> de modelos con reasoning
+          text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+          if (text) return text;
+        } catch (err) {
+          console.warn(`[AI-Groq] Error con modelo ${model}:`, err.message);
+          lastGroqError = err;
+        }
       }
 
-      const data = await res.json();
-      let text = data?.choices?.[0]?.message?.content || '';
-      // Eliminar bloques <think>...</think> de modelos con reasoning
-      text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-      return text;
+      throw lastGroqError || new Error('No se pudo obtener respuesta de Groq con ninguno de los modelos');
     },
   },
 

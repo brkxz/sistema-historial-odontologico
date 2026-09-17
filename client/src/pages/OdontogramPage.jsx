@@ -67,6 +67,43 @@ export default function OdontogramPage() {
     }
   };
 
+  // Listener para marcado de piezas por comandos de voz
+  useEffect(() => {
+    const handleVoiceMark = async (event) => {
+      const { tooth: toothNum, condition } = event.detail || {};
+      if (!toothNum || !condition) return;
+
+      const targetTooth = allTeeth.find((t) => String(t.tooth_number) === String(toothNum));
+      if (!targetTooth) return;
+
+      setSelectedTooth(targetTooth);
+
+      if (patient) {
+        try {
+          await odontogramService.update({
+            patient_id: patient.id,
+            tooth_id: targetTooth.id,
+            condition,
+            surface: '',
+            notes: 'Marcado por comando de voz Denty',
+          });
+          setOdontogramData((prev) => ({
+            ...prev,
+            [targetTooth.id]: { ...prev[targetTooth.id], condition, surface: '', notes: 'Marcado por voz' },
+          }));
+          toast.success(`Pieza ${toothNum} marcada como ${condition} por voz`);
+        } catch {
+          toast.error(`Error al marcar pieza ${toothNum}`);
+        }
+      } else {
+        toast.info(`Pieza ${toothNum} seleccionada. Busca o carga un paciente para guardar.`);
+      }
+    };
+
+    window.addEventListener('odonto_voice_mark', handleVoiceMark);
+    return () => window.removeEventListener('odonto_voice_mark', handleVoiceMark);
+  }, [allTeeth, patient]);
+
   const updateTooth = async (condition, surface = '', notes = '') => {
     if (!selectedTooth || !patient) return;
     try {

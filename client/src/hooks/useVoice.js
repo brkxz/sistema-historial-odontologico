@@ -8,12 +8,25 @@
 // ============================================================
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { trainOdontoSpeech } from '../utils/odontoPhonetics';
+
+// Lock global de micrófono en memoria para evitar colisiones entre hooks
+let globalMicBusy = false;
+let globalActiveStopFn = null;
+
+export const releaseGlobalMic = () => {
+  if (globalActiveStopFn) {
+    try { globalActiveStopFn(); } catch {}
+    globalActiveStopFn = null;
+  }
+  globalMicBusy = false;
+};
 
 // ---- Utilidades de limpieza de texto para TTS ----
 
 /**
- * Elimina emojis, markdown y caracteres especiales del texto
- * para que la síntesis de voz suene natural
+ * Elimina emojis, markdown, tablas y caracteres especiales del texto
+ * para que la síntesis de voz suene completamente natural
  */
 function cleanTextForTTS(text) {
   if (!text) return '';
@@ -31,22 +44,27 @@ function cleanTextForTTS(text) {
     .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '')  // Chess
     .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '')  // Extended-A
     .replace(/[\u{200D}]/gu, '')              // Zero width joiner
-    // Remover markdown
+    // Remover bloques de código y tags de acción
+    .replace(/\[ACTION:[^\]]+\]/g, '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`([^`]+)`/g, '$1')
+    // Remover markdown tabular y delimitadores
+    .replace(/\|[^\n]+\|/g, ' ')
+    .replace(/[-]{3,}/g, ' ')
+    // Remover formato markdown
     .replace(/\*\*(.+?)\*\*/g, '$1')   // Bold **text**
     .replace(/\*(.+?)\*/g, '$1')       // Italic *text*
     .replace(/__(.+?)__/g, '$1')       // Bold __text__
     .replace(/_(.+?)_/g, '$1')         // Italic _text_
     .replace(/~~(.+?)~~/g, '$1')       // Strikethrough
-    .replace(/`(.+?)`/g, '$1')         // Inline code
-    .replace(/```[\s\S]*?```/g, '')    // Code blocks
     .replace(/^#{1,6}\s+/gm, '')       // Headers
     .replace(/^[-*+]\s+/gm, '')        // List items
     .replace(/^\d+\.\s+/gm, '')        // Numbered lists
     .replace(/\[(.+?)\]\(.+?\)/g, '$1') // Links [text](url)
     .replace(/^>\s+/gm, '')            // Blockquotes
-    // Limpiar caracteres especiales
-    .replace(/[*_~`#>|]/g, '')
-    .replace(/\n{3,}/g, '\n\n')        // Múltiples saltos
+    // Limpiar caracteres especiales de lectura
+    .replace(/[*_~`#>|\\/{}[\]()]/g, '')
+    .replace(/\n{2,}/g, '. ')          // Reemplazar saltos por pausas
     .replace(/\s{2,}/g, ' ')           // Múltiples espacios
     .trim();
 }
@@ -55,7 +73,7 @@ function cleanTextForTTS(text) {
  * Divide texto largo en chunks por oraciones para TTS
  * El sintetizador puede cortarse con textos muy largos
  */
-function chunkTextForTTS(text, maxLength = 200) {
+function chunkTextForTTS(text, maxLength = 180) {
   if (!text || text.length <= maxLength) return [text];
 
   const sentences = text.match(/[^.!?]+[.!?]+[\s]*/g) || [text];
@@ -222,6 +240,19 @@ export function useVoice() {
       if (selected) return selected;
     }
 
+    // Priorizar voces neurales/naturales de alta calidad en español
+    const neuralSpanish = voices.find(v => 
+      v.lang.startsWith('es') && (
+        v.name.toLowerCase().includes('neural') ||
+        v.name.toLowerCase().includes('natural') ||
+        v.name.toLowerCase().includes('google') ||
+        v.name.toLowerCase().includes('sabina') ||
+        v.name.toLowerCase().includes('paulina') ||
+        v.name.toLowerCase().includes('elena')
+      )
+    );
+    if (neuralSpanish) return neuralSpanish;
+
     // Priorizar voces en español latinoamericano
     const preferredVoice = voices.find(v => 
       v.lang === 'es-PE' || v.lang === 'es-419' || v.lang === 'es-MX'
@@ -316,13 +347,15 @@ export function useVoice() {
       }
 
       if (interim) {
-        setInterimTranscript(interim);
-        onInterimCallbackRef.current?.(interim);
+        const trainedInterim = trainOdontoSpeech(interim);
+        setInterimTranscript(trainedInterim);
+        onInterimCallbackRef.current?.(trainedInterim);
       }
 
       if (final) {
-        setTranscript(prev => prev ? `${prev} ${final}` : final);
-        onResultCallbackRef.current?.(final);
+        const trainedFinal = trainOdontoSpeech(final);
+        setTranscript(prev => prev ? `${prev} ${trainedFinal}` : trainedFinal);
+        onResultCallbackRef.current?.(trainedFinal);
         
         // Reset silence timer
         if (silenceTimerRef.current) {
@@ -382,6 +415,12 @@ export function useVoice() {
 
     recognitionRef.current = recognition;
 
+    // Registrar en lock global para que otros componentes puedan desocupar el micrófono
+    globalActiveStopFn = () => {
+      try { recognition.stop(); } catch {}
+    };
+    globalMicBusy = true;
+
     try {
       recognition.start();
       // Iniciar análisis de audio para waveform
@@ -390,6 +429,7 @@ export function useVoice() {
     } catch (e) {
       console.warn('Failed to start speech recognition:', e);
       setIsListening(false);
+      globalMicBusy = false;
       return false;
     }
   }, [voiceSupported, startAudioAnalysis, cleanupAudioAnalysis]);
@@ -400,6 +440,8 @@ export function useVoice() {
   const stopListening = useCallback(() => {
     shouldRestartRef.current = false;
     continuousModeRef.current = false;
+    globalMicBusy = false;
+    globalActiveStopFn = null;
     
     if (recognitionRef.current) {
       try {

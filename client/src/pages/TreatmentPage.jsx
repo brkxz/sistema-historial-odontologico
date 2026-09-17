@@ -125,6 +125,37 @@ export default function TreatmentPage() {
     };
   }, [stopListening]);
 
+  // Escuchar acciones por voz disparadas desde el Asistente
+  useEffect(() => {
+    const handleVoiceSubmit = () => {
+      handleSubmit(false);
+    };
+    const handleVoicePrint = () => {
+      handleSubmit(true);
+    };
+    const handleVoiceReset = () => {
+      setForm({
+        treatment_date: new Date().toISOString().split('T')[0],
+        reason: '',
+        procedure_performed: '',
+        observations: '',
+        next_appointment: '',
+      });
+      setSelectedTeeth([]);
+      toast.info('Formulario reiniciado por voz');
+    };
+
+    window.addEventListener('odonto_voice_submit_treatment', handleVoiceSubmit);
+    window.addEventListener('odonto_voice_print_treatment', handleVoicePrint);
+    window.addEventListener('odonto_voice_reset_treatment', handleVoiceReset);
+
+    return () => {
+      window.removeEventListener('odonto_voice_submit_treatment', handleVoiceSubmit);
+      window.removeEventListener('odonto_voice_print_treatment', handleVoicePrint);
+      window.removeEventListener('odonto_voice_reset_treatment', handleVoiceReset);
+    };
+  }, [patient, form, selectedTeeth]);
+
   // Auto-formateo de notas clínicas con IA
   const handleFormatWithAI = useCallback(async (field) => {
     const text = form[field];
