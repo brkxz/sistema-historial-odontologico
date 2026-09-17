@@ -1,6 +1,6 @@
 /* =============================================
    LAYOUT - Sidebar, Header, Content
-   OdontoDesign Aurora v3 — Premium Responsive
+   Tema Clínico Hospital — Blanco con Azul
    ============================================= */
 
 .app-layout {
@@ -11,12 +11,12 @@
 }
 
 /* =============================================
-   SIDEBAR (Desktop) — Frosted Glass Panel
+   SIDEBAR (Desktop) — Panel Blanco Limpio
    ============================================= */
 .sidebar {
   width: var(--sidebar-width);
-  background: linear-gradient(180deg, rgba(7, 11, 20, 0.95), rgba(10, 16, 32, 0.98));
-  border-right: 1px solid rgba(45, 212, 191, 0.08);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -27,22 +27,11 @@
   transition: transform var(--transition), box-shadow var(--transition);
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.3);
-}
-
-.sidebar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(180deg, rgba(45, 212, 191, 0.2), transparent 30%, transparent 70%, rgba(139, 92, 246, 0.15));
-  pointer-events: none;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
 }
 
 .sidebar-logo {
-  padding: 20px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -51,21 +40,22 @@
 }
 
 .sidebar-logo-icon {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 20px;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+  font-size: 18px;
+  color: white;
+  box-shadow: 0 2px 8px rgba(3, 105, 161, 0.25);
 }
 
 .sidebar-logo-text {
   font-size: var(--font-size-sm);
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1.3;
 }
@@ -79,10 +69,10 @@
 
 .sidebar-nav {
   flex: 1;
-  padding: 14px 10px;
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .sidebar-section-title {
@@ -90,20 +80,20 @@
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1.4px;
-  padding: 16px 12px 6px;
+  letter-spacing: 1.2px;
+  padding: 14px 12px 6px;
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
+  gap: 10px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
-  font-weight: 600;
-  transition: all var(--transition-fast);
+  font-weight: 500;
+  transition: all 0.15s ease;
   cursor: pointer;
   border: none;
   background: none;
@@ -113,15 +103,14 @@
 }
 
 .sidebar-link:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  color: var(--primary);
 }
 
 .sidebar-link.active {
-  background: linear-gradient(135deg, rgba(45, 212, 191, 0.14), rgba(14, 165, 233, 0.08));
-  color: var(--primary-light);
-  font-weight: 700;
-  border: 1px solid rgba(45, 212, 191, 0.12);
+  background: var(--bg-tertiary);
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .sidebar-link.active::before {
@@ -130,46 +119,43 @@
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 4px;
-  height: 26px;
+  width: 3px;
+  height: 22px;
   background: var(--gradient-primary);
-  border-radius: 0 6px 6px 0;
-  box-shadow: 0 0 16px rgba(45, 212, 191, 0.6), 0 0 32px rgba(13, 148, 136, 0.3);
+  border-radius: 0 4px 4px 0;
 }
 
 .sidebar-link svg {
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 19px;
   flex-shrink: 0;
-  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .sidebar-link:hover svg {
-  transform: scale(1.12);
-  color: var(--primary-light);
+  color: var(--primary);
 }
 
 .sidebar-user {
-  padding: 16px;
+  padding: 14px 16px;
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(15, 23, 42, 0.4);
+  gap: 10px;
+  background: var(--bg-secondary);
 }
 
 .sidebar-user-avatar {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-full);
   background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 700;
   font-size: var(--font-size-sm);
   flex-shrink: 0;
-  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.3);
+  color: white;
 }
 
 .sidebar-user-info {
@@ -179,7 +165,7 @@
 
 .sidebar-user-name {
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -188,20 +174,20 @@
 
 .sidebar-user-role {
   font-size: var(--font-size-xs);
-  color: var(--primary-light);
+  color: var(--primary);
   font-weight: 500;
   text-transform: capitalize;
 }
 
 /* =============================================
-   HEADER
+   HEADER — Barra Superior Limpia
    ============================================= */
 .header {
   height: var(--header-height);
-  background: rgba(6, 10, 19, 0.82);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -210,31 +196,30 @@
   top: 0;
   z-index: 50;
   padding-top: env(safe-area-inset-top, 0px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .header-title {
   font-size: var(--font-size-lg);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .header-user-name {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .menu-toggle {
@@ -245,15 +230,15 @@
   cursor: pointer;
   padding: 8px;
   border-radius: var(--radius-md);
-  transition: background var(--transition-fast);
+  transition: background 0.15s ease;
 }
 
 .menu-toggle:hover {
-  background: var(--primary-50);
+  background: var(--bg-tertiary);
 }
 
 .menu-toggle:active {
-  transform: scale(0.92);
+  transform: scale(0.94);
 }
 
 /* =============================================
@@ -268,7 +253,7 @@
 }
 
 .page-content {
-  padding: 28px;
+  padding: 24px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -277,29 +262,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 .page-title {
   font-size: var(--font-size-2xl);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--text-primary) 20%, var(--primary-light) 80%, #06B6D4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .page-subtitle {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* =============================================
-   MOBILE BOTTOM NAV — Native App Style (OdontoDesign)
+   MOBILE BOTTOM NAV — Estilo App Nativo
    ============================================= */
 .mobile-nav {
   display: none;
@@ -307,15 +288,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(6, 10, 19, 0.92);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-top: 1px solid rgba(45, 212, 191, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
   z-index: 100;
   justify-content: space-around;
   align-items: stretch;
-  padding-bottom: env(safe-area-inset-bottom, 8px);
-  box-shadow: 0 -6px 40px rgba(0, 0, 0, 0.7), 0 -1px 0 rgba(45, 212, 191, 0.05);
+  padding-bottom: env(safe-area-inset-bottom, 6px);
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .mobile-nav-item {
@@ -323,13 +304,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   padding: 8px 4px 6px;
   color: var(--text-muted);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  transition: all 0.15s ease;
   background: none;
   border: none;
   cursor: pointer;
@@ -342,37 +322,27 @@
 .mobile-nav-item svg {
   width: 22px;
   height: 22px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   stroke-width: 1.8;
 }
 
 .mobile-nav-item.active {
-  color: var(--primary-light);
+  color: var(--primary);
 }
 
 .mobile-nav-item.active svg {
-  color: var(--primary-light);
-  transform: translateY(-3px) scale(1.18);
-  stroke-width: 2.4;
-  filter: drop-shadow(0 0 6px rgba(45, 212, 191, 0.5));
+  color: var(--primary);
+  transform: translateY(-1px);
+  stroke-width: 2.2;
 }
 
-/* Active indicator dot with glow */
 .mobile-nav-item.active::after {
   content: '';
   position: absolute;
-  top: 3px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--primary-light);
-  box-shadow: 0 0 10px rgba(45, 212, 191, 0.7), 0 0 20px rgba(45, 212, 191, 0.3);
-  animation: navDotPulse 2s ease-in-out infinite;
-}
-
-@keyframes navDotPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(45, 212, 191, 0.7), 0 0 20px rgba(45, 212, 191, 0.3); }
-  50% { opacity: 0.7; box-shadow: 0 0 16px rgba(45, 212, 191, 0.9), 0 0 30px rgba(45, 212, 191, 0.5); }
+  top: 2px;
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--primary);
 }
 
 /* =============================================
@@ -382,9 +352,9 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 99;
   opacity: 0;
   transition: opacity var(--transition);
@@ -407,7 +377,7 @@
 
   .sidebar.open {
     transform: translateX(0);
-    box-shadow: 6px 0 36px rgba(0, 0, 0, 0.7);
+    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.12);
   }
 
   .sidebar-overlay.visible {
@@ -427,8 +397,8 @@
   }
 
   .page-content {
-    padding: 20px 16px;
-    padding-bottom: calc(74px + env(safe-area-inset-bottom, 8px));
+    padding: 18px 14px;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 6px));
   }
 }
 
@@ -437,15 +407,13 @@
    ============================================= */
 @media (max-width: 640px) {
   .header {
-    height: 56px;
+    height: 54px;
     padding: 0 14px;
-    background: rgba(9, 13, 22, 0.94);
     padding-top: env(safe-area-inset-top, 0px);
   }
 
   .header-title {
     font-size: var(--font-size-md);
-    font-weight: 700;
   }
 
   .header-user-name {
@@ -453,19 +421,19 @@
   }
 
   .page-content {
-    padding: 14px 12px;
-    padding-bottom: calc(78px + env(safe-area-inset-bottom, 8px));
+    padding: 12px 10px;
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 6px));
   }
 
   .page-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
-    margin-bottom: 18px;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
   .page-title {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
 
   .page-header .btn {
@@ -479,7 +447,7 @@
    ============================================= */
 @media (max-width: 380px) {
   .header {
-    height: 50px;
+    height: 48px;
     padding: 0 10px;
   }
 
@@ -489,11 +457,11 @@
 
   .page-content {
     padding: 10px 8px;
-    padding-bottom: calc(78px + env(safe-area-inset-bottom, 8px));
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 6px));
   }
 
   .page-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
   }
 
   .mobile-nav-item {

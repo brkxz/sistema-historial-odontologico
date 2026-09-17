@@ -168,7 +168,7 @@ export default function LoginPage() {
           <div className="login-header">
             <div className="login-icon-badge">
               <div className="login-icon-inner">
-                <Stethoscope size={32} color="#14B8A6" strokeWidth={2.2} />
+                <Stethoscope size={30} color="#0369A1" strokeWidth={2} />
               </div>
             </div>
 

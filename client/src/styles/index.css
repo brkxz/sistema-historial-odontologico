@@ -44,23 +44,23 @@ img {
   display: block;
 }
 
-/* Scrollbar personalizada */
+/* Scrollbar limpia */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: #CBD5E1;
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-light);
+  background: #94A3B8;
 }
 
 /* =============================================
@@ -77,15 +77,14 @@ img {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background 0.18s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
   user-select: none;
   position: relative;
@@ -133,14 +132,27 @@ img {
 /* ── Variantes ── */
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%);
+  background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 3px 12px rgba(13, 148, 136, 0.35);
+  box-shadow: 0 2px 8px rgba(3, 105, 161, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
-  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.5);
-  filter: brightness(1.08);
+  box-shadow: 0 4px 16px rgba(3, 105, 161, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--bg-tertiary);
+  color: var(--primary);
 }
 
 .btn-secondary {
@@ -187,8 +199,7 @@ img {
 
 .btn-ghost:hover:not(:disabled) {
   background: var(--primary-50);
-  color: var(--primary-light);
-  transform: translateY(-1px);
+  color: var(--primary);
 }
 
 .btn-ghost:hover:not(:disabled)::before {
@@ -311,19 +322,21 @@ img {
   border-radius: var(--radius-lg);
   padding: 24px;
   transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
-  border-color: var(--border-light);
+  box-shadow: var(--shadow-md);
 }
 
 .card-glass {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
+  box-shadow: var(--shadow-sm);
 }
 
 /* Badges */

@@ -123,11 +123,11 @@
 
 /* Tablero de Dientes */
 .odontogram-board-card {
-  background: var(--bg-card);
+  background: white;
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 20px 14px;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .arcada-section {
@@ -149,8 +149,8 @@
 }
 
 .arcada-badge {
-  background: var(--primary-50);
-  color: var(--primary-light);
+  background: rgba(3, 105, 161, 0.08);
+  color: var(--primary);
   padding: 2px 8px;
   border-radius: var(--radius-full);
   font-size: 10px;
@@ -196,15 +196,20 @@
 .tooth-box {
   width: 40px;
   height: 40px;
-  border: 2px solid var(--border-light);
+  border: 2px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--bg-input);
+  background: #F8FAFC;
+  background-image: url('/tooth-molar.jpg');
+  background-size: 28px 28px;
+  background-repeat: no-repeat;
+  background-position: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   position: relative;
-  transition: all var(--transition-fast);
+  transition: all 0.15s ease;
+  padding-bottom: 2px;
 }
 
 .tooth-touch-item.zoomed .tooth-box {
