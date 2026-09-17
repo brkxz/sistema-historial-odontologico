@@ -150,6 +150,22 @@ export default function OdontogramPage() {
           className={`tooth-box ${condKey || 'default'}`}
           style={condObj ? { borderColor: condObj.color, backgroundColor: condObj.bg } : {}}
         >
+          <img
+            src="/tooth-molar.jpg"
+            alt=""
+            className="tooth-img"
+            style={{
+              width: isZoomed ? '32px' : '24px',
+              height: isZoomed ? '32px' : '24px',
+              objectFit: 'contain',
+              opacity: condKey === 'ausente' ? 0.2 : 0.6,
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+            }}
+          />
           <span className="tooth-num">{tooth.tooth_number}</span>
           {condObj && <span className="tooth-dot" style={{ backgroundColor: condObj.color }} />}
         </div>
