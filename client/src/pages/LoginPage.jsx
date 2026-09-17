@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
-import { Eye, EyeOff, LogIn, AlertCircle, Stethoscope } from 'lucide-react';
+import { Eye, EyeOff, LogIn, AlertCircle, Stethoscope, User, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 // SVG Icon para Google
@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   // Cargar SDK de Google Identity Services solo en web (no en APK)
   useEffect(() => {
-    if (isNative) return; // En Android nativo no necesitamos el SDK web
+    if (isNative) return;
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'TU_GOOGLE_CLIENT_ID_AQUI') return;
 
     const script = document.createElement('script');
@@ -87,7 +87,7 @@ export default function LoginPage() {
       navigate('/');
     } catch (err) {
       if (err?.message?.includes('canceled') || err?.message?.includes('cancelled') || err?.message?.includes('sign_in_cancelled')) {
-        // El usuario canceló, no mostrar error
+        // Cancelado
       } else {
         setError(err.message || 'Error al iniciar sesión con Google');
       }
@@ -103,7 +103,7 @@ export default function LoginPage() {
 
     try {
       if (!window.google?.accounts?.id) {
-        setError('El SDK de Google no se ha cargado. Verifica tu conexión o GOOGLE_CLIENT_ID.');
+        setError('El SDK de Google no se ha cargado. Verifica tu conexión.');
         setSocialLoading('');
         return;
       }
@@ -152,69 +152,77 @@ export default function LoginPage() {
     }
   }, [GOOGLE_CLIENT_ID, loginWithGoogle, navigate, toast]);
 
-  // Selecciona el handler correcto según la plataforma
   const handleGoogleLogin = isNative ? handleGoogleLoginNative : handleGoogleLoginWeb;
-
 
   return (
     <div className="login-page">
+      {/* Luces radiales de fondo */}
+      <div className="login-bg-glow-1" />
+      <div className="login-bg-glow-2" />
+      <div className="login-bg-grid" />
+
       <div className="login-container">
         <div className="login-card">
+          <div className="login-card-glow" />
+
           <div className="login-header">
-            <div className="login-icon"><Stethoscope size={28} color="white" /></div>
-            <h1>Historial Odontológico</h1>
-            <p>Sistema de Gestión Digital</p>
+            <div className="login-icon-badge">
+              <div className="login-icon-inner">
+                <Stethoscope size={32} color="#14B8A6" strokeWidth={2.2} />
+              </div>
+            </div>
+
+            <div className="login-hospital-badge">
+              <Sparkles size={13} /> Hospital San Ramón • Chanchamayo
+            </div>
+
+            <h1 className="login-title">Historial Odontológico</h1>
+            <p className="login-subtitle">Sistema de Gestión Clínica Digital</p>
           </div>
 
           <form className="login-form" onSubmit={handleSubmit}>
             {error && (
               <div className="login-error">
                 <AlertCircle size={16} />
-                {error}
+                <span>{error}</span>
               </div>
             )}
 
             <div className="form-group">
-              <label className="form-label">Usuario</label>
-              <input
-                id="login-username"
-                type="text"
-                className="form-input"
-                placeholder="Ingrese su usuario"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                autoFocus
-              />
+              <label className="form-label">Usuario o Correo</label>
+              <div className="input-icon-wrapper">
+                <User size={18} className="input-icon-left" />
+                <input
+                  id="login-username"
+                  type="text"
+                  className="form-input input-with-icon"
+                  placeholder="Ingrese su usuario o correo"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="username"
+                  autoFocus
+                />
+              </div>
             </div>
 
             <div className="form-group">
               <label className="form-label">Contraseña</label>
-              <div style={{ position: 'relative' }}>
+              <div className="input-icon-wrapper">
+                <Lock size={18} className="input-icon-left" />
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
-                  className="form-input"
-                  style={{ width: '100%', paddingRight: '44px' }}
-                  placeholder="Ingrese su contraseña"
+                  className="form-input input-with-icon input-with-right-icon"
+                  placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
+                  className="input-icon-btn-right"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-muted)',
-                    cursor: 'pointer',
-                    padding: '4px',
-                  }}
+                  title={showPassword ? 'Ocultar' : 'Mostrar'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -224,16 +232,15 @@ export default function LoginPage() {
             <button
               id="login-submit"
               type="submit"
-              className="btn btn-primary btn-lg w-full"
+              className="btn btn-primary btn-lg w-full login-btn-main"
               disabled={loading || socialLoading}
-              style={{ marginTop: '8px' }}
             >
               {loading ? (
                 <div className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }} />
               ) : (
                 <>
                   <LogIn size={18} />
-                  Iniciar Sesión
+                  <span>Iniciar Sesión</span>
                 </>
               )}
             </button>
@@ -260,12 +267,17 @@ export default function LoginPage() {
                 ) : (
                   <GoogleIcon />
                 )}
-                <span>Iniciar con Google</span>
+                <span>Continuar con Google</span>
               </button>
             </div>
+          </div>
+
+          <div className="login-security-footer">
+            <ShieldCheck size={14} /> Conexión Cifrada SSL 256-bit • Portal Seguro
           </div>
         </div>
       </div>
     </div>
   );
 }
+
