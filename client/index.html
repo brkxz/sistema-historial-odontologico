@@ -10,10 +10,93 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="OdontoApp" />
     <link rel="apple-touch-icon" href="/icon-512x512.png" />
+    <!-- Preload critical font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <title>Historial Odontológico Digital</title>
+    <style>
+      /* Instant loading screen - shows before React loads */
+      #app-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F0FDFA 100%);
+        z-index: 99999;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+      }
+      #app-loader.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #app-loader .loader-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #0369A1, #0891B2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        animation: loader-pulse 1.5s ease-in-out infinite;
+        box-shadow: 0 8px 32px rgba(3, 105, 161, 0.25);
+      }
+      #app-loader .loader-icon svg {
+        width: 28px;
+        height: 28px;
+        color: white;
+      }
+      #app-loader .loader-bar {
+        width: 160px;
+        height: 3px;
+        background: rgba(3, 105, 161, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      #app-loader .loader-bar-inner {
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, #0369A1, #0891B2);
+        border-radius: 3px;
+        animation: loader-slide 1.2s ease-in-out infinite;
+      }
+      #app-loader .loader-text {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 13px;
+        color: #64748B;
+        margin-top: 12px;
+        letter-spacing: 0.02em;
+      }
+      @keyframes loader-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      @keyframes loader-slide {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(400%); }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Instant loader: visible before React mounts, then auto-hidden -->
+      <div id="app-loader">
+        <div class="loader-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/>
+            <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/>
+            <circle cx="20" cy="10" r="2"/>
+          </svg>
+        </div>
+        <div class="loader-bar">
+          <div class="loader-bar-inner"></div>
+        </div>
+        <p class="loader-text">Iniciando sistema...</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

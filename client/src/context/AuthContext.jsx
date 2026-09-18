@@ -1,31 +1,57 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { authService } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Inicializar con datos del localStorage inmediatamente (sin esperar API)
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+      if (token && savedUser) {
+        return JSON.parse(savedUser);
+      }
+    } catch {
+      // Datos corruptos
+    }
+    return null;
+  });
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  // Loading solo es true si NO hay datos locales (primera visita o sesión expirada)
+  const [loading, setLoading] = useState(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
+    // Si hay datos locales, no bloqueamos → loading = false inmediato
+    return !!(token && savedUser) ? false : false;
+    // En realidad nunca bloqueamos: si no hay token, no hay loading; si hay token, usamos localStorage
+  });
 
-    if (token && savedUser) {
-      try {
-        const data = await authService.getMe();
-        setUser(data.user);
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-      }
+  const hasValidated = useRef(false);
+
+  useEffect(() => {
+    // Validar token con el servidor en background (sin bloquear la UI)
+    if (!hasValidated.current) {
+      hasValidated.current = true;
+      validateTokenInBackground();
     }
-    setLoading(false);
+  }, []);
+
+  const validateTokenInBackground = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return; // No hay sesión, nada que validar
+
+    try {
+      const data = await authService.getMe();
+      // Actualizar con datos frescos del servidor
+      setUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    } catch {
+      // Token inválido o expirado → cerrar sesión silenciosamente
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
   };
 
   const login = async (username, password) => {
