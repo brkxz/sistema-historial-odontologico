@@ -8,6 +8,7 @@ import {
   Search, PlusCircle, Sparkles, ChevronRight, Mic, ShieldCheck, Clock, FileText,
   UserCheck, ArrowUpRight
 } from 'lucide-react';
+import emptyDental from '../assets/empty-dental.svg';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
@@ -154,7 +155,7 @@ export default function DashboardPage() {
 
           {recentTreatments.length === 0 ? (
             <div className="dashboard-empty-panel">
-              <div className="dashboard-empty-icon">🦷</div>
+              <img src={emptyDental} alt="Sin atenciones" className="dashboard-empty-svg" />
               <h4>No hay atenciones registradas hoy</h4>
               <p>Inicia una nueva consulta odontológica para el primer paciente del turno.</p>
               <button

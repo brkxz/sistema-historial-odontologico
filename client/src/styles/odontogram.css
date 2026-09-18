@@ -529,3 +529,79 @@
     font-size: 12px;
   }
 }
+
+@media (max-width: 380px) {
+  .tooth-box {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tooth-num {
+    font-size: 9px;
+  }
+
+  .tooth-label-micro {
+    font-size: 7px;
+  }
+
+  .tooth-touch-item {
+    padding: 2px;
+    gap: 1px;
+  }
+
+  .teeth-row-flex {
+    gap: 1px;
+  }
+
+  .tooth-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .odontogram-board-card {
+    padding: 12px 6px;
+  }
+
+  .segmented-tabs {
+    padding: 2px;
+  }
+
+  .tab-btn {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  .patient-avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: var(--font-size-xs);
+  }
+
+  .patient-active-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .patient-active-dni {
+    font-size: 9px;
+  }
+
+  .condition-chips-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .condition-chip {
+    padding: 10px 12px;
+    font-size: var(--font-size-xs);
+  }
+
+  .legend-pills-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 4px;
+  }
+
+  .legend-pill {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+}

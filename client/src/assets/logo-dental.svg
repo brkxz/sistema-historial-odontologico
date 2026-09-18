@@ -1,0 +1,30 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0369A1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0284C7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="toothWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F9FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="24" cy="24" r="22" fill="url(#logoGrad)"/>
+  
+  <!-- Tooth shape -->
+  <path d="M24 10 C18 10 15 14 15 18 C15 21 16 24 17 27 C18 30 19 35 21 38 C22 40 23 41 24 41 C25 41 26 40 27 38 C29 35 30 30 31 27 C32 24 33 21 33 18 C33 14 30 10 24 10 Z" 
+        fill="url(#toothWhite)" 
+        stroke="#0369A1" 
+        stroke-width="1.5"/>
+  
+  <!-- Tooth shine -->
+  <ellipse cx="20" cy="16" rx="3" ry="4" fill="white" opacity="0.7"/>
+  
+  <!-- Small medical cross -->
+  <g transform="translate(32, 8)">
+    <rect x="0" y="3" width="8" height="2" rx="1" fill="white"/>
+    <rect x="3" y="0" width="2" height="8" rx="1" fill="white"/>
+  </g>
+</svg>

@@ -8,6 +8,7 @@ import {
   History, Users, BarChart3, Settings, LogOut, Menu, X,
   Stethoscope, Home, FilePlus, User, ScrollText
 } from 'lucide-react';
+import logoDental from '../../assets/logo-dental.svg';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Inicio', section: 'general' },
@@ -81,7 +82,9 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon"><Stethoscope size={20} color="white" /></div>
+          <div className="sidebar-logo-icon">
+            <img src={logoDental} alt="Dental Logo" className="sidebar-logo-img" />
+          </div>
           <div className="sidebar-logo-text">
             Odontología Digital
             <span>Sistema de Historial</span>

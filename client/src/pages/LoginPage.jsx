@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
 import { Eye, EyeOff, LogIn, AlertCircle, Stethoscope, User, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
+import dentalHero from '../assets/dental-hero.svg';
 
 // SVG Icon para Google
 const GoogleIcon = () => (
@@ -166,10 +167,8 @@ export default function LoginPage() {
           <div className="login-card-glow" />
 
           <div className="login-header">
-            <div className="login-icon-badge">
-              <div className="login-icon-inner">
-                <Stethoscope size={30} color="#0369A1" strokeWidth={2} />
-              </div>
+            <div className="login-hero-image">
+              <img src={dentalHero} alt="Dental Care" className="login-hero-svg" />
             </div>
 
             <div className="login-hospital-badge">
