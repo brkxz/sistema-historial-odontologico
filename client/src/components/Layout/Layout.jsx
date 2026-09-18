@@ -8,7 +8,7 @@ import {
   History, Users, BarChart3, Settings, LogOut, Menu, X,
   Stethoscope, Home, FilePlus, User, ScrollText
 } from 'lucide-react';
-import logoDental from '../../assets/logo-dental.svg';
+import logoDental from '../../assets/logo-dental.jpg';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Inicio', section: 'general' },

@@ -797,9 +797,12 @@
 }
 
 .dashboard-empty-svg {
-  width: 140px;
-  height: 112px;
-  margin-bottom: 16px;
+  width: 200px;
+  height: 150px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(3, 105, 161, 0.1));
   animation: float-slow 4s ease-in-out infinite;
 }
 

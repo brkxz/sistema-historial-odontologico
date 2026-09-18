@@ -8,7 +8,7 @@ import {
   Search, PlusCircle, Sparkles, ChevronRight, Mic, ShieldCheck, Clock, FileText,
   UserCheck, ArrowUpRight
 } from 'lucide-react';
-import emptyDental from '../assets/empty-dental.svg';
+import emptyDental from '../assets/empty-dental.jpg';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
