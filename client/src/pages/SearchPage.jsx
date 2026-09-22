@@ -18,69 +18,6 @@ export default function SearchPage() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Inicializar reconocimiento de voz inteligente
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'es-PE';
-      recognition.continuous = false;
-      recognition.interimResults = true;
-
-      recognition.onresult = (event) => {
-        let interimTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          interimTranscript += event.results[i][0].transcript;
-        }
-
-        setVoiceHeardText(interimTranscript);
-
-        const detectedDni = parseVoiceToDni(interimTranscript);
-        if (detectedDni && detectedDni.length === 8) {
-          setDni(detectedDni);
-          setListening(false);
-          try { recognition.stop(); } catch (_) {}
-          toast.success(`DNI detectado por voz: ${detectedDni}`);
-          setTimeout(() => searchPatient(detectedDni), 400);
-        }
-      };
-
-      recognition.onerror = (e) => {
-        setListening(false);
-        if (e.error !== 'no-speech') {
-          toast.error('No se pudo captar el audio o permiso denegado');
-        }
-      };
-
-      recognition.onend = () => {
-        setListening(false);
-      };
-
-      recognitionRef.current = recognition;
-    }
-  }, [toast, searchPatient]);
-
-  const toggleVoice = () => {
-    if (!recognitionRef.current) {
-      toast.warning('Su navegador no soporta búsqueda por voz');
-      return;
-    }
-
-    try {
-      if (listening) {
-        recognitionRef.current.stop();
-        setListening(false);
-      } else {
-        recognitionRef.current.start();
-        setListening(true);
-        toast.info('Escuchando... Diga el número de DNI');
-      }
-    } catch (e) {
-      console.warn('Speech recognition state error:', e);
-      setListening(false);
-    }
-  };
-
   // Consultar RENIEC cuando no se encuentra en la BD local
   const consultarReniec = async (dniToSearch) => {
     setLoadingReniec(true);
@@ -91,7 +28,6 @@ export default function SearchPage() {
         toast.success('Datos encontrados en RENIEC');
       }
     } catch (error) {
-      // No mostrar error si simplemente no se encontró
       if (error.message.includes('no encontrado')) {
         toast.warning('DNI no encontrado en RENIEC');
       } else if (error.message.includes('Token') || error.message.includes('configurado')) {
@@ -122,7 +58,6 @@ export default function SearchPage() {
     } catch (error) {
       if (error.message.includes('no encontrado')) {
         setNotFound(true);
-        // Auto-consultar RENIEC si no se encontró localmente y tiene 8 dígitos
         if (/^\d{8}$/.test(dniToSearch.trim())) {
           consultarReniec(dniToSearch.trim());
         }
@@ -133,6 +68,73 @@ export default function SearchPage() {
       setLoading(false);
     }
   }, [dni, toast]);
+
+  // Ref para que el speech recognition pueda llamar a searchPatient sin dependencia circular
+  const searchPatientRef = useRef(searchPatient);
+  searchPatientRef.current = searchPatient;
+
+  // Inicializar reconocimiento de voz inteligente — solo una vez al montar
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-PE';
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          interimTranscript += event.results[i][0].transcript;
+        }
+
+        setVoiceHeardText(interimTranscript);
+
+        const detectedDni = parseVoiceToDni(interimTranscript);
+        if (detectedDni && detectedDni.length === 8) {
+          setDni(detectedDni);
+          setListening(false);
+          try { recognition.stop(); } catch (_) {}
+          toast.success(`DNI detectado por voz: ${detectedDni}`);
+          setTimeout(() => searchPatientRef.current(detectedDni), 400);
+        }
+      };
+
+      recognition.onerror = (e) => {
+        setListening(false);
+        if (e.error !== 'no-speech') {
+          toast.error('No se pudo captar el audio o permiso denegado');
+        }
+      };
+
+      recognition.onend = () => {
+        setListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggleVoice = () => {
+    if (!recognitionRef.current) {
+      toast.warning('Su navegador no soporta búsqueda por voz');
+      return;
+    }
+    try {
+      if (listening) {
+        recognitionRef.current.stop();
+        setListening(false);
+      } else {
+        recognitionRef.current.start();
+        setListening(true);
+        toast.info('Escuchando... Diga el número de DNI');
+      }
+    } catch (e) {
+      console.warn('Speech recognition state error:', e);
+      setListening(false);
+    }
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
