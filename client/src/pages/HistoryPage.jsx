@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { treatmentService, patientService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
-import { Calendar, User, Stethoscope, FileText, Printer, ArrowLeft, Eye } from 'lucide-react';
+import { Calendar, User, Printer, ArrowLeft, Eye } from 'lucide-react';
 
 export default function HistoryPage() {
   const { patientId } = useParams();
@@ -14,26 +14,26 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const toast = useToast();
 
+  const loadHistory = useCallback(async (id) => {
+    setLoading(true);
+    try {
+      const data = await treatmentService.getByPatient(id);
+      setTreatments(data.treatments);
+      setPatient(data.patient);
+    } catch (_) {
+      toast.error('Error al cargar historial');
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
     if (patientId) {
       loadHistory(patientId);
     } else {
       setLoading(false);
     }
-  }, [patientId]);
-
-  const loadHistory = async (id) => {
-    setLoading(true);
-    try {
-      const data = await treatmentService.getByPatient(id);
-      setTreatments(data.treatments);
-      setPatient(data.patient);
-    } catch (error) {
-      toast.error('Error al cargar historial');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [patientId, loadHistory]);
 
   const searchByDni = async () => {
     if (!searchDni.trim()) return;

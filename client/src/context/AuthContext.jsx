@@ -18,14 +18,7 @@ export function AuthProvider({ children }) {
     return null;
   });
 
-  // Loading solo es true si NO hay datos locales (primera visita o sesión expirada)
-  const [loading, setLoading] = useState(() => {
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    // Si hay datos locales, no bloqueamos → loading = false inmediato
-    return !!(token && savedUser) ? false : false;
-    // En realidad nunca bloqueamos: si no hay token, no hay loading; si hay token, usamos localStorage
-  });
+  const [loading] = useState(false);
 
   const hasValidated = useRef(false);
 

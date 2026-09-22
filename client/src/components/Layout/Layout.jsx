@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useAI } from '../../context/AIContext';
 import AIAssistant from '../AI/AIAssistant';
 import {
-  LayoutDashboard, Search, UserPlus, ClipboardList,
-  History, Users, BarChart3, Settings, LogOut, Menu, X,
+  LayoutDashboard, Search, UserPlus,
+  History, Users, BarChart3, LogOut, Menu, X,
   Stethoscope, Home, FilePlus, User, ScrollText
 } from 'lucide-react';
 import logoDental from '../../assets/logo-dental.jpg';

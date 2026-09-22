@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { auditService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Shield, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
 const ACTION_LABELS = {
   CREATE: { label: 'Crear', color: 'badge-success' },
@@ -41,23 +41,23 @@ export default function AuditPage() {
   const { isAdmin } = useAuth();
   const toast = useToast();
 
-  useEffect(() => {
-    loadLogs();
-  }, [page]);
-
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     setLoading(true);
     try {
       const data = await auditService.getLogs({ page, limit: 30, ...filters });
       setLogs(data.logs);
       setTotal(data.total);
       setTotalPages(data.totalPages);
-    } catch (error) {
+    } catch (_) {
       toast.error('Error al cargar logs de auditoría');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, filters, toast]);
+
+  useEffect(() => {
+    loadLogs();
+  }, [loadLogs]);
 
   const handleSearch = () => {
     setPage(1);

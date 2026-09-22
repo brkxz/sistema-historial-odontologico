@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
-import { Eye, EyeOff, LogIn, AlertCircle, Stethoscope, User, Lock, ShieldCheck, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, LogIn, AlertCircle, User, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import dentalHero from '../assets/dental-hero.jpg';
 

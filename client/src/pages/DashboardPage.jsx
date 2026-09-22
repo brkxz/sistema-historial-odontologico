@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -18,11 +18,7 @@ export default function DashboardPage() {
   const { openAssistant, isListening, startVoiceListening } = useAI();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [summaryData, recentData] = await Promise.all([
         reportService.getSummary().catch(() => null),
@@ -35,7 +31,11 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();

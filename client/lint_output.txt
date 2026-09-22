@@ -1,0 +1,813 @@
+﻿
+  ! eslint(no-unused-vars): Variable 'setLoading' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/context/AuthContext.jsx:22:19]
+ 21 |   // Loading solo es true si NO hay datos locales (primera visita o sesi├│n expirada)
+ 22 |   const [loading, setLoading] = useState(() => {
+    :                   ^^^^^|^^^^
+    :                        `-- 'setLoading' is declared here
+ 23 |     const token = localStorage.getItem('token');
+    `----
+  help: Consider removing this declaration.
+
+  ! react(immutability): Cannot access variable while it is being initialized
+    ,-[src/context/AuthContext.jsx:36:7]
+ 35 |       hasValidated.current = true;
+ 36 |       validateTokenInBackground();
+    :       ^^^^^^^^^^^^|^^^^^^^^^^^^
+    :                   `-- `validateTokenInBackground` is read during its own initialization
+ 37 |     }
+    `----
+  help: `validateTokenInBackground` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/context/AuthContext.jsx:90:17]
+ 89 | 
+ 90 | export function useAuth() {
+    :                 ^^^^^^^
+ 91 |   const context = useContext(AuthContext);
+    `----
+
+  ! eslint(no-extra-boolean-cast): Redundant double negation
+    ,-[src/context/AuthContext.jsx:26:12]
+ 25 |     // Si hay datos locales, no bloqueamos ÔåÆ loading = false inmediato
+ 26 |     return !!(token && savedUser) ? false : false;
+    :            ^^^^^^^^^^^^^^^^^^^^^^
+ 27 |     // En realidad nunca bloqueamos: si no hay token, no hay loading; si hay token, usamos localStorage
+    `----
+  help: Remove the double negation as it will already be coerced to a boolean
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/components/UI/Toast.jsx:64:17]
+ 63 | 
+ 64 | export function useToast() {
+    :                 ^^^^^^^^
+ 65 |   const context = useContext(ToastContext);
+    `----
+
+  ! react(immutability): Cannot access variable while it is being initialized
+     ,-[src/hooks/useWakeWord.js:165:13]
+ 164 |           if (enabledRef.current) {
+ 165 |             startWakeWordListener();
+     :             ^^^^^^^^^^|^^^^^^^^^^
+     :                       `-- `startWakeWordListener` is read during its own initialization
+ 166 |           }
+     `----
+  help: `startWakeWordListener` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/hooks/useWakeWord.js:72:5]
+ 69 |   // Verificar soporte
+ 70 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 71 |     const supported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+ 72 |     setWakeWordSupported(supported);
+    :     ^^^^^^^^^^|^^^^^^^^^
+    :               `-- Avoid calling setState() directly within an effect
+ 73 |   }, []);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+     ,-[src/hooks/useWakeWord.js:209:7]
+ 204 |   // Auto-start/stop cuando cambia enabled
+ 205 |   useEffect(() => {
+     :   ^^^^|^^^^
+     :       `-- This is the containing effect
+ 206 |     if (enabled && wakeWordSupported) {
+ 207 |       startWakeWordListener();
+ 208 |     } else {
+ 209 |       stopWakeWordListener();
+     :       ^^^^^^^^^^|^^^^^^^^^
+     :                 `-- Avoid calling setState() directly within an effect
+ 210 |     }
+     `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! eslint(no-unused-vars): Variable 'pendingActionRef' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/context/AIContext.jsx:32:9]
+ 31 |   const navigate = useNavigate();
+ 32 |   const pendingActionRef = useRef(null);
+    :         ^^^^^^^^|^^^^^^^
+    :                 `-- 'pendingActionRef' is declared here
+ 33 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+     ,-[src/context/AIContext.jsx:163:17]
+ 162 | 
+ 163 | export function useAI() {
+     :                 ^^^^^
+ 164 |   const context = useContext(AIContext);
+     `----
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/pages/AuditPage.jsx:51:14]
+ 50 |       setTotalPages(data.totalPages);
+ 51 |     } catch (_) {
+    :              |
+    :              `-- '_' is declared here
+ 52 |       toast.error('Error al cargar logs de auditor├¡a');
+    `----
+  help: Consider handling this error.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/AuditPage.jsx:59:5]
+ 57 | 
+ 58 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 59 |     loadLogs();
+    :     ^^^^|^^^
+    :         `-- Avoid calling setState() directly within an effect
+ 60 |   }, [loadLogs]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! eslint(no-unused-vars): Identifier 'Eye' is imported but never used.
+   ,-[src/pages/HistoryPage.jsx:5:46]
+ 4 | import { useToast } from '../components/UI/Toast';
+ 5 | import { Calendar, User, Printer, ArrowLeft, Eye } from 'lucide-react';
+   :                                              ^|^
+   :                                               `-- 'Eye' is imported here
+ 6 | 
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/pages/HistoryPage.jsx:23:14]
+ 22 |       setPatient(data.patient);
+ 23 |     } catch (_) {
+    :              |
+    :              `-- '_' is declared here
+ 24 |       toast.error('Error al cargar historial');
+    `----
+  help: Consider handling this error.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/HistoryPage.jsx:32:7]
+ 29 | 
+ 30 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 31 |     if (patientId) {
+ 32 |       loadHistory(patientId);
+    :       ^^^^^|^^^^^
+    :            `-- Avoid calling setState() directly within an effect
+ 33 |     } else {
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(jsx-no-undef): 'Stethoscope' is not defined.
+     ,-[src/pages/HistoryPage.jsx:167:12]
+ 166 |         <div className="empty-state card">
+ 167 |           <Stethoscope size={48} />
+     :            ^^^^^^^^^^^
+ 168 |           <h3>Sin atenciones registradas</h3>
+     `----
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/DashboardPage.jsx:37:5]
+ 35 | 
+ 36 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 37 |     loadData();
+    :     ^^^^|^^^
+    :         `-- Avoid calling setState() directly within an effect
+ 38 |   }, [loadData]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/pages/UsersPage.jsx:19:14]
+ 18 |       setUsers(data.users);
+ 19 |     } catch (_) {
+    :              |
+    :              `-- '_' is declared here
+ 20 |       toast.error('Error al cargar usuarios');
+    `----
+  help: Consider handling this error.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/UsersPage.jsx:27:5]
+ 25 | 
+ 26 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 27 |     loadUsers();
+    :     ^^^^|^^^^
+    :         `-- Avoid calling setState() directly within an effect
+ 28 |   }, [loadUsers]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! eslint(no-unused-vars): Identifier 'Stethoscope' is imported but never used.
+   ,-[src/pages/LoginPage.jsx:5:43]
+ 4 | import { useToast } from '../components/UI/Toast';
+ 5 | import { Eye, EyeOff, LogIn, AlertCircle, Stethoscope, User, Lock, ShieldCheck, Sparkles } from 'lucide-react';
+   :                                           ^^^^^|^^^^^
+   :                                                `-- 'Stethoscope' is imported here
+ 6 | import { Capacitor } from '@capacitor/core';
+   `----
+  help: Consider removing this import.
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/AI/VoiceOverlay.jsx:20:27]
+ 19 |     // En modo escucha, las barras reaccionan al audio real
+ 20 |     const wave = Math.sin(Date.now() / 200 + index * 0.8) * 0.3 + 0.7;
+    :                           ^^^^^|^^^^
+    :                                `-- Cannot call impure function
+ 21 |     height = Math.max(8, audioLevel * 60 * offset * wave);
+    `----
+  help: `Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(purity): Cannot call impure function during render
+    ,-[src/components/AI/VoiceOverlay.jsx:24:27]
+ 23 |     // En modo habla, animaci├│n suave
+ 24 |     const wave = Math.sin(Date.now() / 150 + index * 0.6) * 0.5 + 0.5;
+    :                           ^^^^^|^^^^
+    :                                `-- Cannot call impure function
+ 25 |     height = 8 + wave * 30 * offset;
+    `----
+  help: `Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component re-renders
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/purity
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/components/AI/VoiceOverlay.jsx:98:7]
+ 95 |   // Determinar estado visual
+ 96 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 97 |     if (isSpeaking) {
+ 98 |       setCurrentState('speaking');
+    :       ^^^^^^^|^^^^^^^
+    :              `-- Avoid calling setState() directly within an effect
+ 99 |     } else if (isThinking) {
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has missing dependencies: 'onStartListening', 'isSpeaking', 'isThinking', 'voiceSupported', and 'isListening'
+     ,-[src/components/AI/VoiceOverlay.jsx:129:6]
+ 117 |   useEffect(() => {
+ 118 |     if (isOpen && !isListening && !isSpeaking && !isThinking && voiceSupported) {
+     :                    ^^^^^^^^^^^     ^^^^^^^^^^     ^^^^^^^^^^    ^^^^^^^^^^^^^^
+ 119 |       // Ôÿà Delay m├ís largo para que en m├│vil el micr├│fono se libere
+ 120 |       // del wake word listener antes de iniciar nuevo reconocimiento
+ 121 |       const timer = setTimeout(() => {
+ 122 |         // Verificar que sigue abierto antes de iniciar
+ 123 |         if (isOpen && !isListening && !isSpeaking && !isThinking) {
+ 124 |           onStartListening();
+     :           ^^^^^^^^^^^^^^^^
+ 125 |         }
+ 126 |       }, 800);
+ 127 |       return () => clearTimeout(timer);
+ 128 |     }
+ 129 |   }, [isOpen]);
+     :      ^^^^^^^^
+ 130 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Variable 'globalMicBusy' is assigned a value but never used. Unused variables should start with a '_'.
+    ,-[src/hooks/useVoice.js:14:5]
+ 13 | // Lock global de micr├│fono en memoria para evitar colisiones entre hooks
+ 14 | let globalMicBusy = false;
+    :     ^^^^^^|^^^^^^
+    :           `-- 'globalMicBusy' is declared here
+ 15 | let globalActiveStopFn = null;
+    `----
+     ,-[src/hooks/useVoice.js:443:5]
+ 442 |     continuousModeRef.current = false;
+ 443 |     globalMicBusy = false;
+     :     ^^^^^^|^^^^^^
+     :           `-- it was last assigned here
+ 444 |     globalActiveStopFn = null;
+     `----
+  help: Did you mean to use this variable?
+
+  ! react(immutability): Cannot access variable while it is being initialized
+     ,-[src/hooks/useVoice.js:159:7]
+ 158 |       stopSpeaking();
+ 159 |       cleanupAudioAnalysis();
+     :       ^^^^^^^^^^|^^^^^^^^^
+     :                 `-- `cleanupAudioAnalysis` is read during its own initialization
+ 160 |     };
+     `----
+  help: `cleanupAudioAnalysis` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(immutability): Cannot access variable while it is being initialized
+     ,-[src/hooks/useVoice.js:157:7]
+ 156 |     return () => {
+ 157 |       stopListening();
+     :       ^^^^^^|^^^^^^
+     :             `-- `stopListening` is read during its own initialization
+ 158 |       stopSpeaking();
+     `----
+  help: `stopListening` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(immutability): Cannot access variable while it is being initialized
+     ,-[src/hooks/useVoice.js:158:7]
+ 157 |       stopListening();
+ 158 |       stopSpeaking();
+     :       ^^^^^^|^^^^^
+     :             `-- `stopSpeaking` is read during its own initialization
+ 159 |       cleanupAudioAnalysis();
+     `----
+  help: `stopSpeaking` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(preserve-manual-memoization): Existing memoization could not be preserved
+     ,-[src/hooks/useVoice.js:211:32]
+ 210 |    */
+ 211 |   const cleanupAudioAnalysis = useCallback(() => {
+     :                                ^^^^^|^^^^^ |
+     :                                     |      `-- Manual memoization callback starts here
+     :                                     `-- Manual memoization is not preserved here
+ 212 |     if (animFrameRef.current) {
+     `----
+  help: React Compiler could not prove that this useMemo/useCallback remains memoized. Fix related React Compiler errors inside the callback first. If manual memoization is not required for semantics, remove it; otherwise restructure the callback to avoid values that invalidate memoization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/preserve-manual-memoization
+
+  ! react(preserve-manual-memoization): Existing memoization could not be preserved
+     ,-[src/hooks/useVoice.js:528:24]
+ 527 |    */
+ 528 |   const stopSpeaking = useCallback(() => {
+     :                        ^^^^^|^^^^^ |
+     :                             |      `-- Manual memoization callback starts here
+     :                             `-- Manual memoization is not preserved here
+ 529 |     isSpeakingChunksRef.current = false;
+     `----
+  help: React Compiler could not prove that this useMemo/useCallback remains memoized. Fix related React Compiler errors inside the callback first. If manual memoization is not required for semantics, remove it; otherwise restructure the callback to avoid values that invalidate memoization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/preserve-manual-memoization
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+     ,-[src/hooks/useVoice.js:140:5]
+ 137 |   // Verificar soporte al montar
+ 138 |   useEffect(() => {
+     :   ^^^^|^^^^
+     :       `-- This is the containing effect
+ 139 |     const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+ 140 |     setVoiceSupported(hasSpeechRecognition);
+     :     ^^^^^^^^|^^^^^^^^
+     :             `-- Avoid calling setState() directly within an effect
+ 141 |     setTtsSupported('speechSynthesis' in window);
+     `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has missing dependencies: 'stopListening', 'stopSpeaking', and 'cleanupAudioAnalysis'
+     ,-[src/hooks/useVoice.js:161:6]
+ 156 |     return () => {
+ 157 |       stopListening();
+     :       ^^^^^^^^^^^^^
+ 158 |       stopSpeaking();
+     :       ^^^^^^^^^^^^
+ 159 |       cleanupAudioAnalysis();
+     :       ^^^^^^^^^^^^^^^^^^^^
+ 160 |     };
+ 161 |   }, []);
+     :      ^^
+ 162 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! react-hooks(exhaustive-deps): React Hook useCallback has a missing dependency: 'stopListening'
+     ,-[src/hooks/useVoice.js:435:6]
+ 366 |             shouldRestartRef.current = false;
+ 367 |             stopListening();
+     :             ^^^^^^|^^^^^^
+     :                   `-- useCallback uses `stopListening` here
+ 368 |           }, silenceTimeout);
+ 369 |         }
+ 370 |       }
+ 371 |     };
+ 372 | 
+ 373 |     recognition.onerror = (event) => {
+ 374 |       if (event.error !== 'no-speech' && event.error !== 'aborted') {
+ 375 |         console.warn('Speech recognition error:', event.error);
+ 376 |       }
+ 377 |       // No detener inmediatamente en modo continuo para errores no fatales
+ 378 |       if (event.error === 'no-speech' && continuousModeRef.current && shouldRestartRef.current) {
+ 379 |         // Se reintentar├í en onend
+ 380 |         return;
+ 381 |       }
+ 382 |       if (event.error !== 'no-speech' && event.error !== 'aborted') {
+ 383 |         setIsListening(false);
+ 384 |         shouldRestartRef.current = false;
+ 385 |       }
+ 386 |     };
+ 387 | 
+ 388 |     recognition.onend = () => {
+ 389 |       setInterimTranscript('');
+ 390 |       
+ 391 |       // Auto-reinicio en modo continuo
+ 392 |       if (shouldRestartRef.current && continuousModeRef.current) {
+ 393 |         try {
+ 394 |           // Peque├▒o delay para evitar errores de re-start r├ípido
+ 395 |           setTimeout(() => {
+ 396 |             if (shouldRestartRef.current) {
+ 397 |               recognition.start();
+ 398 |             } else {
+ 399 |               setIsListening(false);
+ 400 |               cleanupAudioAnalysis();
+ 401 |             }
+ 402 |           }, 100);
+ 403 |           return;
+ 404 |         } catch {
+ 405 |           // Si falla, se detiene
+ 406 |         }
+ 407 |       }
+ 408 |       
+ 409 |       setIsListening(false);
+ 410 |       if (silenceTimerRef.current) {
+ 411 |         clearTimeout(silenceTimerRef.current);
+ 412 |       }
+ 413 |       cleanupAudioAnalysis();
+ 414 |     };
+ 415 | 
+ 416 |     recognitionRef.current = recognition;
+ 417 | 
+ 418 |     // Registrar en lock global para que otros componentes puedan desocupar el micr├│fono
+ 419 |     globalActiveStopFn = () => {
+ 420 |       try { recognition.stop(); } catch {}
+ 421 |     };
+ 422 |     globalMicBusy = true;
+ 423 | 
+ 424 |     try {
+ 425 |       recognition.start();
+ 426 |       // Iniciar an├ílisis de audio para waveform
+ 427 |       startAudioAnalysis();
+ 428 |       return true;
+ 429 |     } catch (e) {
+ 430 |       console.warn('Failed to start speech recognition:', e);
+ 431 |       setIsListening(false);
+ 432 |       globalMicBusy = false;
+ 433 |       return false;
+ 434 |     }
+ 435 |   }, [voiceSupported, startAudioAnalysis, cleanupAudioAnalysis]);
+     :      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 436 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! react-hooks(exhaustive-deps): React Hook useCallback has a missing dependency: 'stopSpeaking'
+     ,-[src/hooks/useVoice.js:523:6]
+ 474 |     // Detener cualquier speech anterior
+ 475 |     stopSpeaking();
+     :     ^^^^^^|^^^^^
+     :           `-- useCallback uses `stopSpeaking` here
+ 476 | 
+ 477 |     const { rate = 1, pitch = 1, onEnd, clean = true } = options;
+ 478 | 
+ 479 |     // Limpiar texto si es necesario
+ 480 |     const cleanedText = clean ? cleanTextForTTS(text) : text;
+ 481 |     if (!cleanedText) return;
+ 482 | 
+ 483 |     // Dividir en chunks
+ 484 |     const chunks = chunkTextForTTS(cleanedText);
+ 485 |     utteranceQueueRef.current = [...chunks];
+ 486 |     isSpeakingChunksRef.current = true;
+ 487 | 
+ 488 |     const speakNextChunk = () => {
+ 489 |       if (utteranceQueueRef.current.length === 0 || !isSpeakingChunksRef.current) {
+ 490 |         setIsSpeaking(false);
+ 491 |         isSpeakingChunksRef.current = false;
+ 492 |         onEnd?.();
+ 493 |         return;
+ 494 |       }
+ 495 | 
+ 496 |       const chunk = utteranceQueueRef.current.shift();
+ 497 |       const utterance = new SpeechSynthesisUtterance(chunk);
+ 498 |       utterance.lang = 'es-PE';
+ 499 |       utterance.rate = rate;
+ 500 |       utterance.pitch = pitch;
+ 501 |       utterance.volume = 1;
+ 502 | 
+ 503 |       const voice = getSpanishVoice();
+ 504 |       if (voice) {
+ 505 |         utterance.voice = voice;
+ 506 |       }
+ 507 | 
+ 508 |       utterance.onstart = () => setIsSpeaking(true);
+ 509 |       utterance.onend = () => {
+ 510 |         // Hablar siguiente chunk
+ 511 |         speakNextChunk();
+ 512 |       };
+ 513 |       utterance.onerror = () => {
+ 514 |         setIsSpeaking(false);
+ 515 |         isSpeakingChunksRef.current = false;
+ 516 |         utteranceQueueRef.current = [];
+ 517 |       };
+ 518 | 
+ 519 |       synthRef.current.speak(utterance);
+ 520 |     };
+ 521 | 
+ 522 |     speakNextChunk();
+ 523 |   }, [ttsSupported, getSpanishVoice]);
+     :      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 524 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/pages/OdontogramPage.jsx:34:14]
+ 33 |       setAllTeeth(data.teeth);
+ 34 |     } catch (_) {
+    :              |
+    :              `-- '_' is declared here
+ 35 |       console.error('Error al cargar dientes');
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Catch parameter 'error' is caught but never used.
+     ,-[src/pages/OdontogramPage.jsx:122:14]
+ 121 |       toast.success(`Diente ${selectedTooth.tooth_number} marcado como ${condition}`);
+ 122 |     } catch (error) {
+     :              ^^|^^
+     :                `-- 'error' is declared here
+ 123 |       toast.error('Error al actualizar diente');
+     `----
+  help: Consider handling this error.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/OdontogramPage.jsx:40:5]
+ 38 | 
+ 39 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 40 |     loadTeeth();
+    :     ^^^^|^^^^
+    :         `-- Avoid calling setState() directly within an effect
+ 41 |   }, [loadTeeth]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'toast'
+     ,-[src/pages/OdontogramPage.jsx:105:6]
+  93 |           }));
+  94 |           toast.success(`Pieza ${toothNum} marcada como ${condition} por voz`);
+     :           ^^|^^
+     :             `-- useEffect uses `toast` here
+  95 |         } catch {
+  96 |           toast.error(`Error al marcar pieza ${toothNum}`);
+  97 |         }
+  98 |       } else {
+  99 |         toast.info(`Pieza ${toothNum} seleccionada. Busca o carga un paciente para guardar.`);
+ 100 |       }
+ 101 |     };
+ 102 | 
+ 103 |     window.addEventListener('odonto_voice_mark', handleVoiceMark);
+ 104 |     return () => window.removeEventListener('odonto_voice_mark', handleVoiceMark);
+ 105 |   }, [allTeeth, patient]);
+     :      ^^^^^^^^^^^^^^^^^^^
+ 106 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Variable 'login' is declared but never used. Unused variables should start with a '_'.
+   ,-[src/pages/ProfilePage.jsx:8:17]
+ 7 | export default function ProfilePage() {
+ 8 |   const { user, login } = useAuth();
+   :                 ^^|^^
+   :                   `-- 'login' is declared here
+ 9 |   const toast = useToast();
+   `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/pages/ReportsPage.jsx:40:14]
+ 39 |       }
+ 40 |     } catch (_) {
+    :              |
+    :              `-- '_' is declared here
+ 41 |       toast.error('Error al cargar reportes');
+    `----
+  help: Consider handling this error.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/ReportsPage.jsx:48:5]
+ 46 | 
+ 47 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 48 |     loadReports();
+    :     ^^^^^|^^^^^
+    :          `-- Avoid calling setState() directly within an effect
+ 49 |   }, [loadReports]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/pages/SearchPage.jsx:42:46]
+ 41 |           setListening(false);
+ 42 |           try { recognition.stop(); } catch (_) {}
+    :                                              |
+    :                                              `-- '_' is declared here
+ 43 |           toast.success(`DNI detectado por voz: ${detectedDni}`);
+    `----
+  help: Consider handling this error.
+
+  ! react(immutability): Cannot access variable while it is being initialized
+    ,-[src/pages/SearchPage.jsx:44:28]
+ 43 |           toast.success(`DNI detectado por voz: ${detectedDni}`);
+ 44 |           setTimeout(() => searchPatient(detectedDni), 400);
+    :                            ^^^^^^|^^^^^^
+    :                                  `-- `searchPatient` is read during its own initialization
+ 45 |         }
+    `----
+  help: `searchPatient` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react-hooks(exhaustive-deps): React Hook useCallback has a missing dependency: 'consultarReniec'
+     ,-[src/pages/SearchPage.jsx:135:6]
+ 126 |         if (/^\d{8}$/.test(dniToSearch.trim())) {
+ 127 |           consultarReniec(dniToSearch.trim());
+     :           ^^^^^^^|^^^^^^^
+     :                  `-- useCallback uses `consultarReniec` here
+ 128 |         }
+ 129 |       } else {
+ 130 |         toast.error(error.message);
+ 131 |       }
+ 132 |     } finally {
+ 133 |       setLoading(false);
+ 134 |     }
+ 135 |   }, [dni, toast]);
+     :      ^^^^^^^^^^^^
+ 136 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Variable 'wakeWordSupported' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/AI/AIAssistant.jsx:56:28]
+ 55 |   // ---- Wake Word: "Oye Denty" ----
+ 56 |   const { isWakeListening, wakeWordSupported } = useWakeWord({
+    :                            ^^^^^^^^|^^^^^^^^
+    :                                    `-- 'wakeWordSupported' is declared here
+ 57 |     enabled: wakeWordEnabled && !voiceOverlayOpen && !isListening && !isSpeaking,
+    `----
+  help: Consider removing this declaration.
+
+  ! react-hooks(exhaustive-deps): React Hook useCallback has a missing dependency: 'addLocalMessages'
+     ,-[src/components/AI/AIAssistant.jsx:194:6]
+ 134 |       const confirmMsg = command.confirm || `Ô£à Navegando a ${command.label}...`;
+ 135 |       addLocalMessages(msg, confirmMsg);
+     :       ^^^^^^^^|^^^^^^^
+     :               `-- useCallback uses `addLocalMessages` here
+ 136 |       navigate(command.route);
+ 137 |       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+ 138 |       return confirmMsg;
+ 139 |     }
+ 140 | 
+ 141 |     if (command.type === 'search_dni') {
+ 142 |       const confirmMsg = `­ƒöì Buscando paciente con DNI ${command.dni}...`;
+ 143 |       addLocalMessages(msg, confirmMsg);
+ 144 |       navigate('/buscar');
+ 145 |       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+ 146 |       return confirmMsg;
+ 147 |     }
+ 148 | 
+ 149 |     if (command.type === 'odontogram_mark') {
+ 150 |       const confirmMsg = command.confirm || `­ƒªÀ Marcando pieza ${command.toothNumber} con ${command.condition}...`;
+ 151 |       addLocalMessages(msg, confirmMsg);
+ 152 |       // Notificar a OdontogramPage si est├í activa o navegar hacia ella
+ 153 |       window.dispatchEvent(new CustomEvent('odonto_voice_mark', { detail: { tooth: command.toothNumber, condition: command.condition } }));
+ 154 |       if (window.location.pathname !== '/odontograma') {
+ 155 |         navigate('/odontograma');
+ 156 |       }
+ 157 |       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+ 158 |       return confirmMsg;
+ 159 |     }
+ 160 | 
+ 161 |     if (command.type === 'action_submit_treatment') {
+ 162 |       const confirmMsg = command.confirm || '­ƒÆ¥ Guardando atenci├│n...';
+ 163 |       addLocalMessages(msg, confirmMsg);
+ 164 |       window.dispatchEvent(new CustomEvent('odonto_voice_submit_treatment'));
+ 165 |       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+ 166 |       return confirmMsg;
+ 167 |     }
+ 168 | 
+ 169 |     if (command.type === 'action_print_treatment') {
+ 170 |       const confirmMsg = command.confirm || '­ƒû¿´©Å Imprimiendo ficha...';
+ 171 |       addLocalMessages(msg, confirmMsg);
+ 172 |       window.dispatchEvent(new CustomEvent('odonto_voice_print_treatment'));
+ 173 |       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+ 174 |       return confirmMsg;
+ 175 |     }
+ 176 | 
+ 177 |     if (command.type === 'action_reset_treatment') {
+ 178 |       const confirmMsg = command.confirm || '­ƒº╣ Formulario limpiado.';
+ 179 |       addLocalMessages(msg, confirmMsg);
+ 180 |       window.dispatchEvent(new CustomEvent('odonto_voice_reset_treatment'));
+ 181 |       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
+ 182 |       return confirmMsg;
+ 183 |     }
+ 184 | 
+ 185 |     // Chat normal con IA
+ 186 |     const response = await sendChat(msg);
+ 187 | 
+ 188 |     // TTS: hablar la respuesta si est├í activado
+ 189 |     if (ttsEnabled && response && !response.startsWith('ÔÜÖ´©Å') && !response.startsWith('ÔØî')) {
+ 190 |       speak(response, { rate: 1.05 });
+ 191 |     }
+ 192 | 
+ 193 |     return response;
+ 194 |   }, [inputText, isThinking, processVoiceCommand, sendChat, navigate, ttsEnabled, speak, playSendSound]);
+     :      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 195 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/pages/PatientsPage.jsx:40:14]
+ 39 |       setTotalPages(data.totalPages);
+ 40 |     } catch (_) {
+    :              |
+    :              `-- '_' is declared here
+ 41 |       toast.error('Error al cargar pacientes');
+    `----
+  help: Consider handling this error.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/PatientsPage.jsx:29:7]
+ 26 |   });
+ 27 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 28 |     if (initialDniChecked) {
+ 29 |       setShowForm(true);
+    :       ^^^^^|^^^^^
+    :            `-- Avoid calling setState() directly within an effect
+ 30 |     }
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/PatientsPage.jsx:48:5]
+ 46 | 
+ 47 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 48 |     loadPatients();
+    :     ^^^^^^|^^^^^
+    :           `-- Avoid calling setState() directly within an effect
+ 49 |   }, [loadPatients]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(immutability): Cannot access variable while it is being initialized
+     ,-[src/pages/TreatmentPage.jsx:131:7]
+ 130 |     const handleVoiceSubmit = () => {
+ 131 |       handleSubmit(false);
+     :       ^^^^^^|^^^^^
+     :             `-- `handleSubmit` is read during its own initialization
+ 132 |     };
+     `----
+  help: `handleSubmit` is read while its declaration is still being initialized. Move the access after initialization. For a recursive callback, use a named function expression or restructure the callback so it does not capture itself during initialization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+
+  ! react(preserve-manual-memoization): Existing memoization could not be preserved
+     ,-[src/pages/TreatmentPage.jsx:258:24]
+ 257 | 
+ 258 |   const handleSubmit = useCallback(async (andPrint = false) => {
+     :                        ^^^^^|^^^^^ |
+     :                             |      `-- Manual memoization callback starts here
+     :                             `-- Manual memoization is not preserved here
+ 259 |     if (!patient) {
+     `----
+  help: React Compiler could not prove that this useMemo/useCallback remains memoized. Fix related React Compiler errors inside the callback first. If manual memoization is not required for semantics, remove it; otherwise restructure the callback to avoid values that invalidate memoization
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/preserve-manual-memoization
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/TreatmentPage.jsx:64:5]
+ 62 | 
+ 63 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 64 |     loadTeeth();
+    :     ^^^^|^^^^
+    :         `-- Avoid calling setState() directly within an effect
+ 65 |     if (prefillPatientId) {
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+Found 52 warnings and 0 errors.
+Finished in 76ms on 29 files with 104 rules using 8 threads.

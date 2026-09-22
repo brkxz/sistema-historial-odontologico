@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { patientService, reniecService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
-import { Search, UserPlus, Eye, Edit, ChevronLeft, ChevronRight, Globe, Loader } from 'lucide-react';
+import { Search, UserPlus, Eye, Edit, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState([]);
@@ -11,34 +11,30 @@ export default function PatientsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingPatient, setEditingPatient] = useState(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const toast = useToast();
-
+  const [showForm, setShowForm] = useState(() => !!searchParams.get('dni'));
+  const [editingPatient, setEditingPatient] = useState(null);
   const prefilledDni = searchParams.get('dni') || '';
 
-  useEffect(() => {
-    if (searchParams.get('dni')) {
-      setShowForm(true);
-    }
-    loadPatients();
-  }, [page]);
-
-  const loadPatients = async () => {
+  const loadPatients = useCallback(async () => {
     setLoading(true);
     try {
       const data = await patientService.getAll(search, page);
       setPatients(data.patients);
       setTotal(data.total);
       setTotalPages(data.totalPages);
-    } catch (error) {
+    } catch (_) {
       toast.error('Error al cargar pacientes');
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, page, toast]);
+
+  useEffect(() => {
+    loadPatients();
+  }, [loadPatients]);
 
   const handleSearch = () => {
     setPage(1);

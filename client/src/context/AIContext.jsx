@@ -27,13 +27,27 @@ export function AIProvider({ children }) {
   const [currentPatient, setCurrentPatient] = useState(null);
   const [currentPage, setCurrentPage] = useState('');
   const [ttsEnabled, setTtsEnabled] = useState(false);
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(true); // Asumir disponible hasta que se compruebe lo contrario
   const navigate = useNavigate();
   const pendingActionRef = useRef(null);
 
-  // Verificar estado de la IA al cargar
+  // Verificar estado de la IA en background (no bloquea la UI)
   useEffect(() => {
-    checkAIStatus().then(configured => setApiKeyConfigured(configured));
+    let cancelled = false;
+    const verify = async () => {
+      // Esperar a que haya token (usuario logueado) antes de verificar
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const configured = await checkAIStatus();
+        if (!cancelled) setApiKeyConfigured(configured);
+      } catch {
+        // Si falla (cold start, red), no cambiamos el estado — seguimos asumiendo disponible
+      }
+    };
+    // Dar 1.5s para que la app y el servidor estén listos
+    const timer = setTimeout(verify, 1500);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, []);
 
   // Persistir historial de chat en localStorage

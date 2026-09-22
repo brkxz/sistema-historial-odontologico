@@ -1,6 +1,7 @@
 /* =============================================
    ASISTENTE IA - Estilos Premium
-   Glassmorphism + Animaciones + Dark Mode
+   Glassmorphism + Animaciones + Tema Claro
+   Build: 2026-09-22-v2 (cache bust)
    ============================================= */
 
 /* ---- FAB (Floating Action Button) ---- */
@@ -158,13 +159,13 @@
   height: 100vh;
   max-height: 100vh;
   z-index: 1002;
-  background: linear-gradient(180deg, #0F172A 0%, #111827 100%);
-  border-left: 1px solid rgba(139, 92, 246, 0.2);
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
 }
 
 .ai-panel.open {

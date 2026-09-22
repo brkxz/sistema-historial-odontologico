@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { odontogramService, patientService, teethService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
-import { Search, ZoomIn, ZoomOut, Layers, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Search, ZoomIn, ZoomOut, Layers, CheckCircle2 } from 'lucide-react';
 
 const CONDITIONS = [
   { value: 'sano', label: 'Sano', color: '#10B981', bg: 'rgba(16, 185, 129, 0.2)' },
@@ -27,18 +27,18 @@ export default function OdontogramPage() {
   const [isZoomed, setIsZoomed] = useState(false);
   const toast = useToast();
 
-  useEffect(() => {
-    loadTeeth();
-  }, []);
-
-  const loadTeeth = async () => {
+  const loadTeeth = useCallback(async () => {
     try {
       const data = await teethService.getAll();
       setAllTeeth(data.teeth);
-    } catch (error) {
-      console.error('Error al cargar dientes:', error);
+    } catch (_) {
+      console.error('Error al cargar dientes');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadTeeth();
+  }, [loadTeeth]);
 
   const searchPatient = async () => {
     if (!searchDni.trim()) return;

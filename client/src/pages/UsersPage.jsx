@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { userService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
 import { useAuth } from '../context/AuthContext';
@@ -12,20 +12,20 @@ export default function UsersPage() {
   const { isAdmin } = useAuth();
   const toast = useToast();
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const data = await userService.getAll();
       setUsers(data.users);
-    } catch (error) {
+    } catch (_) {
       toast.error('Error al cargar usuarios');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const toggleActive = async (user) => {
     try {

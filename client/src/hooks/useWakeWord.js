@@ -55,6 +55,7 @@ export function useWakeWord({ onWakeWord, enabled = false } = {}) {
   const enabledRef = useRef(enabled);
   const restartTimerRef = useRef(null);
   const lastWakeTimeRef = useRef(0); // Timestamp de la última activación
+  const stopWakeWordListenerRef = useRef(null);
 
   // Mantener ref actualizado
   useEffect(() => {
@@ -132,7 +133,7 @@ export function useWakeWord({ onWakeWord, enabled = false } = {}) {
             lastWakeTimeRef.current = now;
 
             // Detener listener para no interferir con el asistente
-            stopWakeWordListener();
+            stopWakeWordListenerRef.current?.();
 
             // ★ Delay aumentado para móvil: el micrófono necesita más
             // tiempo para liberarse en Android antes de iniciar otro
@@ -195,6 +196,11 @@ export function useWakeWord({ onWakeWord, enabled = false } = {}) {
     setIsWakeListening(false);
   }, []);
 
+  // Keep ref in sync
+  useEffect(() => {
+    stopWakeWordListenerRef.current = stopWakeWordListener;
+  }, [stopWakeWordListener]);
+
   // Auto-start/stop cuando cambia enabled
   useEffect(() => {
     if (enabled && wakeWordSupported) {
@@ -206,7 +212,7 @@ export function useWakeWord({ onWakeWord, enabled = false } = {}) {
     return () => {
       stopWakeWordListener();
     };
-  }, [enabled, wakeWordSupported]);
+  }, [enabled, wakeWordSupported, startWakeWordListener, stopWakeWordListener]);
 
   return {
     isWakeListening,

@@ -1,6 +1,6 @@
 {
   "appId": "com.hospital.sanramon.odontologia",
-  "appName": "OdontoApp",
+  "appName": "DENTY.02",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",

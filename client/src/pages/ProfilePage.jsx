@@ -5,7 +5,7 @@ import { useToast } from '../components/UI/Toast';
 import { User, Lock, Save, Mail, Stethoscope, Shield, ShieldCheck } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const toast = useToast();
 
   // Estado del formulario de perfil

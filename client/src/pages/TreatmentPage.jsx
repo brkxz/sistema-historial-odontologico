@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAI } from '../context/AIContext';
 import { useVoice } from '../hooks/useVoice';
 import { useSoundFeedback } from '../hooks/useSoundFeedback';
-import { Save, X, Printer, Search, CheckCircle, Mic, MicOff, Layers, UserCheck, Sparkles, Bot, Wand2 } from 'lucide-react';
+import { Save, X, Printer, Search, CheckCircle, Mic, UserCheck, Sparkles, Bot, Wand2 } from 'lucide-react';
 
 export default function TreatmentPage() {
   const [searchParams] = useSearchParams();
@@ -38,15 +38,8 @@ export default function TreatmentPage() {
   const toast = useToast();
   const { user } = useAuth();
   const { setCurrentPatient, apiKeyConfigured } = useAI();
-  const { isListening, interimTranscript, startListening, stopListening, audioLevel } = useVoice();
+  const { isListening, startListening, stopListening } = useVoice();
   const { playStartSound, playStopSound, playConfirmSound } = useSoundFeedback();
-
-  useEffect(() => {
-    loadTeeth();
-    if (prefillPatientId) {
-      loadPatient(prefillPatientId);
-    }
-  }, []);
 
   const loadTeeth = async () => {
     try {
@@ -57,7 +50,7 @@ export default function TreatmentPage() {
     }
   };
 
-  const loadPatient = async (id) => {
+  const loadPatient = useCallback(async (id) => {
     try {
       const data = await patientService.getById(id);
       setPatient(data.patient);
@@ -65,7 +58,14 @@ export default function TreatmentPage() {
     } catch {
       toast.error('Error al cargar paciente');
     }
-  };
+  }, [setCurrentPatient, toast]);
+
+  useEffect(() => {
+    loadTeeth();
+    if (prefillPatientId) {
+      loadPatient(prefillPatientId);
+    }
+  }, [prefillPatientId, loadPatient]);
 
   const searchPatient = async () => {
     if (!searchDni.trim()) return;
@@ -154,7 +154,7 @@ export default function TreatmentPage() {
       window.removeEventListener('odonto_voice_print_treatment', handleVoicePrint);
       window.removeEventListener('odonto_voice_reset_treatment', handleVoiceReset);
     };
-  }, [patient, form, selectedTeeth]);
+  }, [patient, form, selectedTeeth, handleSubmit, toast]);
 
   // Auto-formateo de notas clínicas con IA
   const handleFormatWithAI = useCallback(async (field) => {
@@ -199,44 +199,7 @@ export default function TreatmentPage() {
     );
   };
 
-  const handleSubmit = async (andPrint = false) => {
-    if (!patient) {
-      toast.warning('Seleccione un paciente');
-      return;
-    }
-    if (!form.reason) {
-      toast.warning('Ingrese el motivo de consulta');
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const data = await treatmentService.create({
-        patient_id: patient.id,
-        ...form,
-        teeth: selectedTeeth.map(({ tooth_id, condition, surface, notes }) => ({
-          tooth_id,
-          condition,
-          surface,
-          notes,
-        })),
-      });
-
-      setSavedTreatment(data.treatment);
-      setSaved(true);
-      toast.success('Atención registrada exitosamente');
-
-      if (andPrint) {
-        printTreatment(data.treatment);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const printTreatment = (treatment) => {
+  const printTreatment = useCallback((_treatment) => {
     const printWindow = window.open('', '_blank');
     const html = `
       <!DOCTYPE html>
@@ -290,7 +253,44 @@ export default function TreatmentPage() {
     `;
     printWindow.document.write(html);
     printWindow.document.close();
-  };
+  }, [patient, form, selectedTeeth, user]);
+
+  const handleSubmit = useCallback(async (andPrint = false) => {
+    if (!patient) {
+      toast.warning('Seleccione un paciente');
+      return;
+    }
+    if (!form.reason) {
+      toast.warning('Ingrese el motivo de consulta');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const data = await treatmentService.create({
+        patient_id: patient.id,
+        ...form,
+        teeth: selectedTeeth.map(({ tooth_id, condition, surface, notes }) => ({
+          tooth_id,
+          condition,
+          surface,
+          notes,
+        })),
+      });
+
+      setSavedTreatment(data.treatment);
+      setSaved(true);
+      toast.success('Atención registrada exitosamente');
+
+      if (andPrint) {
+        printTreatment(data.treatment);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setSaving(false);
+    }
+  }, [patient, form, selectedTeeth, toast, printTreatment]);
 
   // Vista de éxito al guardar
   if (saved) {

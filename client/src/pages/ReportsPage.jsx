@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { reportService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
-import { BarChart3, Users, ClipboardList, Calendar, TrendingUp, Download } from 'lucide-react';
+import { Users, ClipboardList, Calendar, TrendingUp, Download } from 'lucide-react';
 
 export default function ReportsPage() {
   const [summary, setSummary] = useState(null);
@@ -12,11 +12,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  useEffect(() => {
-    loadReports();
-  }, []);
-
-  const loadReports = async () => {
+  const loadReports = useCallback(async () => {
     setLoading(true);
     try {
       // Cargar cada reporte independientemente para que un error no afecte a los demás
@@ -41,12 +37,16 @@ export default function ReportsPage() {
       if (allFailed) {
         toast.error('Error al cargar reportes. Verifica tu conexión.');
       }
-    } catch (error) {
+    } catch (_) {
       toast.error('Error al cargar reportes');
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate, toast]);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   const handleFilter = () => {
     loadReports();

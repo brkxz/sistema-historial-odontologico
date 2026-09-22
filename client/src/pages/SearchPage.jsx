@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientService, reniecService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
 import { parseVoiceToDni } from '../utils/speechToDni';
-import { Search, Mic, MicOff, UserPlus, History, FilePlus, Phone, Mail, MapPin, Calendar, Globe, AlertCircle, Volume2, Sparkles } from 'lucide-react';
+import { Search, Mic, MicOff, UserPlus, History, FilePlus, Phone, Mail, MapPin, Calendar, Globe, Sparkles } from 'lucide-react';
 
 export default function SearchPage() {
   const [dni, setDni] = useState('');
@@ -39,7 +39,7 @@ export default function SearchPage() {
         if (detectedDni && detectedDni.length === 8) {
           setDni(detectedDni);
           setListening(false);
-          try { recognition.stop(); } catch (e) {}
+          try { recognition.stop(); } catch (_) {}
           toast.success(`DNI detectado por voz: ${detectedDni}`);
           setTimeout(() => searchPatient(detectedDni), 400);
         }
@@ -58,7 +58,7 @@ export default function SearchPage() {
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [toast, searchPatient]);
 
   const toggleVoice = () => {
     if (!recognitionRef.current) {
@@ -104,8 +104,8 @@ export default function SearchPage() {
     }
   };
 
-  const searchPatient = async (searchDni) => {
-    const dniToSearch = searchDni || dni;
+  const searchPatient = useCallback(async (searchDniParam) => {
+    const dniToSearch = searchDniParam || dni;
     if (!dniToSearch.trim()) {
       toast.warning('Ingrese un número de DNI');
       return;
@@ -132,7 +132,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dni, toast]);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
