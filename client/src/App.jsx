@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AIProvider } from './context/AIContext';
 import { ToastProvider } from './components/UI/Toast';
+import ErrorBoundary from './components/UI/ErrorBoundary';
 import Layout from './components/Layout/Layout';
 import LoginPage from './pages/LoginPage';
 
@@ -81,12 +82,13 @@ function PublicRoute({ children }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-          <AIProvider>
-          <HideAppLoader />
-          <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <AIProvider>
+            <HideAppLoader />
+            <Routes>
             {/* Ruta pública: Login */}
             <Route
               path="/login"
@@ -122,11 +124,12 @@ function App() {
 
             {/* Ruta 404 */}
             <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
-          </Routes>
-          </AIProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </BrowserRouter>
+            </Routes>
+            </AIProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 
