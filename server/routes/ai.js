@@ -98,10 +98,16 @@ router.post('/chat', async (req, res) => {
     }
 
     // Convertir formato Gemini (contents/parts) → formato OpenAI (messages)
-    const messages = contents.map(c => ({
-      role: c.role === 'model' ? 'assistant' : c.role,
-      content: c.parts?.[0]?.text || '',
-    }));
+    // El primer mensaje "user" es el SYSTEM_PROMPT → lo marcamos como "system"
+    const messages = contents.map((c, i) => {
+      const role = c.role === 'model' ? 'assistant' : c.role;
+      const content = c.parts?.[0]?.text || '';
+      // El primer mensaje siempre es el system prompt (enviado como 'user' desde el cliente)
+      if (i === 0 && role === 'user') {
+        return { role: 'system', content };
+      }
+      return { role, content };
+    });
 
     const activeProviders = PROVIDERS.filter(p => p.enabled());
 
