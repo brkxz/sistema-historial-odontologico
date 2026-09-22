@@ -19,3 +19,11 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# APK / binarios Android
+*.apk
+*.aab
+
+# Temporales
+lint_output.txt
+*.log
