@@ -126,13 +126,12 @@ export default function TreatmentPage() {
   }, [stopListening]);
 
   // Escuchar acciones por voz disparadas desde el Asistente
+  // Usamos ref para evitar TDZ: handleSubmit se declara más abajo
+  const handleSubmitRef = { current: null };
+
   useEffect(() => {
-    const handleVoiceSubmit = () => {
-      handleSubmit(false);
-    };
-    const handleVoicePrint = () => {
-      handleSubmit(true);
-    };
+    const handleVoiceSubmit = () => handleSubmitRef.current?.(false);
+    const handleVoicePrint = () => handleSubmitRef.current?.(true);
     const handleVoiceReset = () => {
       setForm({
         treatment_date: new Date().toISOString().split('T')[0],
@@ -154,7 +153,8 @@ export default function TreatmentPage() {
       window.removeEventListener('odonto_voice_print_treatment', handleVoicePrint);
       window.removeEventListener('odonto_voice_reset_treatment', handleVoiceReset);
     };
-  }, [patient, form, selectedTeeth, handleSubmit, toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toast]);
 
   // Auto-formateo de notas clínicas con IA
   const handleFormatWithAI = useCallback(async (field) => {
@@ -291,6 +291,9 @@ export default function TreatmentPage() {
       setSaving(false);
     }
   }, [patient, form, selectedTeeth, toast, printTreatment]);
+
+  // Actualizar ref para que el event listener de voz tenga siempre la versión actual
+  handleSubmitRef.current = handleSubmit;
 
   // Vista de éxito al guardar
   if (saved) {
