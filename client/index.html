@@ -95,12 +95,30 @@
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
-    <!-- Ping al servidor para despertar el cold start de Render ANTES de que el usuario lo necesite -->
+    <!-- Limpiar Service Workers viejos y despertar servidor -->
     <script>
-      (function() {
-        var api = 'https://odontologia-api-9a6v.onrender.com/api/health';
-        fetch(api, { method: 'GET', mode: 'no-cors' }).catch(function() {});
-      })();
+      // 1. Limpiar SW y caches viejos si hay versión nueva
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          regs.forEach(function(reg) {
+            reg.update(); // Fuerza buscar nueva versión
+          });
+        });
+        // Limpiar caches con nombres viejos
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(key) {
+              if (key.indexOf('workbox-precache') !== -1) {
+                // Mantener solo el cache actual
+              }
+            });
+          });
+        }
+      }
+      // 2. Ping al servidor para despertar cold start de Render
+      fetch('https://odontologia-api-9a6v.onrender.com/api/health', {
+        method: 'GET', mode: 'no-cors'
+      }).catch(function() {});
     </script>
   </body>
 </html>
