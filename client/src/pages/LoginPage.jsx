@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
 import { Eye, EyeOff, LogIn, AlertCircle, ShieldCheck, ChevronLeft } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
-import dentalLogo from '../assets/dental-logo.png';
+import loginPanelBg from '../assets/login-panel-bg.jpg';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24">
@@ -112,18 +112,31 @@ export default function LoginPage() {
       {/* Tarjeta central */}
       <div className="lp-card">
 
-        {/* Panel izquierdo — azul */}
-        <div className="lp-left">
-          {/* Logo diente */}
-          <img src={dentalLogo} alt="Logo Dental" className="lp-logo" />
-
-          {/* Texto grande */}
-          <div className="lp-left-text">
-            <h2 className="lp-big-title">PORTAL<br/>ODONTOLÓGICO</h2>
-            <p className="lp-left-desc">
-              Accede al historial completo de pacientes, registra atenciones,
-              gestiona odontogramas y genera reportes clínicos desde una sola plataforma.
-            </p>
+        {/* Panel izquierdo — imagen diente */}
+        <div className="lp-left" style={{ backgroundImage: `url(${loginPanelBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+          <div className="lp-left-overlay">
+            <div className="lp-left-top-text">
+              <div className="lp-hero-badge">
+                <i className="fa-solid fa-shield-halved" /> Portal Médico Seguro
+              </div>
+              <h2 className="lp-big-title">PORTAL<br/>ODONTOLÓGICO</h2>
+              <p className="lp-left-desc">
+                Hospital San Ramón · Chanchamayo.<br/>
+                Gestiona historiales, odontogramas y reportes clínicos.
+              </p>
+            </div>
+            <div className="lp-features">
+              {[
+                { icon: 'fa-solid fa-file-medical', text: 'Historial clínico digital' },
+                { icon: 'fa-solid fa-tooth',        text: 'Odontograma interactivo' },
+                { icon: 'fa-solid fa-robot',        text: 'Asistente IA integrado' },
+              ].map((f, i) => (
+                <div key={i} className="lp-feature-item">
+                  <i className={f.icon} />
+                  <span>{f.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

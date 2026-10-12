@@ -61,47 +61,88 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Panel izquierdo azul ── */
+/* ── Panel izquierdo — imagen con overlay ── */
 .lp-left {
   flex: 1;
-  background: #1a4bba;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 40px 36px 48px;
   position: relative;
   overflow: hidden;
+  min-height: 480px;
 }
 
-/* Logo diente arriba */
-.lp-logo {
-  width: 130px;
-  height: 130px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.2));
+/* Overlay oscuro semitransparente para legibilidad del texto */
+.lp-left-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(15, 35, 100, 0.72) 0%,
+    rgba(10, 25, 80, 0.55) 50%,
+    rgba(15, 35, 100, 0.80) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 36px 40px;
 }
 
-/* Texto del panel izquierdo */
-.lp-left-text {
-  text-align: center;
+.lp-left-top-text { flex: 1; }
+
+.lp-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  margin-bottom: 20px;
 }
 
 .lp-big-title {
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: clamp(1.9rem, 3vw, 2.7rem);
   font-weight: 900;
   color: #fff;
-  line-height: 1.1;
+  line-height: 1.08;
   letter-spacing: -0.5px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
 .lp-left-desc {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   line-height: 1.65;
-  color: rgba(255,255,255,0.72);
-  max-width: 280px;
-  margin: 0 auto;
+  color: rgba(255,255,255,0.8);
+  max-width: 300px;
+}
+
+.lp-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lp-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.lp-feature-item i {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 7px;
+  color: #93C5FD;
+  font-size: 0.78rem;
+  flex-shrink: 0;
 }
 
 /* ── Panel derecho blanco ── */
