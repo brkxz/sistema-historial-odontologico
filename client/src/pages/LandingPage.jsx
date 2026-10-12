@@ -6,40 +6,12 @@ import { useEffect } from 'react';
 import heroImg from '../assets/ChatGPT Image 5 mar 2026, 11_34_30.png';
 
 export default function LandingPage() {
-  // ── Preloader ──
-  useEffect(() => {
-    const preloader = document.getElementById('landing-preloader');
-    if (preloader) {
-      const timer = setTimeout(() => preloader.classList.add('loaded'), 800);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  // ── Generate particles ──
-  useEffect(() => {
-    const container = document.getElementById('landing-particles');
-    if (!container) return;
-    container.innerHTML = '';
-    for (let i = 0; i < 14; i++) {
-      const p = document.createElement('div');
-      p.classList.add('landing-particle');
-      const size = Math.random() * 12 + 4;
-      p.style.width = size + 'px';
-      p.style.height = size + 'px';
-      p.style.left = Math.random() * 100 + '%';
-      p.style.top = Math.random() * 100 + '%';
-      p.style.setProperty('--dur', (Math.random() * 6 + 6) + 's');
-      p.style.setProperty('--delay', (Math.random() * 4) + 's');
-      p.style.setProperty('--tx', (Math.random() * 80 - 40) + 'px');
-      p.style.setProperty('--ty', (Math.random() * -100 - 20) + 'px');
-      container.appendChild(p);
-    }
-  }, []);
-
   // ── Scroll reveal ──
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }),
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      }),
       { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
     );
     document.querySelectorAll('.landing-reveal, .landing-reveal-scale').forEach((el) => observer.observe(el));
@@ -75,17 +47,8 @@ export default function LandingPage() {
 
   return (
     <>
-      {/* PRELOADER */}
-      <div className="preloader" id="landing-preloader">
-        <div className="preloader-logo"><i className="fa-solid fa-tooth" /> Servicio de Odontología</div>
-        <div className="preloader-spinner" />
-      </div>
-
       {/* HERO */}
       <section className="landing-hero" id="inicio">
-        <div className="landing-hero-bg-accent" />
-        <div className="landing-hero-bg-accent-2" />
-        <div className="landing-particles" id="landing-particles" />
         <div className="landing-container landing-hero-grid">
           <div className="landing-hero-content">
             <div className="landing-label-text">

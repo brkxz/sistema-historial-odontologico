@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <title>Servicio de Odontología | Hospital San Ramón</title>
     <style>
-      /* Instant loading screen - shows before React loads */
+      /* Splash limpio — fondo blanco sin burbujas */
       #app-loader {
         position: fixed;
         inset: 0;
@@ -25,60 +25,55 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F0FDFA 100%);
+        background: #ffffff;
         z-index: 99999;
-        transition: opacity 0.4s ease, visibility 0.4s ease;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
       }
       #app-loader.hidden {
         opacity: 0;
         visibility: hidden;
       }
       #app-loader .loader-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
         background: linear-gradient(135deg, #0369A1, #0891B2);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 20px;
-        animation: loader-pulse 1.5s ease-in-out infinite;
-        box-shadow: 0 8px 32px rgba(3, 105, 161, 0.25);
+        margin-bottom: 18px;
+        box-shadow: 0 6px 24px rgba(3, 105, 161, 0.2);
       }
       #app-loader .loader-icon svg {
-        width: 28px;
-        height: 28px;
+        width: 26px;
+        height: 26px;
         color: white;
       }
       #app-loader .loader-bar {
-        width: 160px;
-        height: 3px;
-        background: rgba(3, 105, 161, 0.1);
-        border-radius: 3px;
+        width: 140px;
+        height: 2px;
+        background: #E2E8F0;
+        border-radius: 2px;
         overflow: hidden;
-        margin-top: 8px;
+        margin-top: 6px;
       }
       #app-loader .loader-bar-inner {
         width: 40%;
         height: 100%;
         background: linear-gradient(90deg, #0369A1, #0891B2);
-        border-radius: 3px;
-        animation: loader-slide 1.2s ease-in-out infinite;
+        border-radius: 2px;
+        animation: loader-slide 1s ease-in-out infinite;
       }
       #app-loader .loader-text {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 13px;
-        color: #64748B;
-        margin-top: 12px;
-        letter-spacing: 0.02em;
-      }
-      @keyframes loader-pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+        font-size: 12px;
+        color: #94A3B8;
+        margin-top: 10px;
+        letter-spacing: 0.03em;
       }
       @keyframes loader-slide {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(400%); }
+        0%   { transform: translateX(-200%); }
+        100% { transform: translateX(600%); }
       }
     </style>
   </head>
@@ -100,5 +95,12 @@
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Ping al servidor para despertar el cold start de Render ANTES de que el usuario lo necesite -->
+    <script>
+      (function() {
+        var api = 'https://odontologia-api-9a6v.onrender.com/api/health';
+        fetch(api, { method: 'GET', mode: 'no-cors' }).catch(function() {});
+      })();
+    </script>
   </body>
 </html>
