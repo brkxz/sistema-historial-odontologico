@@ -127,7 +127,7 @@ export default function LoginPage() {
       {/* Layout split */}
       <div className="login-split-layout">
 
-        {/* Panel izquierdo — ilustración */}
+        {/* Panel izquierdo — doctor full-height */}
         <div className="login-panel-left">
           <div className="login-panel-left-inner">
             <div className="login-hero-badge">
@@ -138,14 +138,9 @@ export default function LoginPage() {
               <span>Odontológica Digital</span>
             </h2>
             <p className="login-panel-desc">
-              Accede al historial completo de pacientes, registra atenciones, gestiona odontogramas y genera reportes clínicos desde una sola plataforma.
+              Accede al historial completo de pacientes, registra atenciones,
+              gestiona odontogramas y genera reportes clínicos.
             </p>
-
-            <img
-              src={dentalDoctorHero}
-              alt="Doctor Odontólogo"
-              className="login-hero-img"
-            />
 
             {/* Features */}
             <div className="login-features-list">
@@ -160,6 +155,13 @@ export default function LoginPage() {
                 </div>
               ))}
             </div>
+
+            {/* Doctor — al fondo del panel */}
+            <img
+              src={dentalDoctorHero}
+              alt="Doctor Odontólogo"
+              className="login-hero-img"
+            />
           </div>
         </div>
 
