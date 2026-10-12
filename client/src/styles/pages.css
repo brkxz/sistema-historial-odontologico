@@ -1,81 +1,308 @@
 /* =============================================
    ESTILOS DE PÁGINAS — Tema Clínico Hospital
-   Blanco con Azul — Limpio y Profesional
    ============================================= */
 
 /* ─────────────────────────────────────────────────
-   LOGIN — Split Layout (Ilustración + Formulario)
+   LOGIN — Portal Odontológico Style (Card centrada)
    ───────────────────────────────────────────────── */
-.login-page {
+
+/* Página entera: fondo azul claro */
+.lp-page {
   min-height: 100vh;
   min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  position: relative;
-  overflow-x: hidden;
-}
-
-/* Glows eliminados */
-.login-bg-glow-1, .login-bg-glow-2 { display: none; }
-
-/* ── Topbar ── */
-.login-topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  height: 56px;
+  background: #d6e4f7;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  background: #fff;
-  border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-  animation: slideDownBar 0.35s ease both;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
+
+/* Botón volver arriba izquierda */
+.lp-back {
+  position: fixed;
+  top: 20px; left: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.7);
+  color: #1a4bba;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+.lp-back:hover {
+  background: rgba(255,255,255,0.9);
+  transform: translateX(-2px);
+}
+
+/* Tarjeta principal — igual que el ejemplo */
+.lp-card {
+  display: flex;
+  width: 100%;
+  max-width: 860px;
+  min-height: 480px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  animation: fadeInUp 0.45s ease both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Panel izquierdo azul ── */
+.lp-left {
+  flex: 1;
+  background: #1a4bba;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 36px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Logo diente arriba */
+.lp-logo {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.2));
+}
+
+/* Texto del panel izquierdo */
+.lp-left-text {
+  text-align: center;
+}
+
+.lp-big-title {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+
+.lp-left-desc {
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.72);
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ── Panel derecho blanco ── */
+.lp-right {
+  flex: 0 0 380px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+}
+
+/* Ícono arriba del formulario */
+.lp-form-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  color: #1a4bba;
+  margin-bottom: 16px;
+}
+
+.lp-form-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0d1b3e;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.lp-form-sub {
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Formulario */
+.lp-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lp-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  background: #F9FAFB;
+  color: #111827;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.lp-input:focus {
+  border-color: #1a4bba;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26,75,186,0.1);
+}
+
+.lp-input::placeholder { color: #9CA3AF; }
+
+.lp-pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lp-pw-wrap .lp-input { padding-right: 42px; }
+
+.lp-pw-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9CA3AF;
+  display: flex; align-items: center;
+  padding: 4px;
+}
+.lp-pw-toggle:hover { color: #1a4bba; }
+
+.lp-btn-primary {
+  width: 100%;
+  height: 44px;
+  background: #1a4bba;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 4px;
+  font-family: inherit;
+}
+.lp-btn-primary:hover:not(:disabled) {
+  background: #153da0;
+  transform: translateY(-1px);
+}
+.lp-btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.lp-error {
+  background: #FEF2F2;
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #DC2626;
+  font-size: 0.78rem;
+  display: flex; align-items: center; gap: 7px;
+}
+
+/* Divider */
+.lp-divider {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 0 10px;
+  color: #9CA3AF;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.lp-divider::before,
+.lp-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #E5E7EB;
+}
+
+/* Google */
+.lp-btn-google {
+  width: 100%;
+  height: 42px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.lp-btn-google:hover:not(:disabled) {
+  background: #F9FAFB;
+  border-color: #CBD5E1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Footer seguridad */
+.lp-footer {
+  margin-top: 16px;
+  font-size: 0.68rem;
+  color: #9CA3AF;
+  display: flex; align-items: center; gap: 5px;
+  text-align: center;
+}
+
+/* ── Clases heredadas (para no romper nada) ── */
+.login-page, .login-bg-glow-1, .login-bg-glow-2,
+.login-topbar, .login-split-layout, .login-panel-left,
+.login-panel-right, .login-card { /* mantenidas para compatibilidad */ }
 
 @keyframes slideDownBar {
   from { opacity: 0; transform: translateY(-100%); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.login-topbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 0.88rem;
-  color: var(--text-primary);
-  letter-spacing: -0.3px;
+/* ── RESPONSIVE ── */
+@media (max-width: 720px) {
+  .lp-card { flex-direction: column; max-width: 420px; min-height: auto; }
+  .lp-left { padding: 32px 28px; flex-direction: row; align-items: center; gap: 20px; }
+  .lp-logo { width: 80px; height: 80px; }
+  .lp-big-title { font-size: 1.4rem; text-align: left; }
+  .lp-left-desc { display: none; }
+  .lp-left-text { text-align: left; }
+  .lp-right { flex: none; padding: 32px 28px; }
 }
 
-.login-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: 1px solid #E2E8F0;
-  background: #fff;
-  color: #374151;
-  font-size: 0.82rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
+@media (max-width: 480px) {
+  .lp-page { padding: 16px; }
+  .lp-left { display: none; }
+  .lp-card { max-width: 100%; }
+  .lp-right { padding: 32px 24px; }
+  .lp-back { top: 12px; left: 12px; }
 }
 
-.login-back-btn:hover {
-  background: #F3F4F6;
-  border-color: #CBD5E1;
-  color: #1a4bba;
-}
-
-.login-back-btn svg { transition: transform 0.2s; }
-.login-back-btn:hover svg { transform: translateX(-2px); }
-
-/* ── Split layout ── */
+/* ── Split layout placeholder ── */
 .login-split-layout {
   display: flex;
   flex: 1;

@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
-import { Eye, EyeOff, LogIn, AlertCircle, User, Lock, ShieldCheck, ChevronLeft } from 'lucide-react';
+import { Eye, EyeOff, LogIn, AlertCircle, ShieldCheck, ChevronLeft } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
-import toothHero from '../assets/tooth-hero.jpg';
+import dentalLogo from '../assets/dental-logo.png';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24">
@@ -16,15 +16,15 @@ const GoogleIcon = () => (
 );
 
 export default function LoginPage() {
-  const [username, setUsername]       = useState('');
-  const [password, setPassword]       = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading]         = useState(false);
+  const [username, setUsername]           = useState('');
+  const [password, setPassword]           = useState('');
+  const [showPassword, setShowPassword]   = useState(false);
+  const [loading, setLoading]             = useState(false);
   const [socialLoading, setSocialLoading] = useState('');
-  const [error, setError]             = useState('');
-  const navigate                      = useNavigate();
-  const { login, loginWithGoogle }    = useAuth();
-  const toast                         = useToast();
+  const [error, setError]                 = useState('');
+  const navigate                          = useNavigate();
+  const { login, loginWithGoogle }        = useAuth();
+  const toast                             = useToast();
 
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const isNative = Capacitor.isNativePlatform();
@@ -102,143 +102,96 @@ export default function LoginPage() {
   const handleGoogleLogin = isNative ? handleGoogleLoginNative : handleGoogleLoginWeb;
 
   return (
-    <div className="login-page">
+    <div className="lp-page">
 
-      {/* ── Topbar ── */}
-      <div className="login-topbar">
-        <button className="login-back-btn" onClick={() => navigate('/')}>
-          <ChevronLeft size={16} /> Volver al Sitio
-        </button>
-        <div className="login-topbar-brand">
-          <i className="fa-solid fa-tooth" />
-          Servicio de Odontología
-        </div>
-        <div className="login-topbar-spacer" />
-      </div>
+      {/* Botón volver */}
+      <button className="lp-back" onClick={() => navigate('/')}>
+        <ChevronLeft size={16} /> Volver al sitio
+      </button>
 
-      {/* ── Split layout ── */}
-      <div className="login-split-layout">
+      {/* Tarjeta central */}
+      <div className="lp-card">
 
-        {/* Panel izquierdo — azul con diente */}
-        <div className="login-panel-left">
+        {/* Panel izquierdo — azul */}
+        <div className="lp-left">
+          {/* Logo diente */}
+          <img src={dentalLogo} alt="Logo Dental" className="lp-logo" />
 
-          {/* Texto superior */}
-          <div className="login-left-top">
-            <div className="login-hero-badge">
-              <i className="fa-solid fa-shield-halved" /> Portal Médico Seguro
-            </div>
-            <h2 className="login-panel-title">
-              Sistema de Gestión<br />
-              <span>Odontológica Digital</span>
-            </h2>
-            <p className="login-panel-desc">
+          {/* Texto grande */}
+          <div className="lp-left-text">
+            <h2 className="lp-big-title">PORTAL<br/>ODONTOLÓGICO</h2>
+            <p className="lp-left-desc">
               Accede al historial completo de pacientes, registra atenciones,
-              gestiona odontogramas y genera reportes clínicos.
+              gestiona odontogramas y genera reportes clínicos desde una sola plataforma.
             </p>
           </div>
-
-          {/* Diente centrado */}
-          <div className="login-tooth-container">
-            <img src={toothHero} alt="Diente" className="login-tooth-img" />
-          </div>
-
-          {/* Features abajo */}
-          <div className="login-features-list">
-            {[
-              { icon: 'fa-solid fa-file-medical', text: 'Historial clínico digital' },
-              { icon: 'fa-solid fa-tooth',        text: 'Odontograma interactivo' },
-              { icon: 'fa-solid fa-robot',        text: 'Asistente IA integrado' },
-            ].map((f, i) => (
-              <div key={i} className="login-feature-item">
-                <i className={f.icon} />
-                <span>{f.text}</span>
-              </div>
-            ))}
-          </div>
-
         </div>
 
-        {/* Panel derecho — formulario */}
-        <div className="login-panel-right">
-          <div className="login-card">
-            <div className="login-card-glow" />
+        {/* Panel derecho — blanco */}
+        <div className="lp-right">
 
-            <div className="login-header">
-              <div className="login-hospital-badge">
-                <i className="fa-solid fa-hospital" /> Hospital San Ramón · Chanchamayo
+          {/* Ícono de hospital */}
+          <div className="lp-form-icon">
+            <i className="fa-solid fa-hospital" />
+          </div>
+
+          <h1 className="lp-form-title">INICIA SESIÓN</h1>
+          <p className="lp-form-sub">Hospital San Ramón · Chanchamayo</p>
+
+          <form className="lp-form" onSubmit={handleSubmit}>
+            {error && (
+              <div className="lp-error">
+                <AlertCircle size={14} /> <span>{error}</span>
               </div>
-              <h1 className="login-title">Iniciar Sesión</h1>
-              <p className="login-subtitle">Ingresa tus credenciales para continuar</p>
-            </div>
+            )}
 
-            <form className="login-form" onSubmit={handleSubmit}>
-              {error && (
-                <div className="login-error">
-                  <AlertCircle size={15} /><span>{error}</span>
-                </div>
-              )}
+            <input
+              id="login-username"
+              type="text"
+              className="lp-input"
+              placeholder="Usuario o Correo"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              autoFocus
+            />
 
-              <div className="form-group">
-                <label className="form-label">Usuario o Correo</label>
-                <div className="input-icon-wrapper">
-                  <User size={17} className="input-icon-left" />
-                  <input
-                    id="login-username" type="text"
-                    className="form-input input-with-icon"
-                    placeholder="tu.usuario o correo@hospital.pe"
-                    value={username} onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username" autoFocus
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Contraseña</label>
-                <div className="input-icon-wrapper">
-                  <Lock size={17} className="input-icon-left" />
-                  <input
-                    id="login-password"
-                    type={showPassword ? 'text' : 'password'}
-                    className="form-input input-with-icon input-with-right-icon"
-                    placeholder="••••••••••••"
-                    value={password} onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                  />
-                  <button type="button" className="input-icon-btn-right" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                  </button>
-                </div>
-              </div>
-
-              <button id="login-submit" type="submit"
-                className="btn btn-primary btn-lg w-full login-btn-main"
-                disabled={loading || socialLoading}>
-                {loading
-                  ? <div className="spinner" style={{ width: 19, height: 19, borderWidth: 2 }} />
-                  : <><LogIn size={17} /><span>Iniciar Sesión</span></>
-                }
-              </button>
-            </form>
-
-            <div className="login-social-section">
-              <div className="login-divider">
-                <span className="login-divider-line" />
-                <span className="login-divider-text">o continuar con</span>
-                <span className="login-divider-line" />
-              </div>
-              <button id="login-google" type="button" className="btn-social btn-google"
-                onClick={handleGoogleLogin} disabled={loading || socialLoading}>
-                {socialLoading === 'google'
-                  ? <div className="spinner" style={{ width: 17, height: 17, borderWidth: 2 }} />
-                  : <GoogleIcon />
-                }
-                <span>Continuar con Google</span>
+            <div className="lp-pw-wrap">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                className="lp-input"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+              <button type="button" className="lp-pw-toggle" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
 
-            <div className="login-security-footer">
-              <ShieldCheck size={13} /> Conexión cifrada SSL 256-bit · Solo personal autorizado
-            </div>
+            <button id="login-submit" type="submit" className="lp-btn-primary" disabled={loading || socialLoading}>
+              {loading
+                ? <div className="spinner" style={{ width: 18, height: 18, borderWidth: 2, borderColor: '#fff transparent #fff #fff' }} />
+                : <><LogIn size={16} /> Entrar</>
+              }
+            </button>
+          </form>
+
+          {/* Google */}
+          <div className="lp-divider"><span>o continuar con</span></div>
+          <button id="login-google" type="button" className="lp-btn-google"
+            onClick={handleGoogleLogin} disabled={loading || socialLoading}>
+            {socialLoading === 'google'
+              ? <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+              : <GoogleIcon />
+            }
+            Continuar con Google
+          </button>
+
+          <div className="lp-footer">
+            <ShieldCheck size={12} /> Conexión cifrada SSL 256-bit · Solo personal autorizado
           </div>
         </div>
 
