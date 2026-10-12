@@ -37,9 +37,11 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,woff2}'],
+        // Excluir imágenes grandes del precache (>500KB se sirven bajo demanda)
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
         runtimeCaching: [
           // Google Fonts — cachear 1 año
           {
@@ -67,11 +69,10 @@ export default defineConfig({
   ],
 
   build: {
-    // Vite 8 usa oxc como minifier nativo (reemplaza esbuild)
     minify: 'oxc',
     target: 'es2020',
+    cssCodeSplit: true,
 
-    // Chunk splitting manual para mejor caché del navegador
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -87,18 +88,25 @@ export default defineConfig({
           if (id.includes('node_modules/@capacitor')) {
             return 'vendor-capacitor';
           }
+          // recharts y otras librerías grandes en chunk propio
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) {
+            return 'vendor-charts';
+          }
         },
-        // Nombres predecibles para mejor caché
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+        assetFileNames: (assetInfo) => {
+          // Mantener nombres cortos para imágenes
+          const imgExts = ['.jpg', '.jpeg', '.png', '.webp', '.svg', '.gif'];
+          if (imgExts.some(ext => assetInfo.name?.endsWith(ext))) {
+            return 'assets/img/[name]-[hash].[ext]';
+          }
+          return 'assets/[name]-[hash].[ext]';
+        },
       },
     },
 
-    // Advertir si un chunk supera 500kb
     chunkSizeWarningLimit: 500,
-
-    // Sourcemaps solo en desarrollo
     sourcemap: false,
   },
 

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio | Servicio de Odontología</title>
+  <meta name="description"
+    content="Servicio de Odontología especializada en estética dental y salud bucal integral. Tratamientos de primer nivel para niños y adultos.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Estilos unificados -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-logo"><i class="fa-solid fa-tooth"></i> Servicio de Odontología</div>
+    <div class="preloader-spinner"></div>
+  </div>
+
+  <!-- CURSOR GLOW -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- MOBILE NAV -->
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="index.html" onclick="closeMobile()">Inicio</a>
+    <a href="servicios.html" onclick="closeMobile()">Servicios</a>
+    <a href="nosotros.html" onclick="closeMobile()">Nosotros</a>
+    <a href="equipo.html" onclick="closeMobile()">Equipo</a>
+    <a href="contacto.html" onclick="closeMobile()">Contacto</a>
+  </nav>
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="nav-container">
+      <a href="index.html" class="logo"><i class="fa-solid fa-tooth"></i> Servicio de Odontología</a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Inicio</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="equipo.html">Equipo</a></li>
+        <li><a href="contacto.html" class="nav-btn">Contacto</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-accent"></div>
+    <!-- PARTICLES -->
+    <div class="particles" id="particles"></div>
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="label-text">Atención Dental</div>
+        <h1 class="title-main">El arte de una<br><em>sonrisa</em> perfecta.</h1>
+        <p class="subtitle">Servicio de Odontología especializada en estética dental y salud bucal integral. Brindamos
+          tratamientos de primer nivel para niños y adultos en un entorno de confort absoluto.</p>
+
+      </div>
+
+      <div class="hero-visual">
+        <img src="img/ChatGPT Image 5 mar 2026, 11_34_30.png" alt="Servicio de Odontología"
+          class="hero-image-placeholder">
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="container stats-grid reveal">
+      <div class="stat-block">
+        <span class="number">500+</span>
+        <span class="label">Pacientes Satisfechos</span>
+      </div>
+
+      <div class="stat-block">
+        <span class="number">98%</span>
+        <span class="label">Resultados Garantizados</span>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-logo">
+
+      </div>
+      <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i
+            class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.facebook.com/share/1DysHEgQix/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"
+          aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i
+            class="fa-brands fa-tiktok"></i></a>
+        <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i
+            class="fa-brands fa-youtube"></i></a>
+        <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i
+            class="fa-brands fa-whatsapp"></i></a>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2025 Centro de Excelencia Odontológica. Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <!-- WHATSAPP FLOAT BUTTON -->
+  <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" class="whatsapp-float"
+    aria-label="Contactar por WhatsApp">
+    <span class="wa-tooltip">¡Escríbenos!</span>
+    <div class="wa-btn">
+      <i class="fa-brands fa-whatsapp"></i>
+    </div>
+  </a>
+
+  <script>
+    // PRELOADER
+    window.addEventListener('load', () => {
+      setTimeout(() => document.getElementById('preloader').classList.add('loaded'), 600);
+    });
+
+    // GENERATE PARTICLES
+    (function () {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        const size = Math.random() * 12 + 4;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.setProperty('--dur', (Math.random() * 6 + 6) + 's');
+        p.style.setProperty('--delay', (Math.random() * 4) + 's');
+        p.style.setProperty('--tx', (Math.random() * 80 - 40) + 'px');
+        p.style.setProperty('--ty', (Math.random() * -100 - 20) + 'px');
+        container.appendChild(p);
+      }
+    })();
+
+    // CURSOR GLOW
+    (function () {
+      const glow = document.getElementById('cursorGlow');
+      let mx = 0, my = 0, gx = 0, gy = 0;
+      document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+      function animateGlow() {
+        gx += (mx - gx) * 0.08; gy += (my - gy) * 0.08;
+        glow.style.left = gx + 'px'; glow.style.top = gy + 'px';
+        requestAnimationFrame(animateGlow);
+      }
+      animateGlow();
+    })();
+
+    // NAVBAR SCROLL
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.style.padding = window.scrollY > 50 ? '0' : '10px 0';
+      header.style.boxShadow = window.scrollY > 50 ? '0 10px 30px -10px rgba(0,0,0,0.1)' : 'none';
+    });
+
+    // HAMBURGER MENU
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileNav.classList.toggle('active');
+      document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+    });
+    function closeMobile() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // SCROLL REVEAL
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => revealObserver.observe(el));
+
+    // ANIMATED COUNTERS
+    function animateCounter(el, target, suffix) {
+      const isFloat = String(target).includes('.');
+      let current = 0;
+      const increment = target / 60;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = (isFloat ? current.toFixed(1) : Math.floor(current).toLocaleString()) + suffix;
+      }, 25);
+    }
+    const countersObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.number').forEach(num => {
+            const raw = num.textContent.trim();
+            const value = parseFloat(raw.replace(/[^0-9.]/g, ''));
+            const suffix = raw.replace(/[0-9.,]/g, '');
+            animateCounter(num, value, suffix);
+          });
+          countersObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.stats-grid').forEach(el => countersObserver.observe(el));
+
+    // MOBILE NAV STAGGER
+    document.querySelectorAll('.mobile-nav a').forEach((link, i) => {
+      link.style.transitionDelay = (i * 0.08) + 's';
+    });
+  </script>
+
+</body>
+
+</html>

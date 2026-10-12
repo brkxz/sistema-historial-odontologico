@@ -174,9 +174,9 @@ export default function SearchPage() {
         paramData.gender = reniecData.genero;
       }
       const params = new URLSearchParams(paramData);
-      navigate(`/pacientes/nuevo?${params.toString()}`);
+      navigate(`/panel/pacientes/nuevo?${params.toString()}`);
     } else {
-      navigate(`/pacientes/nuevo?dni=${dni}`);
+      navigate(`/panel/pacientes/nuevo?dni=${dni}`);
     }
   };
 
@@ -343,13 +343,13 @@ export default function SearchPage() {
           <div className="patient-actions">
             <button
               className="btn btn-primary"
-              onClick={() => navigate(`/historial/${patient.id}`)}
+              onClick={() => navigate(`/panel/historial/${patient.id}`)}
             >
               <History size={18} /> Ver Historial
             </button>
             <button
               className="btn btn-success"
-              onClick={() => navigate(`/nueva-atencion?patient_id=${patient.id}`)}
+              onClick={() => navigate(`/panel/nueva-atencion?patient_id=${patient.id}`)}
             >
               <FilePlus size={18} /> Nueva Atención
             </button>
@@ -452,7 +452,7 @@ export default function SearchPage() {
           {!reniecData && !loadingReniec && (
             <button
               className="btn btn-primary"
-              onClick={() => navigate(`/pacientes/nuevo?dni=${dni}`)}
+              onClick={() => navigate(`/panel/pacientes/nuevo?dni=${dni}`)}
             >
               <UserPlus size={18} /> Registrar Paciente
             </button>

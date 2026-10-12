@@ -1,76 +1,79 @@
 // ============================================================
 // VoiceOverlay — Modo Conversación por Voz Fullscreen
-// Interfaz premium glassmorphism con waveform reactivo
+// Diseño premium inspirado en Gemini Live / ChatGPT Voice Mode
+//
 // Estados: idle → listening → processing → speaking
+//
+// FIX v3:
+// - NO auto-inicia el micrófono al abrirse (estado idle por defecto)
+// - Orb animado central reactivo al audio (reemplaza barras de waveform)
+// - Feedback visual claro para cada estado
+// - Hint "Di Oye Denty" cuando wake word está habilitado
 // ============================================================
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Mic, MicOff, Square, Volume2, VolumeX, Bot, Stethoscope } from 'lucide-react';
+import { X, Mic, MicOff, Square, Volume2, VolumeX, Ear } from 'lucide-react';
 
-/**
- * Barra individual del waveform que reacciona al nivel de audio
- */
-function WaveformBar({ index, audioLevel, total, isListening, isSpeaking }) {
-  // Cada barra tiene un offset diferente para crear efecto ondulado
-  const offset = Math.sin((index / total) * Math.PI);
-  
-  let height;
-  if (isListening) {
-    // En modo escucha, las barras reaccionan al audio real
-    const wave = Math.sin(Date.now() / 200 + index * 0.8) * 0.3 + 0.7;
-    height = Math.max(8, audioLevel * 60 * offset * wave);
-  } else if (isSpeaking) {
-    // En modo habla, animación suave
-    const wave = Math.sin(Date.now() / 150 + index * 0.6) * 0.5 + 0.5;
-    height = 8 + wave * 30 * offset;
-  } else {
-    height = 4 + offset * 4;
+// ── Orb central animado ────────────────────────────────────────
+function VoiceOrb({ currentState, audioLevel }) {
+  const [tick, setTick] = useState(0);
+
+  // Re-render para animación fluida en listening/speaking
+  useEffect(() => {
+    if (currentState !== 'listening' && currentState !== 'speaking') return;
+    const id = setInterval(() => setTick(t => t + 1), 50);
+    return () => clearInterval(id);
+  }, [currentState]);
+
+  // Calcular tamaño del orb reactivo al audio
+  const baseSize = 140;
+  let scale = 1;
+  if (currentState === 'listening') {
+    scale = 1 + audioLevel * 0.45;
+  } else if (currentState === 'speaking') {
+    scale = 1 + Math.sin(Date.now() / 300) * 0.12 * 0.5 + 0.06;
+  } else if (currentState === 'processing') {
+    scale = 1;
   }
 
-  return (
-    <div
-      className="voice-overlay-bar"
-      style={{
-        height: `${height}px`,
-        opacity: isListening || isSpeaking ? 0.8 + audioLevel * 0.2 : 0.3,
-      }}
-    />
-  );
-}
-
-/**
- * Componente de waveform animado
- */
-function AnimatedWaveform({ audioLevel, isListening, isSpeaking }) {
-  const [, setTick] = useState(0);
-  const barCount = 32;
-
-  // Forzar re-render para animación fluida
-  useEffect(() => {
-    if (!isListening && !isSpeaking) return;
-    const interval = setInterval(() => setTick(t => t + 1), 50);
-    return () => clearInterval(interval);
-  }, [isListening, isSpeaking]);
+  const stateClass = `voice-orb voice-orb--${currentState}`;
 
   return (
-    <div className="voice-overlay-waveform">
-      {Array.from({ length: barCount }).map((_, i) => (
-        <WaveformBar
-          key={i}
-          index={i}
-          audioLevel={audioLevel}
-          total={barCount}
-          isListening={isListening}
-          isSpeaking={isSpeaking}
-        />
-      ))}
+    <div className="voice-orb-container">
+      {/* Anillos de propagación */}
+      {(currentState === 'listening' || currentState === 'speaking') && (
+        <>
+          <div className={`voice-orb-ring voice-orb-ring--1 voice-orb-ring--${currentState}`} />
+          <div className={`voice-orb-ring voice-orb-ring--2 voice-orb-ring--${currentState}`} />
+        </>
+      )}
+      {/* Orb principal */}
+      <div
+        className={stateClass}
+        style={{
+          width: baseSize,
+          height: baseSize,
+          transform: `scale(${scale})`,
+          transition: currentState === 'listening'
+            ? 'transform 0.08s ease-out'
+            : 'transform 0.4s ease',
+        }}
+      >
+        {/* Ícono interno según estado */}
+        <div className="voice-orb-icon">
+          {currentState === 'idle'       && <Mic size={36} />}
+          {currentState === 'listening'  && <Mic size={36} />}
+          {currentState === 'processing' && (
+            <div className="voice-orb-spinner" />
+          )}
+          {currentState === 'speaking'   && <Volume2 size={36} />}
+        </div>
+      </div>
     </div>
   );
 }
 
-/**
- * VoiceOverlay — Panel de conversación por voz fullscreen
- */
+// ── Componente principal ───────────────────────────────────────
 export default function VoiceOverlay({
   isOpen,
   onClose,
@@ -87,25 +90,21 @@ export default function VoiceOverlay({
   onStopSpeaking,
   ttsEnabled,
   onToggleTts,
+  wakeWordEnabled,
 }) {
-  const [showResponse, setShowResponse] = useState(false);
-  const [currentState, setCurrentState] = useState('idle'); // idle | listening | processing | speaking
+  const [showResponse, setShowResponse]     = useState(false);
+  const [currentState, setCurrentState]     = useState('idle');
   const prevResponseRef = useRef(lastResponse);
 
-  // Determinar estado visual
+  // ── Determinar estado visual ──────────────────────────────
   useEffect(() => {
-    if (isSpeaking) {
-      setCurrentState('speaking');
-    } else if (isThinking) {
-      setCurrentState('processing');
-    } else if (isListening) {
-      setCurrentState('listening');
-    } else {
-      setCurrentState('idle');
-    }
+    if (isSpeaking)      setCurrentState('speaking');
+    else if (isThinking) setCurrentState('processing');
+    else if (isListening) setCurrentState('listening');
+    else                 setCurrentState('idle');
   }, [isListening, isSpeaking, isThinking]);
 
-  // Mostrar respuesta cuando cambia
+  // ── Mostrar respuesta cuando cambia ──────────────────────
   useEffect(() => {
     if (lastResponse && lastResponse !== prevResponseRef.current) {
       setShowResponse(true);
@@ -113,29 +112,24 @@ export default function VoiceOverlay({
     }
   }, [lastResponse]);
 
-  // Auto-iniciar escucha al abrir (con delay suficiente para móvil)
+  // ── Resetear estado al abrir ──────────────────────────────
+  // ★ FIX PRINCIPAL: NO arrancamos el micrófono automáticamente.
+  // El usuario debe presionar el botón o decir la wake word.
   useEffect(() => {
-    if (isOpen && !isListening && !isSpeaking && !isThinking && voiceSupported) {
-      // ★ Delay más largo para que en móvil el micrófono se libere
-      // del wake word listener antes de iniciar nuevo reconocimiento
-      const timer = setTimeout(() => {
-        // Verificar que sigue abierto antes de iniciar
-        if (isOpen && !isListening && !isSpeaking && !isThinking) {
-          onStartListening();
-        }
-      }, 800);
-      return () => clearTimeout(timer);
+    if (isOpen) {
+      setShowResponse(false);
     }
   }, [isOpen]);
 
+  // ── Handlers ─────────────────────────────────────────────
   const handleMicToggle = useCallback(() => {
     if (isListening) {
       onStopListening();
-    } else {
+    } else if (!isThinking && !isSpeaking) {
       setShowResponse(false);
       onStartListening();
     }
-  }, [isListening, onStartListening, onStopListening]);
+  }, [isListening, isThinking, isSpeaking, onStartListening, onStopListening]);
 
   const handleClose = useCallback(() => {
     onStopListening();
@@ -143,37 +137,29 @@ export default function VoiceOverlay({
     onClose();
   }, [onClose, onStopListening, onStopSpeaking]);
 
-  const getStateLabel = () => {
-    switch (currentState) {
-      case 'listening': return 'Escuchando...';
-      case 'processing': return 'Procesando...';
-      case 'speaking': return 'OdontoIA está respondiendo...';
-      default: return 'Toca el micrófono para hablar';
-    }
-  };
-
-  const getStateIcon = () => {
-    switch (currentState) {
-      case 'listening': return <Mic size={28} />;
-      case 'processing': return <Stethoscope size={28} />;
-      case 'speaking': return <Volume2 size={28} />;
-      default: return <Bot size={28} />;
-    }
+  // ── Etiquetas por estado ──────────────────────────────────
+  const STATE_LABELS = {
+    idle:       'Toca el micrófono para hablar',
+    listening:  'Escuchando... habla ahora',
+    processing: 'Analizando tu consulta...',
+    speaking:   'Denty está respondiendo',
   };
 
   if (!isOpen) return null;
 
   return (
     <div className={`voice-overlay ${isOpen ? 'open' : ''}`}>
-      {/* Background glow effect */}
-      <div className={`voice-overlay-glow ${currentState}`} />
+      {/* ── Fondo gradiente dinámico por estado ── */}
+      <div className={`voice-overlay-glow voice-overlay-glow--${currentState}`} />
 
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="voice-overlay-header">
         <div className="voice-overlay-header-left">
-          <span className="voice-overlay-logo"><Bot size={20} /></span>
+          <div className="voice-overlay-logo-badge">
+            <span>🦷</span>
+          </div>
           <div>
-            <h3>OdontoIA</h3>
+            <h3>Denty</h3>
             <span className="voice-overlay-status">Modo Conversación por Voz</span>
           </div>
         </div>
@@ -181,73 +167,55 @@ export default function VoiceOverlay({
           <button
             className={`voice-overlay-tts-btn ${ttsEnabled ? 'active' : ''}`}
             onClick={onToggleTts}
-            title={ttsEnabled ? 'Desactivar lectura de respuestas' : 'Activar lectura de respuestas'}
+            title={ttsEnabled ? 'Desactivar respuesta en voz' : 'Activar respuesta en voz'}
           >
             {ttsEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
-          <button className="voice-overlay-close-btn" onClick={handleClose}>
+          <button className="voice-overlay-close-btn" onClick={handleClose} title="Cerrar (Esc)">
             <X size={20} />
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* ── Contenido central ── */}
       <div className="voice-overlay-content">
-        {/* State Icon */}
-        <div className={`voice-overlay-state-icon ${currentState}`}>
-          {getStateIcon()}
-        </div>
 
-        {/* Animated Waveform */}
-        <AnimatedWaveform
-          audioLevel={audioLevel}
-          isListening={isListening}
-          isSpeaking={isSpeaking}
-        />
+        {/* Orb animado */}
+        <VoiceOrb currentState={currentState} audioLevel={audioLevel} />
 
-        {/* Central Mic Button */}
-        <button
-          className={`voice-overlay-mic-btn ${currentState}`}
-          onClick={handleMicToggle}
-          disabled={isThinking}
-        >
-          <div className="voice-overlay-mic-ring" />
-          <div className="voice-overlay-mic-ring ring-2" />
-          {isListening ? <MicOff size={32} /> : <Mic size={32} />}
-        </button>
+        {/* Etiqueta de estado */}
+        <p className="voice-overlay-state-label" key={currentState}>
+          {STATE_LABELS[currentState]}
+        </p>
 
-        {/* State Label */}
-        <p className="voice-overlay-state-label">{getStateLabel()}</p>
-
-        {/* Interim Transcript (lo que se va escuchando) */}
+        {/* Transcript en tiempo real */}
         {isListening && interimTranscript && (
           <div className="voice-overlay-transcript">
-            <span className="voice-overlay-transcript-label">Escuchando:</span>
+            <span className="voice-overlay-transcript-label">Escuchando</span>
             <p>"{interimTranscript}"</p>
           </div>
         )}
 
-        {/* Processing Indicator */}
+        {/* Processing dots */}
         {isThinking && (
           <div className="voice-overlay-processing">
             <div className="voice-overlay-processing-dots">
               <span /><span /><span />
             </div>
-            <p>Analizando tu consulta...</p>
           </div>
         )}
 
-        {/* Response Display */}
+        {/* Respuesta */}
         {showResponse && lastResponse && !isThinking && (
           <div className="voice-overlay-response">
             <div className="voice-overlay-response-header">
-              <span>OdontoIA</span>
+              <span>Denty</span>
               {isSpeaking && (
                 <button
                   className="voice-overlay-stop-speak-btn"
                   onClick={onStopSpeaking}
                 >
-                  <Square size={12} /> Detener lectura
+                  <Square size={11} /> Detener
                 </button>
               )}
             </div>
@@ -255,14 +223,35 @@ export default function VoiceOverlay({
           </div>
         )}
 
-        {/* Chips de Comandos Sugeridos para Guía del Usuario */}
-        {!lastResponse && !isThinking && !isSpeaking && (
+        {/* Botón mic principal */}
+        <button
+          className={`voice-overlay-mic-btn voice-overlay-mic-btn--${currentState}`}
+          onClick={handleMicToggle}
+          disabled={isThinking}
+          title={isListening ? 'Parar de escuchar' : 'Comenzar a escuchar'}
+        >
+          {isListening ? <MicOff size={28} /> : <Mic size={28} />}
+          <span className="voice-overlay-mic-btn-label">
+            {isListening ? 'Detener' : 'Hablar'}
+          </span>
+        </button>
+
+        {/* Hint wake word */}
+        {wakeWordEnabled && !isListening && !isSpeaking && !isThinking && (
+          <div className="voice-overlay-wake-hint">
+            <Ear size={13} />
+            <span>También puedes decir <strong>"Oye Denty"</strong> sin tocar</span>
+          </div>
+        )}
+
+        {/* Comandos sugeridos cuando idle y sin respuesta */}
+        {currentState === 'idle' && !showResponse && (
           <div className="voice-overlay-quick-tips">
-            <span className="voice-overlay-tips-title">💡 Comandos que puedes decir:</span>
+            <span className="voice-overlay-tips-title">💡 Prueba decir:</span>
             <div className="voice-overlay-tips-chips">
               <button type="button" onClick={() => onSend('Nueva atención')}>"Nueva atención"</button>
               <button type="button" onClick={() => onSend('Buscar paciente')}>"Buscar paciente"</button>
-              <button type="button" onClick={() => onSend('Marcar caries en pieza 16')}>"Marcar caries pieza 16"</button>
+              <button type="button" onClick={() => onSend('Marcar caries en pieza 16')}>"Caries en pieza 16"</button>
               <button type="button" onClick={() => onSend('Ver odontograma')}>"Ver odontograma"</button>
               <button type="button" onClick={() => onSend('Dosis de amoxicilina')}>"Dosis de amoxicilina"</button>
             </div>
@@ -270,10 +259,10 @@ export default function VoiceOverlay({
         )}
       </div>
 
-      {/* Footer Hint */}
+      {/* ── Footer ── */}
       <div className="voice-overlay-footer">
         <p>
-          <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd> para abrir/cerrar
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> para abrir/cerrar
           {' · '}Presiona <kbd>Esc</kbd> para salir
         </p>
       </div>

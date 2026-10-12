@@ -5,6 +5,7 @@ import './styles/layout.css'
 import './styles/pages.css'
 import './styles/odontogram.css'
 import './styles/ai-assistant.css'
+import './styles/landing.css'
 import App from './App.jsx'
 
 // Auto-reload cuando el Service Worker instala una nueva version

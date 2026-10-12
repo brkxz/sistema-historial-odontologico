@@ -3,9 +3,6 @@ import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
-// Todas las rutas de IA requieren autenticación
-router.use(authenticateToken);
-
 // ============================================================
 // CONFIGURACIÓN DE PROVEEDORES (Fallback: Groq → Gemini → OpenRouter)
 // ============================================================
@@ -88,9 +85,107 @@ const PROVIDERS = [
 ];
 
 // ============================================================
-// POST /api/ai/chat - Proxy con fallback automático entre proveedores
+// POST /api/ai/public-chat - Chat PÚBLICO para pacientes (sin auth)
+// Rate limit más estricto para evitar abuso
 // ============================================================
-router.post('/chat', async (req, res) => {
+const publicChatLimits = new Map(); // IP -> { count, resetTime }
+const PUBLIC_RATE_LIMIT = 20; // Max mensajes por IP
+const PUBLIC_RATE_WINDOW = 10 * 60 * 1000; // Ventana de 10 minutos
+
+router.post('/public-chat', async (req, res) => {
+  try {
+    // Rate limiting por IP para endpoint público
+    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+    const now = Date.now();
+    let ipLimit = publicChatLimits.get(clientIP);
+    
+    if (!ipLimit || now > ipLimit.resetTime) {
+      ipLimit = { count: 0, resetTime: now + PUBLIC_RATE_WINDOW };
+      publicChatLimits.set(clientIP, ipLimit);
+    }
+    
+    ipLimit.count++;
+    if (ipLimit.count > PUBLIC_RATE_LIMIT) {
+      return res.status(429).json({ 
+        error: 'Demasiadas consultas. Por favor espera unos minutos antes de intentar de nuevo.' 
+      });
+    }
+
+    const { contents } = req.body;
+    if (!contents || !Array.isArray(contents)) {
+      return res.status(400).json({ error: 'Formato de mensaje inválido' });
+    }
+
+    // Limitar la longitud de los mensajes para el endpoint público
+    const truncatedContents = contents.slice(0, 14); // Max 14 mensajes (system + greeting + 6 pares)
+
+    // Convertir formato Gemini → OpenAI
+    const messages = truncatedContents.map((c, i) => {
+      const role = c.role === 'model' ? 'assistant' : c.role;
+      const content = (c.parts?.[0]?.text || '').slice(0, 4000); // Limitar longitud
+      if (i === 0 && role === 'user') {
+        return { role: 'system', content };
+      }
+      return { role, content };
+    });
+
+    const activeProviders = PROVIDERS.filter(p => p.enabled());
+
+    if (activeProviders.length === 0) {
+      return res.status(503).json({ error: 'El asistente no está disponible en este momento.' });
+    }
+
+    let lastError = null;
+
+    for (const provider of activeProviders) {
+      try {
+        console.log(`[AI-Public] Intentando proveedor: ${provider.name}`);
+        const text = await provider.call(messages);
+
+        if (!text) throw new Error('Respuesta vacía');
+
+        console.log(`[AI-Public] Respuesta obtenida de: ${provider.name}`);
+
+        return res.json({
+          candidates: [{
+            content: {
+              parts: [{ text }],
+              role: 'model',
+            },
+          }],
+        });
+      } catch (err) {
+        console.warn(`[AI-Public] Falló ${provider.name}: ${err.message}`);
+        lastError = err;
+      }
+    }
+
+    console.error('[AI-Public] Todos los proveedores fallaron:', lastError?.message);
+    res.status(503).json({
+      error: 'El asistente no está disponible en este momento. Intenta de nuevo más tarde.',
+    });
+  } catch (error) {
+    console.error('Error en chat público:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Limpiar rate limits expirados periódicamente
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, limit] of publicChatLimits) {
+    if (now > limit.resetTime) publicChatLimits.delete(ip);
+  }
+}, 5 * 60 * 1000); // Cada 5 minutos
+
+// ============================================================
+// RUTAS AUTENTICADAS (requieren token)
+// ============================================================
+
+// ============================================================
+// POST /api/ai/chat - Proxy con fallback automático (requiere auth)
+// ============================================================
+router.post('/chat', authenticateToken, async (req, res) => {
   try {
     const { contents } = req.body;
     if (!contents || !Array.isArray(contents)) {
@@ -157,9 +252,9 @@ router.post('/chat', async (req, res) => {
 });
 
 // ============================================================
-// GET /api/ai/status - Estado de todos los proveedores
+// GET /api/ai/status - Estado de todos los proveedores (requiere auth)
 // ============================================================
-router.get('/status', (req, res) => {
+router.get('/status', authenticateToken, (req, res) => {
   const providers = PROVIDERS.map(p => ({
     name: p.name,
     configured: p.enabled(),
@@ -171,3 +266,4 @@ router.get('/status', (req, res) => {
 });
 
 export default router;
+

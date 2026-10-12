@@ -1,29 +1,53 @@
-# Dependencies
+# ─── Dependencies ─────────────────────────────────
 node_modules/
+.pnp
+.pnp.js
 
-# Build
+# ─── Build output ─────────────────────────────────
 dist/
+build/
+.vite/
 
-# Environment
+# ─── Environment variables ────────────────────────
 .env
 .env.local
+.env.*.local
+!.env.example
 
-# Database local
-database/
+# ─── Database ─────────────────────────────────────
+database/*.db
 *.db
+*.sqlite
 
-# OS
-.DS_Store
-Thumbs.db
+# ─── Logs ─────────────────────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+lint_output.txt
 
-# IDE
-.vscode/
-.idea/
-
-# APK / binarios Android
+# ─── Android / Mobile ─────────────────────────────
 *.apk
 *.aab
+android/
+ios/
 
-# Temporales
-lint_output.txt
-*.log
+# ─── OS generated ─────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ─── IDE / Editor ─────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── Testing ──────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ─── Misc ─────────────────────────────────────────
+*.tgz
+*.zip

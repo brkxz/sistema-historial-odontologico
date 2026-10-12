@@ -39,7 +39,7 @@ export default function HistoryPage() {
     if (!searchDni.trim()) return;
     try {
       const data = await patientService.searchByDni(searchDni.trim());
-      navigate(`/historial/${data.patient.id}`);
+      navigate(`/panel/historial/${data.patient.id}`);
     } catch {
       toast.error('Paciente no encontrado');
     }
@@ -143,7 +143,7 @@ export default function HistoryPage() {
       {/* Header con info del paciente */}
       <div className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button className="btn btn-ghost btn-icon" onClick={() => navigate('/historial')}>
+          <button className="btn btn-ghost btn-icon" onClick={() => navigate('/panel/historial')}>
             <ArrowLeft size={20} />
           </button>
           <div>
@@ -155,7 +155,7 @@ export default function HistoryPage() {
         </div>
         <button
           className="btn btn-success"
-          onClick={() => navigate(`/nueva-atencion?patient_id=${patientId}`)}
+          onClick={() => navigate(`/panel/nueva-atencion?patient_id=${patientId}`)}
         >
           Nueva Atención
         </button>

@@ -1,33 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useAI } from '../../context/AIContext';
-import AIAssistant from '../AI/AIAssistant';
 import {
   LayoutDashboard, Search, UserPlus,
   History, Users, BarChart3, LogOut, Menu, X,
-  Stethoscope, Home, FilePlus, User, ScrollText
+  Stethoscope, Home, FilePlus, User, ScrollText, UserCog
 } from 'lucide-react';
 import logoDental from '../../assets/logo-dental.jpg';
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Inicio', section: 'general' },
-  { path: '/buscar', icon: Search, label: 'Buscar Paciente', section: 'general' },
-  { path: '/pacientes', icon: Users, label: 'Pacientes', section: 'general' },
-  { path: '/nueva-atencion', icon: FilePlus, label: 'Nueva Atención', section: 'atenciones' },
-  { path: '/historial', icon: History, label: 'Historial', section: 'atenciones' },
-  { path: '/odontograma', icon: Stethoscope, label: 'Odontograma', section: 'atenciones' },
-  { path: '/reportes', icon: BarChart3, label: 'Reportes', section: 'admin' },
-  { path: '/usuarios', icon: UserPlus, label: 'Usuarios', section: 'admin', adminOnly: true },
-  { path: '/auditoria', icon: ScrollText, label: 'Auditoría', section: 'admin', adminOnly: true },
+  { path: '/panel', icon: LayoutDashboard, label: 'Inicio', section: 'general' },
+  { path: '/panel/buscar', icon: Search, label: 'Buscar Paciente', section: 'general' },
+  { path: '/panel/pacientes', icon: Users, label: 'Pacientes', section: 'general' },
+  { path: '/panel/nueva-atencion', icon: FilePlus, label: 'Nueva Atención', section: 'atenciones' },
+  { path: '/panel/historial', icon: History, label: 'Historial', section: 'atenciones' },
+  { path: '/panel/odontograma', icon: Stethoscope, label: 'Odontograma', section: 'atenciones' },
+  { path: '/panel/reportes', icon: BarChart3, label: 'Reportes', section: 'admin' },
+  { path: '/panel/usuarios', icon: UserCog, label: 'Panel de Doctores', section: 'admin' },
+  { path: '/panel/auditoria', icon: ScrollText, label: 'Auditoría', section: 'admin', adminOnly: true },
 ];
 
 const mobileNavItems = [
-  { path: '/', icon: Home, label: 'Inicio' },
-  { path: '/buscar', icon: Search, label: 'Buscar' },
-  { path: '/nueva-atencion', icon: FilePlus, label: 'Atención' },
-  { path: '/pacientes', icon: Users, label: 'Pacientes' },
-  { path: '/perfil', icon: User, label: 'Perfil' },
+  { path: '/panel', icon: Home, label: 'Inicio' },
+  { path: '/panel/buscar', icon: Search, label: 'Buscar' },
+  { path: '/panel/nueva-atencion', icon: FilePlus, label: 'Atención' },
+  { path: '/panel/pacientes', icon: Users, label: 'Pacientes' },
+  { path: '/panel/perfil', icon: User, label: 'Perfil' },
 ];
 
 export default function Layout() {
@@ -35,13 +33,6 @@ export default function Layout() {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { setCurrentPage } = useAI();
-
-  // Actualizar contexto de la IA con la página actual
-  useEffect(() => {
-    const item = navItems.find((n) => n.path === location.pathname);
-    setCurrentPage(item?.label || location.pathname);
-  }, [location.pathname, setCurrentPage]);
 
   const handleLogout = () => {
     logout();
@@ -104,7 +95,7 @@ export default function Layout() {
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.path === '/'}
+              end={item.path === '/panel'}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
               onClick={() => setSidebarOpen(false)}
             >
@@ -148,13 +139,13 @@ export default function Layout() {
         <div className="sidebar-user">
           <div
             className="sidebar-user-avatar"
-            onClick={() => navigate('/perfil')}
+            onClick={() => navigate('/panel/perfil')}
             style={{ cursor: 'pointer' }}
             title="Ver mi perfil"
           >
             {getInitials(user?.full_name)}
           </div>
-          <div className="sidebar-user-info" style={{ cursor: 'pointer' }} onClick={() => navigate('/perfil')}>
+          <div className="sidebar-user-info" style={{ cursor: 'pointer' }} onClick={() => navigate('/panel/perfil')}>
             <div className="sidebar-user-name">{user?.full_name}</div>
             <div className="sidebar-user-role">
               {user?.role === 'admin' ? 'Administrador' : 'Odontólogo'}
@@ -195,7 +186,7 @@ export default function Layout() {
           <NavLink
             key={item.path}
             to={item.path}
-            end={item.path === '/'}
+            end={item.path === '/panel'}
             className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}
           >
             <item.icon size={22} />
@@ -203,9 +194,6 @@ export default function Layout() {
           </NavLink>
         ))}
       </nav>
-
-      {/* Asistente IA */}
-      <AIAssistant />
     </div>
   );
 }

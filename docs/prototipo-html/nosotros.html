@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosotros | Servicio de Odontología</title>
+    <meta name="description"
+        content="Conoce nuestra filosofía: más que odontología, diseñamos bienestar. Tecnología de punta en un entorno de confort absoluto.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- PRELOADER -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-logo"><i class="fa-solid fa-tooth"></i> Servicio de Odontología</div>
+        <div class="preloader-spinner"></div>
+    </div>
+
+    <!-- CURSOR GLOW -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="index.html" onclick="closeMobile()">Inicio</a>
+        <a href="servicios.html" onclick="closeMobile()">Servicios</a>
+        <a href="nosotros.html" onclick="closeMobile()">Nosotros</a>
+        <a href="equipo.html" onclick="closeMobile()">Equipo</a>
+        <a href="contacto.html" onclick="closeMobile()">Contacto</a>
+    </nav>
+
+    <!-- HEADER -->
+    <header id="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><i class="fa-solid fa-tooth"></i> Servicio de Odontología</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="servicios.html">Servicios</a></li>
+                <li><a href="nosotros.html" class="active">Nosotros</a></li>
+                <li><a href="equipo.html">Equipo</a></li>
+                <li><a href="contacto.html" class="nav-btn">Contacto</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger" aria-label="Menú">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+        <!-- ABOUT -->
+        <section class="section-padding about" id="nosotros">
+            <div class="container about-grid">
+                <div class="about-content reveal-left">
+
+                    <h2 class="title-section">Quiénes Somos</h2>
+                    <p class="subtitle">En Servicio de Odontología, nos especializamos en cuidar de tu salud bucal para
+                        niños y adultos. Nuestro equipo profesional utiliza tecnología avanzada para brindarte
+                        diagnósticos
+                        precisos y tratamientos eficaces en un ambiente cómodo y seguro. Nos preocupamos por tu sonrisa
+                        y la
+                        de tu familia, por eso ofrecemos controles periódicos y asesoramiento profesional para prevenir
+                        problemas dentales. Ven y descubre un servicio personalizado que hará la diferencia en tu
+                        bienestar.
+                    </p>
+
+                </div>
+
+                <div class="about-img-wrap reveal-right">
+                    <img src="img/foto.png" alt="Consultorio Dental Premium" class="about-img">
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container footer-inner">
+            <div class="footer-logo">
+
+            </div>
+            <div class="social-links">
+                <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i
+                        class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.facebook.com/share/1DysHEgQix/?mibextid=wwXIfr" target="_blank"
+                    rel="noopener noreferrer" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i
+                        class="fa-brands fa-tiktok"></i></a>
+                <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i
+                        class="fa-brands fa-youtube"></i></a>
+                <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i
+                        class="fa-brands fa-whatsapp"></i></a>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2025 Centro de Excelencia Odontológica. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- WHATSAPP FLOAT BUTTON -->
+    <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" class="whatsapp-float"
+        aria-label="Contactar por WhatsApp">
+        <span class="wa-tooltip">¡Escríbenos!</span>
+        <div class="wa-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    </a>
+
+    <script>
+        window.addEventListener('load', () => setTimeout(() => document.getElementById('preloader').classList.add('loaded'), 600));
+        (function () { const g = document.getElementById('cursorGlow'); let mx = 0, my = 0, gx = 0, gy = 0; document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }); function a() { gx += (mx - gx) * .08; gy += (my - gy) * .08; g.style.left = gx + 'px'; g.style.top = gy + 'px'; requestAnimationFrame(a); } a(); })();
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => { header.style.padding = window.scrollY > 50 ? '0' : '10px 0'; header.style.boxShadow = window.scrollY > 50 ? '0 10px 30px -10px rgba(0,0,0,0.1)' : 'none'; });
+        const hamburger = document.getElementById('hamburger'), mobileNav = document.getElementById('mobileNav');
+        hamburger.addEventListener('click', () => { hamburger.classList.toggle('active'); mobileNav.classList.toggle('active'); document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : ''; });
+        function closeMobile() { hamburger.classList.remove('active'); mobileNav.classList.remove('active'); document.body.style.overflow = ''; }
+        const ro = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); } }); }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(el => ro.observe(el));
+        // Parallax about image
+        window.addEventListener('scroll', () => {
+            const aboutImg = document.querySelector('.about-img');
+            if (aboutImg) { const rect = aboutImg.getBoundingClientRect(); if (rect.top < window.innerHeight && rect.bottom > 0) { const offset = (window.innerHeight - rect.top) * 0.04; aboutImg.style.transform = 'translateY(' + offset + 'px) scale(1.02)'; } }
+        });
+        document.querySelectorAll('.mobile-nav a').forEach((link, i) => { link.style.transitionDelay = (i * .08) + 's'; });
+    </script>
+
+</body>
+
+</html>

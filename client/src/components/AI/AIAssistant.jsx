@@ -53,28 +53,16 @@ export default function AIAssistant() {
   const navigate = useNavigate();
 
   // ---- Wake Word: "Oye Denty" ----
-  const { isWakeListening, wakeWordSupported } = useWakeWord({
+  // FIX v3: Al detectar la wake word abrimos el VoiceOverlay en estado IDLE.
+  // El usuario verá el overlay listo y podrá hablar; el micrófono NO se activa
+  // automáticamente (igual que Gemini Live / ChatGPT Voice).
+  const { isWakeListening, wakeWordSupported, resumeWakeWordListener } = useWakeWord({
     enabled: wakeWordEnabled && !voiceOverlayOpen && !isListening && !isSpeaking,
     onWakeWord: () => {
       playStartSound();
-      // Abrir el chat para que se vea la app
-      if (!isOpen) setIsOpen(true);
-      // ★ Delay largo (800ms) para que el micrófono se libere
-      // completamente en Android antes de iniciar nuevo reconocimiento.
-      // Sin este delay, el navegador móvil ignora el nuevo start().
-      setTimeout(() => {
-        startListening({
-          continuous: false,
-          onResult: async (text) => {
-            playConfirmSound();
-            const response = await handleSend(text);
-            // Hablar la respuesta si TTS está activo
-            if (ttsEnabled && response && !response.startsWith('⚙️') && !response.startsWith('⚠️')) {
-              speak(response, { rate: 1.05 });
-            }
-          },
-        });
-      }, 800);
+      // Abrir el VoiceOverlay — el micrófono queda en idle hasta que el usuario toque
+      setVoiceOverlayOpen(true);
+      if (!isOpen) setIsOpen(false); // Cerrar el chat panel si estaba abierto
     },
   });
 
@@ -141,7 +129,7 @@ export default function AIAssistant() {
     if (command.type === 'search_dni') {
       const confirmMsg = `🔍 Buscando paciente con DNI ${command.dni}...`;
       addLocalMessages(msg, confirmMsg);
-      navigate('/buscar');
+      navigate('/panel/buscar');
       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
       return confirmMsg;
     }
@@ -151,8 +139,8 @@ export default function AIAssistant() {
       addLocalMessages(msg, confirmMsg);
       // Notificar a OdontogramPage si está activa o navegar hacia ella
       window.dispatchEvent(new CustomEvent('odonto_voice_mark', { detail: { tooth: command.toothNumber, condition: command.condition } }));
-      if (window.location.pathname !== '/odontograma') {
-        navigate('/odontograma');
+      if (window.location.pathname !== '/panel/odontograma') {
+        navigate('/panel/odontograma');
       }
       if (ttsEnabled) speak(confirmMsg, { rate: 1.05 });
       return confirmMsg;
@@ -237,6 +225,17 @@ export default function AIAssistant() {
     playStopSound();
   }, [stopListening, playStopSound]);
 
+  // Cuando se cierra el VoiceOverlay, reanudar el wake word listener
+  const handleVoiceOverlayClose = useCallback(() => {
+    setVoiceOverlayOpen(false);
+    stopListening();
+    stopSpeaking();
+    // Reanudar escucha de wake word con delay para que el mic quede libre
+    if (wakeWordEnabled) {
+      resumeWakeWordListener();
+    }
+  }, [stopListening, stopSpeaking, wakeWordEnabled, resumeWakeWordListener]);
+
   /**
    * Hablar un mensaje del asistente
    */
@@ -266,7 +265,7 @@ export default function AIAssistant() {
       <button
         className={`ai-fab ${isOpen ? 'open' : ''} ${isWakeListening ? 'wake-active' : ''}`}
         onClick={togglePanel}
-        title={isWakeListening ? 'OdontoIA — Escuchando "Oye Denty"' : 'Asistente IA OdontoIA'}
+        title={isWakeListening ? 'Denty — Escuchando "Oye Denty"' : 'Asistente IA Denty'}
         id="ai-assistant-fab"
       >
         {!isOpen && <div className="ai-fab-pulse" />}
@@ -288,7 +287,7 @@ export default function AIAssistant() {
         <div className="ai-panel-header">
           <div className="ai-panel-avatar"><Bot size={20} /></div>
           <div className="ai-panel-title">
-            <h3>OdontoIA</h3>
+            <h3>Denty</h3>
             <span>Asistente Inteligente</span>
           </div>
           <div className="ai-header-actions">
@@ -344,7 +343,7 @@ export default function AIAssistant() {
               <label>Estado de la IA</label>
               <div className="hint">
                 {apiKeyConfigured
-                  ? 'OdontoIA está activa y lista para usar'
+                  ? 'Denty está activa y lista para usar'
                   : 'API no configurada — Contacta al administrador'}
               </div>
             </div>
@@ -438,7 +437,7 @@ export default function AIAssistant() {
                   <span className="ai-welcome-icon"><Sparkles size={32} /></span>
                   <h4>¡Hola, Doctor!</h4>
                   <p>
-                    Soy <strong>OdontoIA</strong>, tu asistente inteligente. 
+                    Soy <strong>Denty</strong>, tu asistente inteligente. 
                     Pregúntame sobre tratamientos, medicación, o dime un comando por voz.
                   </p>
                   {!apiKeyConfigured && (
@@ -460,7 +459,7 @@ export default function AIAssistant() {
                       </div>
                       <div className="ai-voice-mode-card-text">
                         <strong>Modo Conversación por Voz</strong>
-                        <span>Habla con OdontoIA en modo manos libres</span>
+                        <span>Habla con Denty en modo manos libres</span>
                       </div>
                       <ChevronRight size={16} className="ai-voice-mode-card-arrow" />
                     </div>
@@ -571,7 +570,7 @@ export default function AIAssistant() {
       {/* Voice Overlay (Fullscreen Mode) */}
       <VoiceOverlay
         isOpen={voiceOverlayOpen}
-        onClose={() => setVoiceOverlayOpen(false)}
+        onClose={handleVoiceOverlayClose}
         onSend={handleSend}
         isListening={isListening}
         isSpeaking={isSpeaking}
@@ -585,6 +584,7 @@ export default function AIAssistant() {
         onStopSpeaking={stopSpeaking}
         ttsEnabled={ttsEnabled}
         onToggleTts={() => setTtsEnabled(!ttsEnabled)}
+        wakeWordEnabled={wakeWordEnabled}
       />
     </>
   );

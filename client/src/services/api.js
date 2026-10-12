@@ -24,10 +24,20 @@ const handleResponse = async (response) => {
 
   if (!response.ok) {
     if (response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-      throw new Error(data.error || 'Sesión expirada. Inicie sesión nuevamente.');
+      // Solo cerrar sesión si es un error de autenticación JWT del sistema
+      // (no de APIs externas como RENIEC cuyo token puede expirar)
+      const isAuthEndpoint = response.url?.includes('/auth/') || response.url?.includes('/patients') ||
+        response.url?.includes('/treatments') || response.url?.includes('/odontogram') ||
+        response.url?.includes('/users') || response.url?.includes('/reports') ||
+        response.url?.includes('/audit') || response.url?.includes('/ai/');
+      const isReniecEndpoint = response.url?.includes('/reniec/');
+      
+      if (isAuthEndpoint && !isReniecEndpoint) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        throw new Error(data.error || 'Sesión expirada. Inicie sesión nuevamente.');
+      }
     }
     throw new Error(data.error || 'Error en la solicitud');
   }

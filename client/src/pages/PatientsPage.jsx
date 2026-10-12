@@ -126,7 +126,7 @@ export default function PatientsPage() {
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                           className="btn btn-ghost btn-sm"
-                          onClick={() => navigate(`/historial/${p.id}`)}
+                          onClick={() => navigate(`/panel/historial/${p.id}`)}
                           title="Ver historial"
                         >
                           <Eye size={16} />
@@ -167,14 +167,14 @@ export default function PatientsPage() {
                 <div className="patient-mobile-card-actions">
                   <button
                     className="btn btn-secondary btn-sm"
-                    onClick={() => navigate(`/historial/${p.id}`)}
+                    onClick={() => navigate(`/panel/historial/${p.id}`)}
                     title="Ver Historial Clínico"
                   >
                     <Eye size={15} /> Historial
                   </button>
                   <button
                     className="btn btn-secondary btn-sm"
-                    onClick={() => navigate(`/odontograma?patientId=${p.id}`)}
+                    onClick={() => navigate(`/panel/odontograma?patientId=${p.id}`)}
                     title="Ver Odontograma"
                     style={{ borderColor: 'rgba(13, 148, 136, 0.4)', color: 'var(--primary-light)' }}
                   >

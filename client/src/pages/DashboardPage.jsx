@@ -2,10 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { useAI } from '../context/AIContext';
 import {
   Users, Activity, TrendingUp, CalendarCheck, CalendarClock, Stethoscope,
-  Search, PlusCircle, Sparkles, ChevronRight, Mic, ShieldCheck, Clock, FileText,
+  Search, PlusCircle, ChevronRight, ShieldCheck, Clock, FileText,
   UserCheck, ArrowUpRight
 } from 'lucide-react';
 import emptyDental from '../assets/empty-dental.jpg';
@@ -15,7 +14,6 @@ export default function DashboardPage() {
   const [recentTreatments, setRecentTreatments] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { openAssistant, isListening, startVoiceListening } = useAI();
   const navigate = useNavigate();
 
   const loadData = useCallback(async () => {
@@ -99,19 +97,19 @@ export default function DashboardPage() {
           <div className="dashboard-quick-actions">
             <button
               className="btn btn-primary btn-sm dashboard-action-btn"
-              onClick={() => navigate('/tratamientos/nuevo')}
+              onClick={() => navigate('/panel/nueva-atencion')}
             >
               <PlusCircle size={16} /> Nueva Atención
             </button>
             <button
               className="btn btn-secondary btn-sm dashboard-action-btn"
-              onClick={() => navigate('/buscar')}
+              onClick={() => navigate('/panel/buscar')}
             >
               <Search size={16} /> Buscar DNI
             </button>
             <button
               className="btn btn-secondary btn-sm dashboard-action-btn"
-              onClick={() => navigate('/odontograma')}
+              onClick={() => navigate('/panel/odontograma')}
               style={{ borderColor: 'rgba(13, 148, 136, 0.4)', color: 'var(--primary-light)' }}
             >
               🦷 Odontograma
@@ -136,7 +134,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Grid de 2 Columnas: Atenciones Recientes vs Widget Clínico & OdontoIA */}
+      {/* Grid de 2 Columnas: Atenciones Recientes vs Widget Clínico & Denty */}
       <div className="dashboard-content-grid">
         {/* Columna Izquierda: Atenciones Recientes */}
         <div className="dashboard-panel">
@@ -147,7 +145,7 @@ export default function DashboardPage() {
             </div>
             <button
               className="btn btn-ghost btn-sm"
-              onClick={() => navigate('/historial')}
+              onClick={() => navigate('/panel/historial')}
             >
               Ver Todas <ChevronRight size={15} />
             </button>
@@ -160,7 +158,7 @@ export default function DashboardPage() {
               <p>Inicia una nueva consulta odontológica para el primer paciente del turno.</p>
               <button
                 className="btn btn-primary btn-sm"
-                onClick={() => navigate('/tratamientos/nuevo')}
+                onClick={() => navigate('/panel/nueva-atencion')}
                 style={{ marginTop: '12px' }}
               >
                 <PlusCircle size={15} /> Iniciar Atención
@@ -172,7 +170,7 @@ export default function DashboardPage() {
                 <div
                   key={t.id}
                   className="dashboard-recent-item"
-                  onClick={() => navigate(`/historial/${t.patient_id}`)}
+                  onClick={() => navigate(`/panel/historial/${t.patient_id}`)}
                 >
                   <div className="dashboard-recent-avatar">
                     {t.patient?.first_name?.[0] || 'P'}{t.patient?.last_name?.[0] || ''}
@@ -197,7 +195,7 @@ export default function DashboardPage() {
                       title="Ver Ficha y Odontograma"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/odontograma?patientId=${t.patient_id}`);
+                        navigate(`/panel/odontograma?patientId=${t.patient_id}`);
                       }}
                     >
                       <ArrowUpRight size={16} />
@@ -212,47 +210,6 @@ export default function DashboardPage() {
         {/* Columna Derecha: Widget de Asistente IA Denty & Resumen Diario */}
         <div className="dashboard-side-column">
           {/* Card Asistente de Voz Denty */}
-          <div className="dashboard-ai-card">
-            <div className="dashboard-ai-glow" />
-            <div className="dashboard-ai-content">
-              <div className="dashboard-ai-header">
-                <div className="dashboard-ai-badge">
-                  <Sparkles size={14} /> OdontoIA Asistente de Voz
-                </div>
-                <button
-                  className={`dashboard-ai-mic-btn ${isListening ? 'listening' : ''}`}
-                  onClick={startVoiceListening}
-                  title="Activar dictado por voz"
-                >
-                  <Mic size={18} />
-                </button>
-              </div>
-              <h4 className="dashboard-ai-title">¿Cómo puedo ayudarte hoy?</h4>
-              <p className="dashboard-ai-desc">
-                Dicta números de DNI, registra diagnósticos por voz o navega por el sistema manos libres.
-              </p>
-              <div className="dashboard-ai-chips">
-                <button
-                  className="dashboard-ai-chip"
-                  onClick={() => openAssistant('Buscar paciente por DNI')}
-                >
-                  🔍 Buscar Paciente
-                </button>
-                <button
-                  className="dashboard-ai-chip"
-                  onClick={() => openAssistant('Marcar caries en pieza 16')}
-                >
-                  🦷 Marcar Odontograma
-                </button>
-                <button
-                  className="dashboard-ai-chip"
-                  onClick={() => openAssistant('Ver estadísticas')}
-                >
-                  📊 Ver Estadísticas
-                </button>
-              </div>
-            </div>
-          </div>
 
           {/* Card Resumen de la Jornada */}
           <div className="dashboard-panel">

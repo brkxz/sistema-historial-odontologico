@@ -37,30 +37,22 @@ export default function UsersPage() {
     }
   };
 
-  if (!isAdmin) {
-    return (
-      <div className="empty-state card">
-        <Shield size={48} />
-        <h3>Acceso Restringido</h3>
-        <p>Solo los administradores pueden gestionar usuarios</p>
-      </div>
-    );
-  }
-
   if (loading) {
-    return <div className="loading-overlay"><div className="spinner" /><p>Cargando usuarios...</p></div>;
+    return <div className="loading-overlay"><div className="spinner" /><p>Cargando panel de doctores...</p></div>;
   }
 
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Usuarios</h1>
-          <p className="page-subtitle">Gestión de usuarios del sistema</p>
+          <h1 className="page-title">Panel de Doctores</h1>
+          <p className="page-subtitle">Equipo médico del Servicio de Odontología</p>
         </div>
-        <button className="btn btn-primary" onClick={() => { setEditingUser(null); setShowForm(true); }}>
-          <UserPlus size={18} /> Nuevo Usuario
-        </button>
+        {isAdmin && (
+          <button className="btn btn-primary" onClick={() => { setEditingUser(null); setShowForm(true); }}>
+            <UserPlus size={18} /> Nuevo Usuario
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -108,22 +100,29 @@ export default function UsersPage() {
                   </span>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => { setEditingUser(u); setShowForm(true); }}
-                      title="Editar"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => toggleActive(u)}
-                      title={u.is_active ? 'Desactivar' : 'Activar'}
-                    >
-                      {u.is_active ? <ToggleRight size={16} color="var(--success)" /> : <ToggleLeft size={16} />}
-                    </button>
-                  </div>
+                  {isAdmin && (
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => { setEditingUser(u); setShowForm(true); }}
+                        title="Editar"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => toggleActive(u)}
+                        title={u.is_active ? 'Desactivar' : 'Activar'}
+                      >
+                        {u.is_active ? <ToggleRight size={16} color="var(--success)" /> : <ToggleLeft size={16} />}
+                      </button>
+                    </div>
+                  )}
+                  {!isAdmin && (
+                    <span className={`badge ${u.is_active ? 'badge-success' : 'badge-error'}`}>
+                      {u.is_active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

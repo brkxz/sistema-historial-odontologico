@@ -1,16 +1,21 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { AIProvider } from './context/AIContext';
 import { ToastProvider } from './components/UI/Toast';
 import ErrorBoundary from './components/UI/ErrorBoundary';
 import Layout from './components/Layout/Layout';
+import PublicLayout from './components/Layout/PublicLayout';
 import LoginPage from './pages/LoginPage';
+import LandingPage from './pages/LandingPage';
 
 // =============================================
 // Code Splitting: Lazy load todas las páginas
-// Solo LoginPage y Layout se cargan inmediatamente
 // =============================================
+const ServiciosPage = lazy(() => import('./pages/ServiciosPage'));
+const NosotrosPage = lazy(() => import('./pages/NosotrosPage'));
+const EquipoPage = lazy(() => import('./pages/EquipoPage'));
+const ContactoPage = lazy(() => import('./pages/ContactoPage'));
+
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const PatientsPage = lazy(() => import('./pages/PatientsPage'));
@@ -74,7 +79,7 @@ function PublicRoute({ children }) {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/panel" replace />;
   }
 
   return children;
@@ -86,10 +91,18 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <ToastProvider>
-            <AIProvider>
             <HideAppLoader />
             <Routes>
-            {/* Ruta pública: Login */}
+            {/* ═══ Rutas públicas con PublicLayout (Header + Footer + Denty IA) ═══ */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/servicios" element={<Suspense fallback={<PageLoader />}><ServiciosPage /></Suspense>} />
+              <Route path="/nosotros" element={<Suspense fallback={<PageLoader />}><NosotrosPage /></Suspense>} />
+              <Route path="/equipo" element={<Suspense fallback={<PageLoader />}><EquipoPage /></Suspense>} />
+              <Route path="/contacto" element={<Suspense fallback={<PageLoader />}><ContactoPage /></Suspense>} />
+            </Route>
+
+            {/* ═══ Ruta pública: Login del panel admin (oculto) ═══ */}
             <Route
               path="/login"
               element={
@@ -99,9 +112,9 @@ function App() {
               }
             />
 
-            {/* Rutas protegidas con Layout */}
+            {/* ═══ Rutas protegidas: Panel del administrador ═══ */}
             <Route
-              path="/"
+              path="/panel"
               element={
                 <ProtectedRoute>
                   <Layout />
@@ -125,7 +138,6 @@ function App() {
             {/* Ruta 404 */}
             <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
             </Routes>
-            </AIProvider>
           </ToastProvider>
         </AuthProvider>
       </BrowserRouter>

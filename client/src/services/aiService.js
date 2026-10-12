@@ -14,25 +14,26 @@ Cuando el usuario quiera ir a alguna sección, incluye al INICIO de tu respuesta
 [ACTION:navigate:/ruta]
 
 Rutas:
-- Inicio: [ACTION:navigate:/]
-- Nueva Atención: [ACTION:navigate:/nueva-atencion]
-- Buscar paciente: [ACTION:navigate:/buscar]
-- Lista de Pacientes: [ACTION:navigate:/pacientes]
-- Historial: [ACTION:navigate:/historial]
-- Odontograma: [ACTION:navigate:/odontograma]
-- Reportes: [ACTION:navigate:/reportes]
-- Usuarios: [ACTION:navigate:/usuarios]
-- Mi perfil/contraseña: [ACTION:navigate:/perfil]
-- Auditoría: [ACTION:navigate:/auditoria]
+- Inicio/Dashboard: [ACTION:navigate:/panel]
+- Nueva Atención: [ACTION:navigate:/panel/nueva-atencion]
+- Buscar paciente: [ACTION:navigate:/panel/buscar]
+- Lista de Pacientes: [ACTION:navigate:/panel/pacientes]
+- Historial: [ACTION:navigate:/panel/historial]
+- Odontograma: [ACTION:navigate:/panel/odontograma]
+- Reportes: [ACTION:navigate:/panel/reportes]
+- Usuarios: [ACTION:navigate:/panel/usuarios]
+- Mi perfil/contraseña: [ACTION:navigate:/panel/perfil]
+- Auditoría: [ACTION:navigate:/panel/auditoria]
+- Página pública (Landing): [ACTION:navigate:/]
 
 TRIGGERS:
-"registrar/nueva atención/atender" → /nueva-atencion
-"buscar/DNI/busca al" → /buscar
-"pacientes/lista" → /pacientes
-"historial/atenciones anteriores/ficha" → /historial
-"odontograma/dientes/piezas" → /odontograma
-"reportes/estadísticas" → /reportes
-"perfil/contraseña" → /perfil
+"registrar/nueva atención/atender" → /panel/nueva-atencion
+"buscar/DNI/busca al" → /panel/buscar
+"pacientes/lista" → /panel/pacientes
+"historial/atenciones anteriores/ficha" → /panel/historial
+"odontograma/dientes/piezas" → /panel/odontograma
+"reportes/estadísticas" → /panel/reportes
+"perfil/contraseña" → /panel/perfil
 
 TÚ SÍ PUEDES navegar. NUNCA digas que no tienes acceso a la interfaz.
 
@@ -299,7 +300,7 @@ export function parseVoiceCommand(transcript) {
   // 4. Comandos de navegación con sinónimos enriquecidos en lenguaje natural
   const navCommands = [
     {
-      route: '/buscar',
+      route: '/panel/buscar',
       label: 'Buscar Paciente',
       confirm: '🔍 ¡Claro! Abriendo el buscador de pacientes.',
       patterns: [
@@ -311,7 +312,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/nueva-atencion',
+      route: '/panel/nueva-atencion',
       label: 'Nueva Atención',
       confirm: '📋 ¡Listo! Abriendo el registro de nueva atención.',
       patterns: [
@@ -329,7 +330,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/historial',
+      route: '/panel/historial',
       label: 'Historial',
       confirm: '📂 ¡Aquí tienes! Abriendo el historial clínico.',
       patterns: [
@@ -340,7 +341,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/odontograma',
+      route: '/panel/odontograma',
       label: 'Odontograma',
       confirm: '🦷 Abriendo el odontograma interactivo.',
       patterns: [
@@ -350,7 +351,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/reportes',
+      route: '/panel/reportes',
       label: 'Reportes',
       confirm: '📊 Abriendo el módulo de reportes y estadísticas.',
       patterns: [
@@ -360,7 +361,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/pacientes',
+      route: '/panel/pacientes',
       label: 'Lista de Pacientes',
       confirm: '👥 Mostrando el directorio de pacientes.',
       patterns: [
@@ -369,7 +370,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/',
+      route: '/panel',
       label: 'Inicio',
       confirm: '🏠 Regresando al panel principal.',
       patterns: [
@@ -378,7 +379,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/usuarios',
+      route: '/panel/usuarios',
       label: 'Usuarios',
       confirm: '👤 Abriendo la gestión de usuarios del sistema.',
       patterns: [
@@ -387,7 +388,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/perfil',
+      route: '/panel/perfil',
       label: 'Mi Perfil',
       confirm: '👤 Abriendo tu perfil y ajustes de cuenta.',
       patterns: [
@@ -397,7 +398,7 @@ export function parseVoiceCommand(transcript) {
       ],
     },
     {
-      route: '/auditoria',
+      route: '/panel/auditoria',
       label: 'Auditoría',
       confirm: '📋 Abriendo los registros de auditoría y seguridad.',
       patterns: [

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios | Servicio de Odontología</title>
+    <meta name="description"
+        content="Conoce nuestros tratamientos dentales: Odontología General, Odontopediatría y Estética Dental con tecnología de vanguardia.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- PRELOADER -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-logo"><i class="fa-solid fa-tooth"></i> Servicio de Odontología</div>
+        <div class="preloader-spinner"></div>
+    </div>
+
+    <!-- CURSOR GLOW -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="index.html" onclick="closeMobile()">Inicio</a>
+        <a href="servicios.html" onclick="closeMobile()">Servicios</a>
+        <a href="nosotros.html" onclick="closeMobile()">Nosotros</a>
+        <a href="equipo.html" onclick="closeMobile()">Equipo</a>
+        <a href="contacto.html" onclick="closeMobile()">Contacto</a>
+    </nav>
+
+    <!-- HEADER -->
+    <header id="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo"><i class="fa-solid fa-tooth"></i> Servicio de Odontología</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="servicios.html" class="active">Servicios</a></li>
+                <li><a href="nosotros.html">Nosotros</a></li>
+                <li><a href="equipo.html">Equipo</a></li>
+                <li><a href="contacto.html" class="nav-btn">Contacto</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger" aria-label="Menú">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="label-text">Tratamientos</div>
+            <h1 class="title-main">Nuestros Servicios</h1>
+            <p class="subtitle">Abordamos la odontología con tecnología de vanguardia y atención personalizada para cada
+                paciente.</p>
+        </div>
+    </section>
+
+    <!-- SERVICIOS -->
+    <section class="section-padding services" id="servicios">
+        <div class="container">
+            <div class="services-header reveal">
+                <div class="label-text">Tratamientos</div>
+                <h2 class="title-section">Excelencia del Servicio de Odontología</h2>
+                <p class="subtitle" style="margin: 0 auto;">Abordamos la odontología con tecnología</p>
+            </div>
+
+            <div class="services-grid" data-stagger>
+                <div class="service-card reveal-scale" style="--i:0">
+                    <div class="service-icon-box"><i class="fa-solid fa-teeth-open"></i></div>
+                    <h3>Odontología General</h3>
+                    <p>Diagnóstico preciso y profilaxis de alta tecnología. Tratamiento de caries, extracciones y
+                        cuidado
+                        preventivo para preservar la salud de tu dentadura a largo plazo.</p>
+                </div>
+
+                <div class="service-card reveal-scale" style="--i:1">
+                    <div class="service-icon-box"><i class="fa-solid fa-child-reaching"></i></div>
+                    <h3>Odontopediatría</h3>
+                    <p>Abordaje especializado y psicología infantil para garantizar que los más pequeños reciban
+                        tratamiento sin temor, construyendo hábitos saludables para toda su vida.</p>
+                </div>
+
+
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container footer-inner">
+            <div class="footer-logo">
+
+            </div>
+            <div class="social-links">
+                <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i
+                        class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.facebook.com/share/1DysHEgQix/?mibextid=wwXIfr" target="_blank"
+                    rel="noopener noreferrer" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i
+                        class="fa-brands fa-tiktok"></i></a>
+                <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i
+                        class="fa-brands fa-youtube"></i></a>
+                <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i
+                        class="fa-brands fa-whatsapp"></i></a>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2025 Centro de Excelencia Odontológica. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- WHATSAPP FLOAT BUTTON -->
+    <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" class="whatsapp-float"
+        aria-label="Contactar por WhatsApp">
+        <span class="wa-tooltip">¡Escríbenos!</span>
+        <div class="wa-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    </a>
+
+    <script>
+        window.addEventListener('load', () => setTimeout(() => document.getElementById('preloader').classList.add('loaded'), 600));
+        (function () { const g = document.getElementById('cursorGlow'); let mx = 0, my = 0, gx = 0, gy = 0; document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }); function a() { gx += (mx - gx) * .08; gy += (my - gy) * .08; g.style.left = gx + 'px'; g.style.top = gy + 'px'; requestAnimationFrame(a); } a(); })();
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => { header.style.padding = window.scrollY > 50 ? '0' : '10px 0'; header.style.boxShadow = window.scrollY > 50 ? '0 10px 30px -10px rgba(0,0,0,0.1)' : 'none'; });
+        const hamburger = document.getElementById('hamburger'), mobileNav = document.getElementById('mobileNav');
+        hamburger.addEventListener('click', () => { hamburger.classList.toggle('active'); mobileNav.classList.toggle('active'); document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : ''; });
+        function closeMobile() { hamburger.classList.remove('active'); mobileNav.classList.remove('active'); document.body.style.overflow = ''; }
+        const ro = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); } }); }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(el => ro.observe(el));
+        document.querySelectorAll('.mobile-nav a').forEach((link, i) => { link.style.transitionDelay = (i * .08) + 's'; });
+    </script>
+
+</body>
+
+</html>
