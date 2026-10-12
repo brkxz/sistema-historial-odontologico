@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/UI/Toast';
 import { Eye, EyeOff, LogIn, AlertCircle, User, Lock, ShieldCheck, ChevronLeft } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
+import toothHero from '../assets/tooth-hero.jpg';
 
-// SVG Icon para Google
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -15,69 +15,16 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Diente SVG limpio y profesional
-const ToothSVG = () => (
-  <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', maxWidth: 200, display: 'block', margin: '0 auto' }}>
-    {/* Sombra suave */}
-    <ellipse cx="100" cy="210" rx="55" ry="10" fill="rgba(0,0,0,0.08)" />
-    {/* Cuerpo del diente */}
-    <path
-      d="M40 70 C35 40, 45 15, 65 12 C78 10, 88 22, 100 22 C112 22, 122 10, 135 12 C155 15, 165 40, 160 70 C158 90, 155 110, 148 135 C142 158, 135 185, 125 200 C118 212, 108 215, 100 212 C92 215, 82 212, 75 200 C65 185, 58 158, 52 135 C45 110, 42 90, 40 70Z"
-      fill="white"
-      stroke="#E2E8F0"
-      strokeWidth="2"
-    />
-    {/* Brillo superior izquierdo */}
-    <path
-      d="M58 25 C52 32, 50 45, 52 58"
-      stroke="rgba(255,255,255,0.9)"
-      strokeWidth="5"
-      strokeLinecap="round"
-    />
-    {/* Línea central sutil */}
-    <path
-      d="M100 22 L100 80"
-      stroke="#EEF2FF"
-      strokeWidth="1.5"
-    />
-    {/* Cúspides */}
-    <circle cx="72" cy="30" r="8" fill="#EEF2FF" />
-    <circle cx="128" cy="30" r="8" fill="#EEF2FF" />
-    <circle cx="100" cy="26" r="6" fill="#E8EDFF" />
-    {/* Detalle interior */}
-    <path
-      d="M65 60 C70 55, 85 52, 100 52 C115 52, 130 55, 135 60"
-      stroke="#DDE4F0"
-      strokeWidth="1.5"
-      fill="none"
-      strokeLinecap="round"
-    />
-    {/* Raíces */}
-    <path
-      d="M75 200 C70 218, 62 230, 60 240"
-      stroke="#DDE4F0"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M125 200 C130 218, 138 230, 140 240"
-      stroke="#DDE4F0"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername]       = useState('');
+  const [password, setPassword]       = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]         = useState(false);
   const [socialLoading, setSocialLoading] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { login, loginWithGoogle } = useAuth();
-  const toast = useToast();
+  const [error, setError]             = useState('');
+  const navigate                      = useNavigate();
+  const { login, loginWithGoogle }    = useAuth();
+  const toast                         = useToast();
 
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const isNative = Capacitor.isNativePlatform();
@@ -87,8 +34,7 @@ export default function LoginPage() {
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'TU_GOOGLE_CLIENT_ID_AQUI') return;
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
+    script.async = true; script.defer = true;
     document.head.appendChild(script);
     return () => { if (document.head.contains(script)) document.head.removeChild(script); };
   }, [GOOGLE_CLIENT_ID, isNative]);
@@ -104,9 +50,7 @@ export default function LoginPage() {
       navigate('/panel');
     } catch (err) {
       setError(err.message || 'Credenciales incorrectas');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleGoogleLoginNative = useCallback(async () => {
@@ -159,60 +103,59 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      {/* Topbar */}
+
+      {/* ── Topbar ── */}
       <div className="login-topbar">
         <button className="login-back-btn" onClick={() => navigate('/')}>
-          <ChevronLeft size={16} />
-          <span>Volver al Sitio</span>
+          <ChevronLeft size={16} /> Volver al Sitio
         </button>
         <div className="login-topbar-brand">
-          <i className="fa-solid fa-tooth" style={{ color: '#1a4bba', fontSize: '1rem' }} />
-          <span>Servicio de Odontología</span>
+          <i className="fa-solid fa-tooth" />
+          Servicio de Odontología
         </div>
-        <div style={{ width: '130px' }} />
+        <div className="login-topbar-spacer" />
       </div>
 
-      {/* Layout split */}
+      {/* ── Split layout ── */}
       <div className="login-split-layout">
 
-        {/* Panel izquierdo — ilustración diente */}
+        {/* Panel izquierdo — azul con diente */}
         <div className="login-panel-left">
-          <div className="login-panel-left-inner">
 
+          {/* Texto superior */}
+          <div className="login-left-top">
             <div className="login-hero-badge">
               <i className="fa-solid fa-shield-halved" /> Portal Médico Seguro
             </div>
-
             <h2 className="login-panel-title">
               Sistema de Gestión<br />
               <span>Odontológica Digital</span>
             </h2>
-
             <p className="login-panel-desc">
-              Accede al historial de pacientes, registra atenciones,
+              Accede al historial completo de pacientes, registra atenciones,
               gestiona odontogramas y genera reportes clínicos.
             </p>
-
-            {/* Diente SVG centrado */}
-            <div className="login-tooth-wrap">
-              <ToothSVG />
-            </div>
-
-            {/* Features */}
-            <div className="login-features-list">
-              {[
-                { icon: 'fa-solid fa-file-medical', text: 'Historial clínico digital' },
-                { icon: 'fa-solid fa-tooth',        text: 'Odontograma interactivo' },
-                { icon: 'fa-solid fa-robot',        text: 'Asistente IA integrado' },
-              ].map((f, i) => (
-                <div key={i} className="login-feature-item">
-                  <i className={f.icon} />
-                  <span>{f.text}</span>
-                </div>
-              ))}
-            </div>
-
           </div>
+
+          {/* Diente centrado */}
+          <div className="login-tooth-container">
+            <img src={toothHero} alt="Diente" className="login-tooth-img" />
+          </div>
+
+          {/* Features abajo */}
+          <div className="login-features-list">
+            {[
+              { icon: 'fa-solid fa-file-medical', text: 'Historial clínico digital' },
+              { icon: 'fa-solid fa-tooth',        text: 'Odontograma interactivo' },
+              { icon: 'fa-solid fa-robot',        text: 'Asistente IA integrado' },
+            ].map((f, i) => (
+              <div key={i} className="login-feature-item">
+                <i className={f.icon} />
+                <span>{f.text}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
 
         {/* Panel derecho — formulario */}
@@ -231,8 +174,7 @@ export default function LoginPage() {
             <form className="login-form" onSubmit={handleSubmit}>
               {error && (
                 <div className="login-error">
-                  <AlertCircle size={15} />
-                  <span>{error}</span>
+                  <AlertCircle size={15} /><span>{error}</span>
                 </div>
               )}
 
@@ -241,14 +183,11 @@ export default function LoginPage() {
                 <div className="input-icon-wrapper">
                   <User size={17} className="input-icon-left" />
                   <input
-                    id="login-username"
-                    type="text"
+                    id="login-username" type="text"
                     className="form-input input-with-icon"
                     placeholder="tu.usuario o correo@hospital.pe"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username"
-                    autoFocus
+                    value={username} onChange={(e) => setUsername(e.target.value)}
+                    autoComplete="username" autoFocus
                   />
                 </div>
               </div>
@@ -262,48 +201,33 @@ export default function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     className="form-input input-with-icon input-with-right-icon"
                     placeholder="••••••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={password} onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
                   />
-                  <button
-                    type="button"
-                    className="input-icon-btn-right"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
+                  <button type="button" className="input-icon-btn-right" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
               </div>
 
-              <button
-                id="login-submit"
-                type="submit"
+              <button id="login-submit" type="submit"
                 className="btn btn-primary btn-lg w-full login-btn-main"
-                disabled={loading || socialLoading}
-              >
-                {loading ? (
-                  <div className="spinner" style={{ width: 19, height: 19, borderWidth: 2 }} />
-                ) : (
-                  <><LogIn size={17} /><span>Iniciar Sesión</span></>
-                )}
+                disabled={loading || socialLoading}>
+                {loading
+                  ? <div className="spinner" style={{ width: 19, height: 19, borderWidth: 2 }} />
+                  : <><LogIn size={17} /><span>Iniciar Sesión</span></>
+                }
               </button>
             </form>
 
-            {/* Google */}
             <div className="login-social-section">
               <div className="login-divider">
                 <span className="login-divider-line" />
                 <span className="login-divider-text">o continuar con</span>
                 <span className="login-divider-line" />
               </div>
-              <button
-                id="login-google"
-                type="button"
-                className="btn-social btn-google"
-                onClick={handleGoogleLogin}
-                disabled={loading || socialLoading}
-              >
+              <button id="login-google" type="button" className="btn-social btn-google"
+                onClick={handleGoogleLogin} disabled={loading || socialLoading}>
                 {socialLoading === 'google'
                   ? <div className="spinner" style={{ width: 17, height: 17, borderWidth: 2 }} />
                   : <GoogleIcon />
