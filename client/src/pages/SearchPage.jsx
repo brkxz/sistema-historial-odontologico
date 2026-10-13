@@ -198,14 +198,7 @@ export default function SearchPage() {
             maxLength={8}
             autoFocus
           />
-          <button
-            id="voice-search-btn"
-            className={`voice-btn ${listening ? 'listening' : ''}`}
-            onClick={toggleVoice}
-            title={listening ? 'Detener' : 'Búsqueda por voz'}
-          >
-            {listening ? <MicOff size={20} /> : <Mic size={20} />}
-          </button>
+
           <button
             id="search-btn"
             className="btn btn-primary btn-lg"
@@ -223,8 +216,8 @@ export default function SearchPage() {
           </button>
         </div>
 
-        {/* Modal Interactivo de Escucha de Voz */}
-        {listening && (
+        {/* Voice overlay removed */}
+        {false && (
           <div className="voice-listening-overlay" onClick={toggleVoice}>
             <div className="voice-listening-card" onClick={(e) => e.stopPropagation()}>
               <div className="voice-pulse-circle">
