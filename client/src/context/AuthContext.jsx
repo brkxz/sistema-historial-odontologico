@@ -30,6 +30,15 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Mantener el servidor de Render despierto: ping cada 10 minutos mientras hay sesion
+  useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://odontologia-api-9a6v.onrender.com';
+    const ping = () => fetch(`${API_BASE}/api/health`, { method: 'GET', mode: 'no-cors' }).catch(() => {});
+    ping(); // Ping inmediato al cargar
+    const interval = setInterval(ping, 10 * 60 * 1000); // Cada 10 minutos
+    return () => clearInterval(interval);
+  }, []);
+
   const validateTokenInBackground = async () => {
     const token = localStorage.getItem('token');
     if (!token) return; // No hay sesión, nada que validar
