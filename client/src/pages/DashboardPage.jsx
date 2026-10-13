@@ -3,42 +3,39 @@ import { useNavigate } from 'react-router-dom';
 import { reportService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import {
-  Users, Activity, TrendingUp, CalendarCheck, CalendarClock, Stethoscope,
-  Search, PlusCircle, ChevronRight, ShieldCheck, Clock, FileText,
-  UserCheck, ArrowUpRight
+  Users, Activity, CalendarCheck, CalendarClock,
+  Search, PlusCircle, ChevronRight, Clock, FileText,
+  ArrowUpRight, Stethoscope
 } from 'lucide-react';
-import emptyDental from '../assets/empty-dental.jpg';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState(null);
-  const [recentTreatments, setRecentTreatments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const [stats, setStats]                 = useState(null);
+  const [recentTreatments, setRecent]     = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const { user }                          = useAuth();
+  const navigate                          = useNavigate();
 
   const loadData = useCallback(async () => {
     try {
-      const [summaryData, recentData] = await Promise.all([
+      const [summary, recent] = await Promise.all([
         reportService.getSummary().catch(() => null),
-        reportService.getRecentTreatments().catch(() => ({ treatments: [] }))
+        reportService.getRecentTreatments().catch(() => ({ treatments: [] })),
       ]);
-      setStats(summaryData);
-      setRecentTreatments(recentData?.treatments || []);
-    } catch (error) {
-      console.error('Error al cargar dashboard:', error);
+      setStats(summary);
+      setRecent(recent?.treatments || []);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 18) return 'Buenas tardes';
+    const h = new Date().getHours();
+    if (h < 12) return 'Buenos dias';
+    if (h < 18) return 'Buenas tardes';
     return 'Buenas noches';
   };
 
@@ -46,206 +43,118 @@ export default function DashboardPage() {
     return (
       <div className="loading-overlay">
         <div className="spinner" />
-        <p>Cargando panel odontológico...</p>
+        <p>Cargando...</p>
       </div>
     );
   }
 
-  const statCards = [
-    { label: 'Pacientes', value: stats?.totalPatients || 0, sub: 'Registrados', icon: Users, color: 'teal' },
-    { label: 'Atenciones Hoy', value: stats?.todayTreatments || 0, sub: 'Turno actual', icon: Activity, color: 'blue' },
-    { label: 'Este Mes', value: stats?.monthTreatments || 0, sub: 'Mes en curso', icon: TrendingUp, color: 'green' },
-    { label: 'Historial Total', value: stats?.totalTreatments || 0, sub: 'Completados', icon: CalendarCheck, color: 'purple' },
-    { label: 'Citas Próximas', value: stats?.upcomingAppointments || 0, sub: 'Próx. 7 días', icon: CalendarClock, color: 'amber' },
-  ];
-
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('es-PE', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  const doctorName = user?.full_name || 'Doctor';
+  const today = new Date().toLocaleDateString('es-PE', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
 
-  const doctorName = user?.full_name || 'Doctor';
-  const roleName = user?.role === 'admin' ? 'Administrador Clínico' : 'Odontólogo Especialista';
+  const metrics = [
+    { label: 'Pacientes', value: stats?.totalPatients  || 0, icon: Users,         color: '#0D9488' },
+    { label: 'Hoy',       value: stats?.todayTreatments|| 0, icon: Activity,       color: '#3B82F6' },
+    { label: 'Este mes',  value: stats?.monthTreatments|| 0, icon: CalendarCheck,  color: '#8B5CF6' },
+    { label: 'Proximas',  value: stats?.upcomingAppointments || 0, icon: CalendarClock, color: '#F59E0B' },
+  ];
 
   return (
-    <div className="dashboard-container">
-      {/* Hero Banner Principal */}
-      <div className="dashboard-hero-card">
-        <div className="dashboard-hero-glow" />
-        <div className="dashboard-hero-content">
-          <div className="dashboard-hero-left">
-            <div className="dashboard-avatar-wrap">
-              <div className="dashboard-avatar-icon">
-                <Stethoscope size={30} strokeWidth={2} />
-              </div>
-              <span className="dashboard-status-dot" title="Sistema en línea" />
-            </div>
-            <div>
-              <div className="dashboard-badge-role">
-                <ShieldCheck size={13} /> {roleName} • Hospital San Ramón
-              </div>
-              <h1 className="dashboard-greeting-text">
-                {getGreeting()}, Dr. {doctorName}
-              </h1>
-              <p className="dashboard-date-text">
-                <Clock size={13} /> {dateStr}
-              </p>
-            </div>
-          </div>
+    <div className="db-wrap">
 
-          {/* Botonera de Acciones Rápidas */}
-          <div className="dashboard-quick-actions">
-            <button
-              className="btn btn-primary btn-sm dashboard-action-btn"
-              onClick={() => navigate('/panel/nueva-atencion')}
-            >
-              <PlusCircle size={16} /> Nueva Atención
-            </button>
-            <button
-              className="btn btn-secondary btn-sm dashboard-action-btn"
-              onClick={() => navigate('/panel/buscar')}
-            >
-              <Search size={16} /> Buscar DNI
-            </button>
-            <button
-              className="btn btn-secondary btn-sm dashboard-action-btn"
-              onClick={() => navigate('/panel/odontograma')}
-              style={{ borderColor: 'rgba(13, 148, 136, 0.4)', color: 'var(--primary-light)' }}
-            >
-              🦷 Odontograma
-            </button>
+      {/* ---- Saludo ---- */}
+      <div className="db-header">
+        <div className="db-greet-left">
+          <div className="db-avatar">
+            <Stethoscope size={22} />
           </div>
+          <div>
+            <p className="db-role">
+              {user?.role === 'admin' ? 'Administrador Clinico' : 'Odontologo'} &bull; Hospital San Ramon
+            </p>
+            <h1 className="db-title">{getGreeting()}, Dr. {doctorName}</h1>
+            <p className="db-date"><Clock size={12} /> {today}</p>
+          </div>
+        </div>
+        <div className="db-quick">
+          <button className="btn btn-primary btn-sm" onClick={() => navigate('/panel/nueva-atencion')}>
+            <PlusCircle size={15} /> Nueva Atencion
+          </button>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/panel/buscar')}>
+            <Search size={15} /> Buscar DNI
+          </button>
         </div>
       </div>
 
-      {/* Grid de Métricas Principales */}
-      <div className="dashboard-stats-grid">
-        {statCards.map((card, i) => (
-          <div key={i} className={`dash-stat-card dash-stat-${card.color}`}>
-            <div className="dash-stat-top">
-              <span className="dash-stat-label">{card.label}</span>
-              <div className="dash-stat-icon">
-                <card.icon size={18} />
-              </div>
+      {/* ---- Metricas ---- */}
+      <div className="db-metrics">
+        {metrics.map((m, i) => (
+          <div key={i} className="db-metric-card">
+            <div className="db-metric-icon" style={{ background: m.color + '18', color: m.color }}>
+              <m.icon size={20} />
             </div>
-            <div className="dash-stat-value">{card.value}</div>
-            <div className="dash-stat-sub">{card.sub}</div>
+            <div>
+              <div className="db-metric-val">{m.value}</div>
+              <div className="db-metric-lbl">{m.label}</div>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Grid de 2 Columnas: Atenciones Recientes vs Widget Clínico & Denty */}
-      <div className="dashboard-content-grid">
-        {/* Columna Izquierda: Atenciones Recientes */}
-        <div className="dashboard-panel">
-          <div className="dashboard-panel-header">
-            <div className="dashboard-panel-title">
-              <FileText size={18} className="text-primary" />
-              <h3>Atenciones Clínicas Recientes</h3>
-            </div>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => navigate('/panel/historial')}
-            >
-              Ver Todas <ChevronRight size={15} />
+      {/* ---- Atenciones recientes ---- */}
+      <div className="db-panel">
+        <div className="db-panel-hd">
+          <span className="db-panel-ttl"><FileText size={16} /> Atenciones Recientes</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/panel/historial')}>
+            Ver todas <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {recentTreatments.length === 0 ? (
+          <div className="db-empty">
+            <Stethoscope size={36} style={{ opacity: 0.25 }} />
+            <p>Sin atenciones registradas</p>
+            <button className="btn btn-primary btn-sm" style={{ marginTop: 12 }}
+              onClick={() => navigate('/panel/nueva-atencion')}>
+              <PlusCircle size={14} /> Iniciar primera atencion
             </button>
           </div>
-
-          {recentTreatments.length === 0 ? (
-            <div className="dashboard-empty-panel">
-              <img src={emptyDental} alt="Sin atenciones" className="dashboard-empty-svg" />
-              <h4>No hay atenciones registradas hoy</h4>
-              <p>Inicia una nueva consulta odontológica para el primer paciente del turno.</p>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => navigate('/panel/nueva-atencion')}
-                style={{ marginTop: '12px' }}
-              >
-                <PlusCircle size={15} /> Iniciar Atención
-              </button>
-            </div>
-          ) : (
-            <div className="dashboard-recent-list">
-              {recentTreatments.slice(0, 5).map((t) => (
-                <div
-                  key={t.id}
-                  className="dashboard-recent-item"
-                  onClick={() => navigate(`/panel/historial/${t.patient_id}`)}
-                >
-                  <div className="dashboard-recent-avatar">
-                    {t.patient?.first_name?.[0] || 'P'}{t.patient?.last_name?.[0] || ''}
-                  </div>
-                  <div className="dashboard-recent-info">
-                    <div className="dashboard-recent-name">
-                      {t.patient ? `${t.patient.first_name} ${t.patient.last_name}` : 'Paciente'}
-                    </div>
-                    <div className="dashboard-recent-meta">
-                      <span className="badge-dni">DNI: {t.patient?.dni || '-'}</span>
-                      <span className="recent-diagnostic">
-                        {t.diagnosis || t.treatment_type || 'Consulta Odontológica'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="dashboard-recent-right">
-                    <span className="dashboard-recent-date">
-                      {t.treatment_date ? new Date(t.treatment_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' }) : 'Hoy'}
-                    </span>
-                    <button
-                      className="btn-icon-link"
-                      title="Ver Ficha y Odontograma"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/panel/odontograma?patientId=${t.patient_id}`);
-                      }}
-                    >
-                      <ArrowUpRight size={16} />
-                    </button>
-                  </div>
+        ) : (
+          <div className="db-list">
+            {recentTreatments.slice(0, 6).map((t) => (
+              <div key={t.id} className="db-item" onClick={() => navigate(`/panel/historial/${t.patient_id}`)}>
+                <div className="db-item-av">
+                  {t.patient?.first_name?.[0]}{t.patient?.last_name?.[0]}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Columna Derecha: Widget de Asistente IA Denty & Resumen Diario */}
-        <div className="dashboard-side-column">
-          {/* Card Asistente de Voz Denty */}
-
-          {/* Card Resumen de la Jornada */}
-          <div className="dashboard-panel">
-            <div className="dashboard-panel-header">
-              <div className="dashboard-panel-title">
-                <UserCheck size={18} className="text-secondary" />
-                <h3>Resumen de la Jornada</h3>
+                <div className="db-item-info">
+                  <span className="db-item-name">
+                    {t.patient ? `${t.patient.first_name} ${t.patient.last_name}` : 'Paciente'}
+                  </span>
+                  <span className="db-item-meta">
+                    DNI: {t.patient?.dni || '-'} &bull; {t.reason || 'Consulta Odontologica'}
+                  </span>
+                </div>
+                <div className="db-item-right">
+                  <span className="db-item-date">
+                    {t.treatment_date
+                      ? new Date(t.treatment_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })
+                      : 'Hoy'}
+                  </span>
+                  <button
+                    className="db-item-link"
+                    title="Ver odontograma"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/panel/odontograma?patientId=${t.patient_id}`); }}
+                  >
+                    <ArrowUpRight size={15} />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="dashboard-summary-split">
-              <div className="dashboard-summary-box">
-                <span className="dashboard-summary-big-num text-primary">
-                  {stats?.todayTreatments || 0}
-                </span>
-                <span className="dashboard-summary-box-label">Atenciones Hoy</span>
-                <span className="dashboard-summary-box-sub">Pacientes atendidos en sillón</span>
-              </div>
-              <div className="dashboard-summary-divider-v" />
-              <div className="dashboard-summary-box">
-                <span className="dashboard-summary-big-num text-secondary">
-                  {stats?.upcomingAppointments || 0}
-                </span>
-                <span className="dashboard-summary-box-label">Citas Programadas</span>
-                <span className="dashboard-summary-box-sub">En los próximos 7 días</span>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Footer Hospital */}
-      <div className="dashboard-footer">
-        <p>Sistema de Historial Odontológico Digital • Hospital San Ramón Chanchamayo</p>
-        <span className="dashboard-footer-ver">Versión 2.5 • OdontoDesign System</span>
-      </div>
     </div>
   );
 }
-
