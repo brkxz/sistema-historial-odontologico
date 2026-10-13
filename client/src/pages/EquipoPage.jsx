@@ -92,6 +92,7 @@ export default function EquipoPage() {
                 </div>
                 <h3>{member.name}</h3>
                 <span
+                  className="landing-member-badge"
                   style={{
                     color: member.color,
                     background: `${member.color}18`,

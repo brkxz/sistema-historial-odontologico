@@ -1104,7 +1104,7 @@
   line-height: 1.3;
 }
 
-.landing-team-member span,
+.landing-team-member .landing-member-badge,
 .landing-member-card .role {
   display: inline-block;
   font-size: 0.78rem;
