@@ -1,5 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+// Timeout en ms para cada intento (15s para aguantar cold-start de Render)
+const TIMEOUT_MS = 15000;
+const MAX_RETRIES = 2;
+
 // Helper para obtener headers con token
 const getHeaders = () => {
   const token = localStorage.getItem('token');
@@ -9,23 +13,43 @@ const getHeaders = () => {
   };
 };
 
+// Fetch con timeout y retry automatico (sobrevive cold-start de Render)
+const fetchWithRetry = async (url, options = {}, attempt = 1) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return response;
+  } catch (err) {
+    clearTimeout(timer);
+    const isTimeout = err.name === 'AbortError' || err.message?.includes('fetch');
+    if (isTimeout && attempt < MAX_RETRIES) {
+      // Esperar 2s antes del siguiente intento
+      await new Promise(r => setTimeout(r, 2000));
+      return fetchWithRetry(url, options, attempt + 1);
+    }
+    if (isTimeout) {
+      throw new Error('El servidor esta iniciando, espera unos segundos y vuelve a intentar.');
+    }
+    throw new Error('Sin conexion. Verifica tu internet e intenta de nuevo.');
+  }
+};
+
 // Helper para manejar respuestas
 const handleResponse = async (response) => {
   let data;
   try {
     data = await response.json();
   } catch {
-    // La respuesta no es JSON (502, 503, HTML de error, etc.)
     if (!response.ok) {
-      throw new Error('El servidor no está disponible. Intente más tarde.');
+      throw new Error('El servidor no esta disponible. Intente mas tarde.');
     }
     throw new Error('Respuesta inesperada del servidor');
   }
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Solo cerrar sesión si es un error de autenticación JWT del sistema
-      // (no de APIs externas como RENIEC cuyo token puede expirar)
       const isAuthEndpoint = response.url?.includes('/auth/') || response.url?.includes('/patients') ||
         response.url?.includes('/treatments') || response.url?.includes('/odontogram') ||
         response.url?.includes('/users') || response.url?.includes('/reports') ||
@@ -36,7 +60,7 @@ const handleResponse = async (response) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/login';
-        throw new Error(data.error || 'Sesión expirada. Inicie sesión nuevamente.');
+        throw new Error(data.error || 'Sesion expirada. Inicie sesion nuevamente.');
       }
     }
     throw new Error(data.error || 'Error en la solicitud');
@@ -50,14 +74,14 @@ const handleResponse = async (response) => {
 // =============================================
 const api = {
   get: async (endpoint) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetchWithRetry(`${API_URL}${endpoint}`, {
       headers: getHeaders(),
     });
     return handleResponse(response);
   },
 
   post: async (endpoint, body) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetchWithRetry(`${API_URL}${endpoint}`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(body),
@@ -66,7 +90,7 @@ const api = {
   },
 
   put: async (endpoint, body) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetchWithRetry(`${API_URL}${endpoint}`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(body),
@@ -75,13 +99,14 @@ const api = {
   },
 
   delete: async (endpoint) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetchWithRetry(`${API_URL}${endpoint}`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
     return handleResponse(response);
   },
 };
+
 
 // =============================================
 // AUTH
