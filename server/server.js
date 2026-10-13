@@ -60,10 +60,13 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://localhost:3000',
   'https://localhost',        // Capacitor Android (androidScheme: https)
+  'https://app',              // Capacitor Android con hostname: app
+  'http://app',               // Capacitor Android fallback
   'capacitor://localhost',    // Capacitor Android (androidScheme: capacitor)
   'ionic://localhost',        // Ionic/Capacitor iOS
-  'http://localhost',         // Capacitor genérico
+  'http://localhost',         // Capacitor generico
 ];
+
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }

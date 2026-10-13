@@ -4,9 +4,7 @@
   "webDir": "dist",
   "server": {
     "androidScheme": "https",
-    "cleartext": true,
-    "hostname": "app",
-    "iosScheme": "ionic"
+    "cleartext": true
   },
   "plugins": {
     "GoogleAuth": {
@@ -16,3 +14,4 @@
     }
   }
 }
+
