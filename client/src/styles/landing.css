@@ -1035,52 +1035,113 @@
 
 .landing-team-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 280px));
+  gap: 24px;
+  justify-content: center;
 }
 
+/* Card base (usada con clase landing-team-member) */
+.landing-team-member,
 .landing-member-card {
   background: var(--l-bg);
-  border: 1px solid var(--l-border);
-  border-radius: var(--l-radius-lg);
-  padding: 28px 24px;
+  border: 1.5px solid var(--l-border);
+  border-radius: 20px;
+  padding: 32px 28px 28px;
   text-align: center;
-  transition: box-shadow 0.22s;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
 }
 
-.landing-member-card:hover { box-shadow: var(--l-shadow-md); }
+.landing-team-member::before,
+.landing-member-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.landing-team-member:hover,
+.landing-member-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  border-color: rgba(79, 195, 247, 0.35);
+}
 
 .landing-member-avatar {
-  width: 72px; height: 72px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
-  color: #fff;
-  margin: 0 auto 16px;
+  margin: 0 auto 18px;
   letter-spacing: -1px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
 }
 
+.landing-team-member:hover .landing-member-avatar,
+.landing-member-card:hover .landing-member-avatar {
+  transform: scale(1.12) translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.landing-team-member h3,
 .landing-member-card h3 {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--l-text);
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  line-height: 1.3;
 }
 
+.landing-team-member span,
 .landing-member-card .role {
-  font-size: 0.82rem;
-  color: var(--l-blue);
-  font-weight: 600;
-  margin-bottom: 10px;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding: 3px 10px;
+  border-radius: 30px;
+  background: rgba(79, 195, 247, 0.10);
 }
 
+.landing-member-detail,
+.landing-team-member p,
 .landing-member-card p {
-  font-size: 0.85rem;
-  line-height: 1.6;
+  font-size: 0.86rem;
+  line-height: 1.65;
   color: var(--l-text-muted);
+  margin-top: 4px;
+}
+
+/* Separador decorativo bajo el nombre */
+.landing-team-member::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.15;
+  margin: 12px auto 0;
+  transition: width 0.28s ease, opacity 0.28s ease;
+}
+
+.landing-team-member:hover::after {
+  width: 60px;
+  opacity: 0.35;
 }
 
 /* Stats strip */
@@ -1267,7 +1328,7 @@
   .landing-denty-info { text-align: center; }
   .landing-denty-features { align-items: center; }
   .landing-about-grid { grid-template-columns: 1fr; gap: 32px; }
-  .landing-team-grid { grid-template-columns: repeat(2, 1fr); }
+  .landing-team-grid { grid-template-columns: repeat(2, minmax(0, 280px)); justify-content: center; }
   .landing-contact-grid { grid-template-columns: 1fr; gap: 36px; }
 }
 
@@ -1278,7 +1339,7 @@
   .landing-stat-block { padding: 20px 12px; }
   .landing-stat-block .number { font-size: 1.6rem; }
   .landing-services-grid { grid-template-columns: 1fr; }
-  .landing-team-grid { grid-template-columns: 1fr; }
+  .landing-team-grid { grid-template-columns: minmax(0, 360px); justify-content: center; }
   .landing-chatbot { height: 440px; }
   .landing-hero-cta { flex-direction: column; align-items: stretch; }
   .landing-btn-primary, .landing-btn-secondary { justify-content: center; }

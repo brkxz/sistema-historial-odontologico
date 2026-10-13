@@ -74,17 +74,31 @@ export default function EquipoPage() {
               <div
                 key={i}
                 className="landing-team-member landing-reveal-scale"
-                style={{ transitionDelay: `${i * 0.1}s` }}
+                style={{
+                  transitionDelay: `${i * 0.1}s`,
+                  borderTop: `3px solid ${member.color}`,
+                }}
               >
                 {/* Avatar con iniciales */}
                 <div
                   className="landing-member-avatar"
-                  style={{ background: member.bg, border: `1.5px solid ${member.color}40`, color: member.color }}
+                  style={{
+                    background: member.bg,
+                    border: `2px solid ${member.color}55`,
+                    color: member.color,
+                  }}
                 >
                   {member.initials}
                 </div>
                 <h3>{member.name}</h3>
-                <span style={{ color: member.color }}>{member.specialty}</span>
+                <span
+                  style={{
+                    color: member.color,
+                    background: `${member.color}18`,
+                  }}
+                >
+                  {member.specialty}
+                </span>
                 <p className="landing-member-detail">{member.detail}</p>
               </div>
             ))}
