@@ -3476,4 +3476,20 @@
   animation: spin 0.7s linear infinite;
 }
 
+/* Ocultar boton de microfono nativo del navegador en inputs */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-search-cancel-button,
+input::-webkit-search-decoration,
+input::-webkit-speech-input-results-button,
+input[type="text"]::-webkit-inner-spin-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+
+
 

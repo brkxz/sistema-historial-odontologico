@@ -11,6 +11,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ocultar boton de microfono/voz nativo del navegador */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-search-results-button,
+input::-webkit-search-results-decoration,
+input::-webkit-search-cancel-button,
+input::-webkit-speech-input-results-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
 /* Improved readability on mobile */
 @media (max-width: 768px) {
   body {
