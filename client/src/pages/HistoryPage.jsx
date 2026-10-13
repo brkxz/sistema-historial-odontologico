@@ -1,26 +1,75 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { treatmentService, patientService } from '../services/api';
+import { treatmentService, patientService, reportService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
-import { Calendar, User, Printer, ArrowLeft, Eye } from 'lucide-react';
+import {
+  Calendar, User, Printer, ArrowLeft, Search,
+  ChevronRight, Clock, Filter, X, FileText,
+} from 'lucide-react';
 
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+
+const fmtDateLong = (d) =>
+  new Date(d).toLocaleDateString('es-PE', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+
+const MONTHS = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
+];
+
+// â”€â”€â”€ Componente principal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function HistoryPage() {
   const { patientId } = useParams();
-  const [treatments, setTreatments] = useState([]);
-  const [patient, setPatient] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedTreatment, setSelectedTreatment] = useState(null);
-  const [searchDni, setSearchDni] = useState('');
-  const navigate = useNavigate();
-  const toast = useToast();
+  const navigate      = useNavigate();
+  const toast         = useToast();
 
+  /* â”€â”€ Estado vista principal (sin patientId) â”€â”€ */
+  const [recent,     setRecent]     = useState([]);
+  const [loadingAll, setLoadingAll] = useState(false);
+  const [searchDni,  setSearchDni]  = useState('');
+  const [searching,  setSearching]  = useState(false);
+
+  // Filtros
+  const now = new Date();
+  const [filterYear,  setFilterYear]  = useState('');
+  const [filterMonth, setFilterMonth] = useState('');
+  const [filterDate,  setFilterDate]  = useState('');
+
+  /* â”€â”€ Estado vista historial paciente â”€â”€ */
+  const [treatments,        setTreatments]        = useState([]);
+  const [patient,           setPatient]           = useState(null);
+  const [loading,           setLoading]           = useState(true);
+  const [selectedTreatment, setSelectedTreatment] = useState(null);
+
+  // â”€â”€ Carga tratamientos recientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const loadRecent = useCallback(async () => {
+    setLoadingAll(true);
+    try {
+      const data = await reportService.getRecentTreatments();
+      const list = data.treatments || data || [];
+      const sorted = [...list].sort(
+        (a, b) => new Date(b.updated_at || b.treatment_date) - new Date(a.updated_at || a.treatment_date)
+      );
+      setRecent(sorted);
+    } catch {
+      toast.error('Error al cargar historiales recientes');
+    } finally {
+      setLoadingAll(false);
+    }
+  }, [toast]);
+
+  // â”€â”€ Carga historial de un paciente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadHistory = useCallback(async (id) => {
     setLoading(true);
     try {
       const data = await treatmentService.getByPatient(id);
       setTreatments(data.treatments);
       setPatient(data.patient);
-    } catch (_) {
+    } catch {
       toast.error('Error al cargar historial');
     } finally {
       setLoading(false);
@@ -32,27 +81,60 @@ export default function HistoryPage() {
       loadHistory(patientId);
     } else {
       setLoading(false);
+      loadRecent();
     }
-  }, [patientId, loadHistory]);
+  }, [patientId, loadHistory, loadRecent]);
 
+  // â”€â”€ Buscador DNI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const searchByDni = async () => {
     if (!searchDni.trim()) return;
+    setSearching(true);
     try {
       const data = await patientService.searchByDni(searchDni.trim());
       navigate(`/panel/historial/${data.patient.id}`);
     } catch {
-      toast.error('Paciente no encontrado');
+      toast.error('Paciente no encontrado con ese DNI');
+    } finally {
+      setSearching(false);
     }
   };
 
+  // â”€â”€ AÃ±os disponibles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const availableYears = useMemo(() => {
+    const years = new Set(recent.map(t => new Date(t.treatment_date).getFullYear()));
+    return [...years].sort((a, b) => b - a);
+  }, [recent]);
+
+  // â”€â”€ Filtrado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const filtered = useMemo(() => {
+    return recent.filter(t => {
+      const d = new Date(t.treatment_date);
+      if (filterDate) {
+        const sel = new Date(filterDate + 'T00:00:00');
+        return d.toDateString() === sel.toDateString();
+      }
+      if (filterYear  && d.getFullYear() !== Number(filterYear))  return false;
+      if (filterMonth && d.getMonth()    !== Number(filterMonth))  return false;
+      return true;
+    });
+  }, [recent, filterYear, filterMonth, filterDate]);
+
+  const clearFilters = () => { setFilterYear(''); setFilterMonth(''); setFilterDate(''); };
+  const hasFilters   = filterYear || filterMonth || filterDate;
+
+  // â”€â”€ Imprimir atenciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const printTreatment = (treatment) => {
     const printWindow = window.open('', '_blank');
+    const patName = patient
+      ? `${patient.first_name} ${patient.last_name}`
+      : `${treatment.patient?.first_name ?? ''} ${treatment.patient?.last_name ?? ''}`;
+    const patDni = patient?.dni ?? treatment.patient?.dni ?? '-';
     const html = `
       <!DOCTYPE html>
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Atención Odontológica</title>
+        <title>AtenciÃ³n OdontolÃ³gica</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1a1a1a; }
@@ -71,28 +153,26 @@ export default function HistoryPage() {
       </head>
       <body>
         <div class="header">
-          <h1>HISTORIAL DE ATENCIÓN ODONTOLÓGICA</h1>
-          <p>Clínica Dental - Sistema de Historial Digital</p>
+          <h1>HISTORIAL DE ATENCIÃ“N ODONTOLÃ“GICA</h1>
+          <p>ClÃ­nica Dental - Sistema de Historial Digital</p>
         </div>
         <div class="section">
           <div class="section-title">Datos del Paciente</div>
-          <div class="field"><span class="field-label">Nombre Completo:</span><span class="field-value">${patient?.first_name} ${patient?.last_name}</span></div>
-          <div class="field"><span class="field-label">DNI:</span><span class="field-value">${patient?.dni}</span></div>
-          <div class="field"><span class="field-label">Edad:</span><span class="field-value">${patient?.age || '-'} años</span></div>
+          <div class="field"><span class="field-label">Nombre Completo:</span><span class="field-value">${patName}</span></div>
+          <div class="field"><span class="field-label">DNI:</span><span class="field-value">${patDni}</span></div>
         </div>
         <div class="section">
-          <div class="section-title">Datos de la Atención</div>
+          <div class="section-title">Datos de la AtenciÃ³n</div>
           <div class="field"><span class="field-label">Fecha:</span><span class="field-value">${new Date(treatment.treatment_date).toLocaleDateString('es-PE')}</span></div>
           <div class="field"><span class="field-label">Motivo de Consulta:</span><span class="field-value">${treatment.reason}</span></div>
-          <div class="field"><span class="field-label">Diente(s) Atendido(s):</span><span class="field-value">${treatment.treatmentTeeth?.map(t => t.tooth?.tooth_number + ' - ' + t.tooth?.name).join(', ') || 'No especificado'}</span></div>
           <div class="field"><span class="field-label">Procedimiento:</span><span class="field-value">${treatment.procedure_performed || '-'}</span></div>
           <div class="field"><span class="field-label">Observaciones:</span><span class="field-value">${treatment.observations || '-'}</span></div>
-          <div class="field"><span class="field-label">Próxima Cita:</span><span class="field-value">${treatment.next_appointment ? new Date(treatment.next_appointment).toLocaleDateString('es-PE') : 'No programada'}</span></div>
-          <div class="field"><span class="field-label">Odontólogo:</span><span class="field-value">${treatment.dentist?.full_name}</span></div>
+          <div class="field"><span class="field-label">PrÃ³xima Cita:</span><span class="field-value">${treatment.next_appointment ? new Date(treatment.next_appointment).toLocaleDateString('es-PE') : 'No programada'}</span></div>
+          <div class="field"><span class="field-label">OdontÃ³logo:</span><span class="field-value">${treatment.dentist?.full_name}</span></div>
         </div>
         <div class="footer">
           <div class="signature">Firma del Paciente</div>
-          <div class="signature">Firma del Odontólogo<br/>${treatment.dentist?.full_name}</div>
+          <div class="signature">Firma del OdontÃ³logo<br/>${treatment.dentist?.full_name}</div>
         </div>
         <script>window.onload = () => window.print();</script>
       </body>
@@ -102,150 +182,278 @@ export default function HistoryPage() {
     printWindow.document.close();
   };
 
-  // Si no hay patientId, mostrar buscador
-  if (!patientId) {
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // VISTA: Historial de paciente especÃ­fico
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  if (patientId) {
+    if (loading) {
+      return (
+        <div className="loading-overlay">
+          <div className="spinner" />
+          <p>Cargando historial...</p>
+        </div>
+      );
+    }
+
     return (
       <div>
-        <h1 className="page-title">Historial Completo</h1>
-        <p className="page-subtitle mb-lg">Busque un paciente para consultar su historial de atenciones</p>
-
-        <div className="card" style={{ maxWidth: '500px' }}>
-          <div className="form-group mb-md">
-            <label className="form-label">Buscar por DNI</label>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Ingrese DNI..."
-                value={searchDni}
-                onChange={(e) => setSearchDni(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && searchByDni()}
-              />
-              <button className="btn btn-primary" onClick={searchByDni}>Buscar</button>
+        <div className="page-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button className="btn btn-ghost btn-icon" onClick={() => navigate('/panel/historial')}>
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="page-title">
+                Historial de {patient?.first_name} {patient?.last_name}
+              </h1>
+              <p className="page-subtitle">DNI: {patient?.dni} â€¢ {treatments.length} atenciones registradas</p>
             </div>
           </div>
+          <button
+            className="btn btn-success"
+            onClick={() => navigate(`/panel/nueva-atencion?patient_id=${patientId}`)}
+          >
+            Nueva AtenciÃ³n
+          </button>
         </div>
+
+        {treatments.length === 0 ? (
+          <div className="empty-state card">
+            <FileText size={48} />
+            <h3>Sin atenciones registradas</h3>
+            <p>Este paciente aÃºn no tiene atenciones odontolÃ³gicas registradas</p>
+          </div>
+        ) : (
+          <div className="treatment-list">
+            {treatments.map((t) => (
+              <div
+                key={t.id}
+                className="treatment-card"
+                onClick={() => setSelectedTreatment(selectedTreatment?.id === t.id ? null : t)}
+              >
+                <div className="treatment-card-header">
+                  <div className="treatment-date">
+                    <Calendar size={16} />
+                    {fmtDateLong(t.treatment_date)}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <span className="treatment-dentist">
+                      <User size={12} style={{ display: 'inline', marginRight: 4 }} />
+                      {t.dentist?.full_name}
+                    </span>
+                    <button
+                      className="btn btn-ghost btn-icon btn-sm"
+                      onClick={(e) => { e.stopPropagation(); printTreatment(t); }}
+                      title="Imprimir"
+                    >
+                      <Printer size={16} />
+                    </button>
+                  </div>
+                </div>
+                <div className="treatment-card-body">
+                  <div className="treatment-field">
+                    <span className="treatment-field-label">Motivo</span>
+                    <span className="treatment-field-value">{t.reason}</span>
+                  </div>
+                  <div className="treatment-field">
+                    <span className="treatment-field-label">Procedimiento</span>
+                    <span className="treatment-field-value">{t.procedure_performed || '-'}</span>
+                  </div>
+                  <div className="treatment-field">
+                    <span className="treatment-field-label">Dientes</span>
+                    <span className="treatment-field-value">
+                      {t.treatmentTeeth?.map((tt) => tt.tooth?.tooth_number).join(', ') || '-'}
+                    </span>
+                  </div>
+                  <div className="treatment-field">
+                    <span className="treatment-field-label">PrÃ³xima Cita</span>
+                    <span className="treatment-field-value">
+                      {t.next_appointment
+                        ? new Date(t.next_appointment).toLocaleDateString('es-PE')
+                        : 'No programada'}
+                    </span>
+                  </div>
+                </div>
+                {selectedTreatment?.id === t.id && (
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+                    <div className="treatment-field">
+                      <span className="treatment-field-label">Observaciones</span>
+                      <span className="treatment-field-value">{t.observations || 'Sin observaciones'}</span>
+                    </div>
+                    {t.treatmentTeeth?.length > 0 && (
+                      <div style={{ marginTop: '12px' }}>
+                        <span className="treatment-field-label">Detalle de dientes:</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                          {t.treatmentTeeth.map((tt, i) => (
+                            <span key={i} className="badge badge-info">
+                              #{tt.tooth?.tooth_number} - {tt.condition || 'N/A'}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
 
-  if (loading) {
-    return (
-      <div className="loading-overlay">
-        <div className="spinner" />
-        <p>Cargando historial...</p>
-      </div>
-    );
-  }
-
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // VISTA: Historial general con filtros
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   return (
     <div>
-      {/* Header con info del paciente */}
+      {/* Encabezado */}
       <div className="page-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button className="btn btn-ghost btn-icon" onClick={() => navigate('/panel/historial')}>
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="page-title">
-              Historial de {patient?.first_name} {patient?.last_name}
-            </h1>
-            <p className="page-subtitle">DNI: {patient?.dni} • {treatments.length} atenciones registradas</p>
-          </div>
+        <div>
+          <h1 className="page-title">Historial Completo</h1>
+          <p className="page-subtitle">Atenciones ordenadas por Ãºltima actualizaciÃ³n</p>
         </div>
-        <button
-          className="btn btn-success"
-          onClick={() => navigate(`/panel/nueva-atencion?patient_id=${patientId}`)}
-        >
-          Nueva Atención
-        </button>
       </div>
 
-      {/* Lista de atenciones */}
-      {treatments.length === 0 ? (
-        <div className="empty-state card">
-          <Stethoscope size={48} />
-          <h3>Sin atenciones registradas</h3>
-          <p>Este paciente aún no tiene atenciones odontológicas registradas</p>
+      {/* Buscador DNI + Filtros */}
+      <div className="hist-toolbar">
+        {/* Buscador */}
+        <div className="hist-search-box">
+          <Search size={16} className="hist-search-icon" />
+          <input
+            type="text"
+            className="hist-search-input"
+            placeholder="Buscar paciente por DNI..."
+            value={searchDni}
+            onChange={(e) => setSearchDni(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && searchByDni()}
+          />
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={searchByDni}
+            disabled={searching || !searchDni.trim()}
+          >
+            {searching ? <div className="spinner-sm" /> : 'Buscar'}
+          </button>
+        </div>
+
+        {/* Filtros */}
+        <div className="hist-filters">
+          <Filter size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+
+          <select
+            className="hist-select"
+            value={filterYear}
+            onChange={(e) => { setFilterYear(e.target.value); setFilterDate(''); }}
+          >
+            <option value="">AÃ±o</option>
+            {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          <select
+            className="hist-select"
+            value={filterMonth}
+            onChange={(e) => { setFilterMonth(e.target.value); setFilterDate(''); }}
+          >
+            <option value="">Mes</option>
+            {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+          </select>
+
+          <input
+            type="date"
+            className="hist-select"
+            value={filterDate}
+            max={now.toISOString().slice(0, 10)}
+            onChange={(e) => { setFilterDate(e.target.value); setFilterYear(''); setFilterMonth(''); }}
+          />
+
+          {hasFilters && (
+            <button className="btn btn-ghost btn-sm hist-clear-btn" onClick={clearFilters} title="Limpiar filtros">
+              <X size={14} /> Limpiar
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Resultados */}
+      {loadingAll ? (
+        <div className="loading-overlay" style={{ minHeight: '200px' }}>
+          <div className="spinner" />
+          <p>Cargando historiales...</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="empty-state card" style={{ marginTop: '24px' }}>
+          <FileText size={48} />
+          <h3>{hasFilters ? 'Sin resultados para ese filtro' : 'Sin atenciones registradas'}</h3>
+          <p>{hasFilters ? 'Intenta con otro perÃ­odo de tiempo.' : 'AÃºn no hay atenciones en el sistema.'}</p>
+          {hasFilters && (
+            <button className="btn btn-ghost btn-sm" style={{ marginTop: '12px' }} onClick={clearFilters}>
+              Quitar filtros
+            </button>
+          )}
         </div>
       ) : (
-        <div className="treatment-list">
-          {treatments.map((t) => (
-            <div key={t.id} className="treatment-card" onClick={() => setSelectedTreatment(selectedTreatment?.id === t.id ? null : t)}>
-              <div className="treatment-card-header">
-                <div className="treatment-date">
-                  <Calendar size={16} />
-                  {new Date(t.treatment_date).toLocaleDateString('es-PE', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span className="treatment-dentist">
-                    <User size={12} style={{ display: 'inline', marginRight: 4 }} />
-                    {t.dentist?.full_name}
-                  </span>
-                  <button
-                    className="btn btn-ghost btn-icon btn-sm"
-                    onClick={(e) => { e.stopPropagation(); printTreatment(t); }}
-                    title="Imprimir"
-                  >
-                    <Printer size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="treatment-card-body">
-                <div className="treatment-field">
-                  <span className="treatment-field-label">Motivo</span>
-                  <span className="treatment-field-value">{t.reason}</span>
-                </div>
-                <div className="treatment-field">
-                  <span className="treatment-field-label">Procedimiento</span>
-                  <span className="treatment-field-value">{t.procedure_performed || '-'}</span>
-                </div>
-                <div className="treatment-field">
-                  <span className="treatment-field-label">Dientes</span>
-                  <span className="treatment-field-value">
-                    {t.treatmentTeeth?.map((tt) => tt.tooth?.tooth_number).join(', ') || '-'}
-                  </span>
-                </div>
-                <div className="treatment-field">
-                  <span className="treatment-field-label">Próxima Cita</span>
-                  <span className="treatment-field-value">
-                    {t.next_appointment
-                      ? new Date(t.next_appointment).toLocaleDateString('es-PE')
-                      : 'No programada'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Detalle expandido */}
-              {selectedTreatment?.id === t.id && (
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-                  <div className="treatment-field">
-                    <span className="treatment-field-label">Observaciones</span>
-                    <span className="treatment-field-value">{t.observations || 'Sin observaciones'}</span>
+        <>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+            {filtered.length} atenciÃ³n{filtered.length !== 1 ? 'es' : ''} encontrada{filtered.length !== 1 ? 's' : ''}
+          </p>
+          <div className="hist-list">
+            {filtered.map((t) => {
+              const pat = t.patient;
+              return (
+                <div
+                  key={t.id}
+                  className="hist-row"
+                  onClick={() => pat?.id && navigate(`/panel/historial/${pat.id}`)}
+                >
+                  {/* Avatar iniciales */}
+                  <div className="hist-avatar">
+                    {pat?.first_name?.[0]}{pat?.last_name?.[0]}
                   </div>
-                  {t.treatmentTeeth?.length > 0 && (
-                    <div style={{ marginTop: '12px' }}>
-                      <span className="treatment-field-label">Detalle de dientes:</span>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
-                        {t.treatmentTeeth.map((tt, i) => (
-                          <span key={i} className="badge badge-info">
-                            #{tt.tooth?.tooth_number} - {tt.condition || 'N/A'}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+
+                  {/* Info paciente */}
+                  <div className="hist-info">
+                    <span className="hist-name">{pat?.first_name} {pat?.last_name}</span>
+                    <span className="hist-dni">DNI: {pat?.dni}</span>
+                  </div>
+
+                  {/* Detalle atenciÃ³n */}
+                  <div className="hist-detail">
+                    <span className="hist-reason">{t.reason}</span>
+                    <span className="hist-procedure">{t.procedure_performed || 'Sin procedimiento'}</span>
+                  </div>
+
+                  {/* Fecha + Doctor */}
+                  <div className="hist-meta">
+                    <span className="hist-date">
+                      <Calendar size={12} /> {fmtDate(t.treatment_date)}
+                    </span>
+                    <span className="hist-doc">
+                      <User size={12} /> {t.dentist?.full_name || 'N/A'}
+                    </span>
+                    {t.updated_at && t.updated_at !== t.created_at && (
+                      <span className="hist-updated">
+                        <Clock size={11} /> Act. {fmtDate(t.updated_at)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* AcciÃ³n */}
+                  <div className="hist-action">
+                    <button
+                      className="btn btn-ghost btn-icon btn-sm"
+                      onClick={(e) => { e.stopPropagation(); printTreatment(t); }}
+                      title="Imprimir"
+                    >
+                      <Printer size={15} />
+                    </button>
+                    <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
