@@ -12,12 +12,11 @@ const PROVIDERS = [
     name: 'Groq',
     enabled: () => !!process.env.GROQ_API_KEY,
     call: async (messages) => {
-      // Modelos activos en Groq (actualizados Oct 2026)
+      // Modelos activos verificados en Groq API (Oct 2026)
       const fallbackModels = [
-        'llama-3.3-70b-versatile',
-        'llama3-8b-8192',
-        'gemma2-9b-it',
-        'mixtral-8x7b-32768',
+        'openai/gpt-oss-120b',
+        'qwen/qwen3.8-27b',
+        'openai/gpt-oss-20b',
       ];
       const maxTokens = parseInt(process.env.GROQ_MAX_TOKENS || '1000');
 
@@ -41,7 +40,6 @@ const PROVIDERS = [
 
           const data = await res.json();
           let text = data?.choices?.[0]?.message?.content || '';
-          // Eliminar bloques <think>...</think> de modelos con reasoning
           text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
           if (text) return text;
         } catch (err) {
@@ -50,13 +48,13 @@ const PROVIDERS = [
         }
       }
 
-      throw lastGroqError || new Error('No se pudo obtener respuesta de Groq con ninguno de los modelos');
+      throw lastGroqError || new Error('No se pudo obtener respuesta de Groq');
     },
   },
 
-
   {
     name: 'OpenRouter',
+
     enabled: () => !!process.env.OPENROUTER_API_KEY,
     call: async (messages) => {
       // Modelos gratuitos en OpenRouter (sin necesidad de créditos)
