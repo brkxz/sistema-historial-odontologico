@@ -12,8 +12,13 @@ const PROVIDERS = [
     name: 'Groq',
     enabled: () => !!process.env.GROQ_API_KEY,
     call: async (messages) => {
-      const primaryModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
-      const fallbackModels = [primaryModel, 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+      // Modelos activos en Groq (actualizados Oct 2026)
+      const fallbackModels = [
+        'llama-3.3-70b-versatile',
+        'llama3-8b-8192',
+        'gemma2-9b-it',
+        'mixtral-8x7b-32768',
+      ];
       const maxTokens = parseInt(process.env.GROQ_MAX_TOKENS || '1000');
 
       let lastGroqError = null;
@@ -48,6 +53,7 @@ const PROVIDERS = [
       throw lastGroqError || new Error('No se pudo obtener respuesta de Groq con ninguno de los modelos');
     },
   },
+
 
   {
     name: 'OpenRouter',
