@@ -8,6 +8,12 @@ import PublicLayout from './components/Layout/PublicLayout';
 import LoginPage from './pages/LoginPage';
 import LandingPage from './pages/LandingPage';
 
+// Detectar si corre como APK nativa (Capacitor Android/iOS)
+const isNativeApp = typeof window !== 'undefined' &&
+  (window.Capacitor?.isNativePlatform?.() ||
+   window.location.protocol === 'capacitor:' ||
+   navigator.userAgent.includes('CapacitorWebView'));
+
 // =============================================
 // Code Splitting: Lazy load todas las páginas
 // =============================================
@@ -93,14 +99,21 @@ function App() {
           <ToastProvider>
             <HideAppLoader />
             <Routes>
-            {/* ═══ Rutas públicas con PublicLayout (Header + Footer + Denty IA) ═══ */}
-            <Route element={<PublicLayout />}>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/servicios" element={<Suspense fallback={<PageLoader />}><ServiciosPage /></Suspense>} />
-              <Route path="/nosotros" element={<Suspense fallback={<PageLoader />}><NosotrosPage /></Suspense>} />
-              <Route path="/equipo" element={<Suspense fallback={<PageLoader />}><EquipoPage /></Suspense>} />
-              <Route path="/contacto" element={<Suspense fallback={<PageLoader />}><ContactoPage /></Suspense>} />
-            </Route>
+            {/* Si es APK nativa, la raiz redirige directo al login */}
+            {isNativeApp && (
+              <Route path="/" element={<Navigate to="/login" replace />} />
+            )}
+
+            {/* Rutas publicas con PublicLayout (solo web) */}
+            {!isNativeApp && (
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/servicios" element={<Suspense fallback={<PageLoader />}><ServiciosPage /></Suspense>} />
+                <Route path="/nosotros" element={<Suspense fallback={<PageLoader />}><NosotrosPage /></Suspense>} />
+                <Route path="/equipo" element={<Suspense fallback={<PageLoader />}><EquipoPage /></Suspense>} />
+                <Route path="/contacto" element={<Suspense fallback={<PageLoader />}><ContactoPage /></Suspense>} />
+              </Route>
+            )}
 
             {/* ═══ Ruta pública: Login del panel admin (oculto) ═══ */}
             <Route
