@@ -3998,3 +3998,17 @@ input[type="search"]::-webkit-search-cancel-button {
   .db-metrics { grid-template-columns: repeat(2, 1fr); }
   .db-title { font-size: 1.35rem; }
 }
+
+/* Dashboard full-width override */
+.db-wrap {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Dashboard ocupa todo el ancho disponible */
+.db-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
