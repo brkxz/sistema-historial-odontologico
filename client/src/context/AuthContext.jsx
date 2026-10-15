@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
 
   // Mantener el servidor de Render despierto: ping cada 5 minutos mientras hay sesion
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://odontologia-api-9s6v.onrender.com';
+    const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://odontologia-api-9a6v.onrender.com';
     const ping = () => fetch(`${API_BASE}/api/health`, { method: 'GET', mode: 'cors' }).catch(() => {});
     ping(); // Ping inmediato al cargar
     const interval = setInterval(ping, 5 * 60 * 1000); // Cada 5 minutos (Render duerme a los 15min)

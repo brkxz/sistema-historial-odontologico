@@ -13,7 +13,7 @@ jobs:
       - name: Ping backend health endpoint
         run: |
           echo "Pinging Render backend to keep it alive..."
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://odontologia-api-9s6v.onrender.com/api/health)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://odontologia-api-9a6v.onrender.com/api/health)
           echo "Response status: $STATUS"
           if [ "$STATUS" = "200" ]; then
             echo "✅ Backend is alive and responding!"
