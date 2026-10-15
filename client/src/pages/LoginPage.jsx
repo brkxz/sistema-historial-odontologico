@@ -22,49 +22,12 @@ export default function LoginPage() {
   const [loading, setLoading]             = useState(false);
   const [socialLoading, setSocialLoading] = useState('');
   const [error, setError]                 = useState('');
-  const [serverStatus, setServerStatus]   = useState('checking'); // 'checking' | 'online' | 'offline'
   const navigate                          = useNavigate();
   const { login, loginWithGoogle }        = useAuth();
   const toast                             = useToast();
 
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const isNative = Capacitor.isNativePlatform();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-
-  // Verificar estado del servidor al cargar la pagina
-  useEffect(() => {
-    let cancelled = false;
-    let attempts = 0;
-    const maxAttempts = 5;
-
-    const checkServer = async () => {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 10000);
-        const res = await fetch(`${API_URL.replace('/api', '')}/api/health`, {
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-        if (!cancelled && res.ok) {
-          setServerStatus('online');
-          setError('');
-        }
-      } catch {
-        attempts++;
-        if (!cancelled) {
-          if (attempts < maxAttempts) {
-            setServerStatus('checking');
-            setTimeout(checkServer, 5000);
-          } else {
-            setServerStatus('offline');
-          }
-        }
-      }
-    };
-
-    checkServer();
-    return () => { cancelled = true; };
-  }, [API_URL]);
 
   useEffect(() => {
     if (isNative) return;
@@ -86,7 +49,13 @@ export default function LoginPage() {
       toast.success('¡Bienvenido al sistema!');
       navigate('/panel');
     } catch (err) {
-      setError(err.message || 'Credenciales incorrectas');
+      const msg = err.message || '';
+      // Si es error de cold-start, mostrar mensaje mas amigable
+      if (msg.includes('iniciando') || msg.includes('servidor') || msg.includes('conexion') || msg.includes('fetch')) {
+        setError('El servidor tardó en responder. Haz clic en "Entrar" nuevamente para conectar.');
+      } else {
+        setError(msg || 'Credenciales incorrectas');
+      }
     } finally { setLoading(false); }
   };
 
@@ -191,19 +160,6 @@ export default function LoginPage() {
           <p className="lp-form-sub">Hospital San Ramón · Chanchamayo</p>
 
           <form className="lp-form" onSubmit={handleSubmit}>
-            {/* Server status indicator */}
-            {serverStatus === 'checking' && (
-              <div className="lp-server-status lp-server-checking">
-                <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2, borderColor: '#3b82f6 transparent #3b82f6 #3b82f6' }} />
-                <span>Conectando con el servidor... Esto puede tomar unos segundos</span>
-              </div>
-            )}
-            {serverStatus === 'online' && !error && (
-              <div className="lp-server-status lp-server-online">
-                <ShieldCheck size={14} />
-                <span>Servidor conectado y listo</span>
-              </div>
-            )}
             {error && (
               <div className="lp-error">
                 <AlertCircle size={14} /> <span>{error}</span>
