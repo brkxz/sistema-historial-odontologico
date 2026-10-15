@@ -73,10 +73,17 @@ export function AuthProvider({ children }) {
   };
 
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+  const logout = async () => {
+    try {
+      // Revocar token en el servidor (invalidación real del JWT)
+      await authService.logout();
+    } catch {
+      // Si falla, igual limpiamos localmente
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
   };
 
   const isAdmin = user?.role === 'admin';

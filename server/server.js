@@ -6,17 +6,21 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { sequelize } from './models/index.js';
+import { cleanExpiredTokens } from './models/RevokedToken.js';
+import logger from './utils/logger.js';
+import { setupSwagger } from './utils/swagger.js';
 
 // Rutas
-import authRoutes from './routes/auth.js';
-import patientRoutes from './routes/patients.js';
-import treatmentRoutes from './routes/treatments.js';
-import odontogramRoutes from './routes/odontogram.js';
-import userRoutes from './routes/users.js';
-import reportRoutes from './routes/reports.js';
-import reniecRoutes from './routes/reniec.js';
-import aiRoutes from './routes/ai.js';
-import auditRoutes from './routes/audit.js';
+import authRoutes        from './routes/auth.js';
+import patientRoutes     from './routes/patients.js';
+import treatmentRoutes   from './routes/treatments.js';
+import odontogramRoutes  from './routes/odontogram.js';
+import userRoutes        from './routes/users.js';
+import reportRoutes      from './routes/reports.js';
+import reniecRoutes      from './routes/reniec.js';
+import aiRoutes          from './routes/ai.js';
+import auditRoutes       from './routes/audit.js';
+import appointmentRoutes from './routes/appointments.js';
 
 // Middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -59,38 +63,39 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
-  'https://localhost',        // Capacitor Android (androidScheme: https)
-  'https://app',              // Capacitor Android con hostname: app
-  'http://app',               // Capacitor Android fallback
-  'capacitor://localhost',    // Capacitor Android (androidScheme: capacitor)
-  'ionic://localhost',        // Ionic/Capacitor iOS
-  'http://localhost',         // Capacitor generico
+  'https://localhost',
+  'https://app',
+  'http://app',
+  'capacitor://localhost',
+  'ionic://localhost',
+  'http://localhost',
 ];
 
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
 
+const isProd = process.env.NODE_ENV === 'production';
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Permitir requests sin origin (curl, Postman, algunos contextos móviles)
+    // Requests sin origin (Postman, algunos móviles)
     if (!origin) return callback(null, true);
-    // Permitir orígenes de Vercel (preview y producción)
+    // Vercel previews y producción
     if (origin.includes('vercel.app')) return callback(null, true);
-    // Permitir localhost en cualquier puerto (Capacitor, dev)
-    if (origin.includes('localhost')) return callback(null, true);
-    // Verificar contra lista de orígenes permitidos
+    // En desarrollo: permitir cualquier localhost
+    if (!isProd && origin.includes('localhost')) return callback(null, true);
+    // Verificar contra lista explícita
     if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       return callback(null, true);
     }
-    // Rechazar orígenes no autorizados
-    console.warn(`⚠️ CORS: Origen no autorizado bloqueado: ${origin}`);
+    logger.warn('CORS: Origen no autorizado bloqueado', { origin });
     callback(new Error('No permitido por CORS'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400, // Cache preflight 24h
+  maxAge: 86400,
 }));
 
 // Parseo de body con límites
@@ -106,6 +111,9 @@ app.use(sanitizeInputs);
 // Ocultar tecnología del servidor
 app.disable('x-powered-by');
 
+// Documentación API — Swagger UI
+setupSwagger(app);
+
 // =============================================
 // RUTAS DE LA API
 // =============================================
@@ -118,6 +126,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/reniec', reniecRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // Ruta protegida para obtener dientes
 app.get('/api/teeth', authenticateToken, async (req, res) => {
@@ -140,19 +149,16 @@ app.get('/api/health', (req, res) => {
 // MANEJO DE ERRORES GLOBAL
 // =============================================
 app.use((err, req, res, next) => {
-  // Error de CORS
   if (err.message === 'No permitido por CORS') {
     return res.status(403).json({ error: 'Origen no autorizado' });
   }
-  // Error de JSON malformado
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'JSON malformado' });
   }
-  // Error de payload demasiado grande
   if (err.type === 'entity.too.large') {
     return res.status(413).json({ error: 'Solicitud demasiado grande' });
   }
-  console.error('Error no manejado:', err);
+  logger.error('Error no manejado', { error: err.message, stack: err.stack, path: req.path });
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
@@ -161,29 +167,32 @@ app.use((err, req, res, next) => {
 // =============================================
 async function startServer() {
   try {
-    // Verificar conexión a la base de datos
     await sequelize.authenticate();
-    console.log('✅ Conexión a la base de datos establecida.');
+    logger.info('Conexión a la base de datos establecida.');
 
-    // Sincronizar modelos
     const isDev = process.env.NODE_ENV !== 'production';
     await sequelize.sync(isDev ? { alter: true } : {});
-    console.log(`✅ Modelos sincronizados (${isDev ? 'desarrollo - alter' : 'producción - safe'}).`);
+    logger.info(`Modelos sincronizados (${isDev ? 'desarrollo - alter' : 'producción - safe'}).`);
+
+    // Limpiar tokens JWT revocados expirados (cada hora)
+    setInterval(cleanExpiredTokens, 60 * 60 * 1000);
+    cleanExpiredTokens().catch(() => {});
 
     app.listen(PORT, () => {
+      logger.info(`Servidor iniciado en http://localhost:${PORT}`);
       console.log('');
-      console.log('════════════════════════════════════════════════════');
+      console.log('════════════════════════════════════════════════════════');
       console.log('  🦷 Sistema de Historial Odontológico Digital');
-      console.log('════════════════════════════════════════════════════');
+      console.log('════════════════════════════════════════════════════════');
       console.log(`  Servidor:  http://localhost:${PORT}`);
       console.log(`  API:       http://localhost:${PORT}/api`);
-      console.log(`  Estado:    http://localhost:${PORT}/api/health`);
-      console.log('  Seguridad: 🔒 Rate Limit + Helmet + CORS + Sanitize');
-      console.log('════════════════════════════════════════════════════');
+      console.log(`  Docs API:  http://localhost:${PORT}/api-docs`);
+      console.log('  Seguridad: 🔒 Rate Limit + Helmet + Zod + JWT Blacklist');
+      console.log('════════════════════════════════════════════════════════');
       console.log('');
     });
   } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error);
+    logger.error('Error al iniciar el servidor', { error: error.message });
     process.exit(1);
   }
 }

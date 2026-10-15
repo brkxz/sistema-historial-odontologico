@@ -4,20 +4,21 @@ import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Search, UserPlus,
   History, Users, BarChart3, LogOut, Menu, X,
-  Stethoscope, Home, FilePlus, User, ScrollText, UserCog
+  Stethoscope, Home, FilePlus, User, ScrollText, UserCog, CalendarCheck
 } from 'lucide-react';
 import logoDental from '../../assets/logo-dental.jpg';
 
 const navItems = [
-  { path: '/panel', icon: LayoutDashboard, label: 'Inicio', section: 'general' },
-  { path: '/panel/buscar', icon: Search, label: 'Buscar Paciente', section: 'general' },
-  { path: '/panel/pacientes', icon: Users, label: 'Pacientes', section: 'general' },
-  { path: '/panel/nueva-atencion', icon: FilePlus, label: 'Nueva Atención', section: 'atenciones' },
-  { path: '/panel/historial', icon: History, label: 'Historial', section: 'atenciones' },
-  { path: '/panel/odontograma', icon: Stethoscope, label: 'Odontograma', section: 'atenciones' },
-  { path: '/panel/reportes', icon: BarChart3, label: 'Reportes', section: 'admin', adminOnly: true },
-  { path: '/panel/usuarios', icon: UserCog, label: 'Panel de Doctores', section: 'admin', adminOnly: true },
-  { path: '/panel/auditoria', icon: ScrollText, label: 'Auditoría', section: 'admin', adminOnly: true },
+  { path: '/panel',               icon: LayoutDashboard, label: 'Inicio',           section: 'general' },
+  { path: '/panel/buscar',        icon: Search,          label: 'Buscar Paciente',  section: 'general' },
+  { path: '/panel/pacientes',     icon: Users,           label: 'Pacientes',        section: 'general' },
+  { path: '/panel/nueva-atencion',icon: FilePlus,        label: 'Nueva Atención',   section: 'atenciones' },
+  { path: '/panel/historial',     icon: History,         label: 'Historial',        section: 'atenciones' },
+  { path: '/panel/odontograma',   icon: Stethoscope,     label: 'Odontograma',      section: 'atenciones' },
+  { path: '/panel/citas',         icon: CalendarCheck,   label: 'Agenda de Citas',  section: 'atenciones' },
+  { path: '/panel/reportes',      icon: BarChart3,       label: 'Reportes',         section: 'admin', adminOnly: true },
+  { path: '/panel/usuarios',      icon: UserCog,         label: 'Panel de Doctores',section: 'admin', adminOnly: true },
+  { path: '/panel/auditoria',     icon: ScrollText,      label: 'Auditoría',        section: 'admin', adminOnly: true },
 ];
 
 
@@ -35,8 +36,8 @@ export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

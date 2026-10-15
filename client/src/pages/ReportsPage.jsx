@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { reportService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
-import { Users, ClipboardList, Calendar, TrendingUp, Download } from 'lucide-react';
+import { exportReportPDF } from '../utils/exportPDF';
+import { Users, ClipboardList, Calendar, TrendingUp, Download, FileText } from 'lucide-react';
 
 export default function ReportsPage() {
   const [summary, setSummary] = useState(null);

@@ -105,6 +105,15 @@ const api = {
     });
     return handleResponse(response);
   },
+
+  patch: async (endpoint, body) => {
+    const response = await fetchWithRetry(`${API_URL}${endpoint}`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify(body),
+    });
+    return handleResponse(response);
+  },
 };
 
 
@@ -112,12 +121,13 @@ const api = {
 // AUTH
 // =============================================
 export const authService = {
-  login: (username, password) => api.post('/auth/login', { username, password }),
-  loginWithGoogle: (token) => api.post('/auth/google', { token }),
-  getMe: () => api.get('/auth/me'),
+  login:          (username, password) => api.post('/auth/login', { username, password }),
+  logout:         ()                   => api.post('/auth/logout', {}),
+  loginWithGoogle:(token)              => api.post('/auth/google', { token }),
+  getMe:          ()                   => api.get('/auth/me'),
   changePassword: (current_password, new_password) =>
     api.post('/auth/change-password', { current_password, new_password }),
-  updateProfile: (data) => api.put('/auth/profile', data),
+  updateProfile:  (data)               => api.put('/auth/profile', data),
 };
 
 // =============================================
@@ -193,13 +203,36 @@ export const auditService = {
   getLogs: (params = {}) => {
     const { page = 1, limit = 30, action, entity, user_id, start_date, end_date } = params;
     const query = new URLSearchParams({ page, limit });
-    if (action) query.append('action', action);
-    if (entity) query.append('entity', entity);
-    if (user_id) query.append('user_id', user_id);
+    if (action)     query.append('action', action);
+    if (entity)     query.append('entity', entity);
+    if (user_id)    query.append('user_id', user_id);
     if (start_date) query.append('start_date', start_date);
-    if (end_date) query.append('end_date', end_date);
+    if (end_date)   query.append('end_date', end_date);
     return api.get(`/audit?${query.toString()}`);
   },
+};
+
+// =============================================
+// CITAS
+// =============================================
+export const appointmentService = {
+  getAll:     (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.date)       query.set('date',       params.date);
+    if (params.status)     query.set('status',     params.status);
+    if (params.dentist_id) query.set('dentist_id', params.dentist_id);
+    if (params.patient_id) query.set('patient_id', params.patient_id);
+    if (params.page)       query.set('page',       params.page);
+    if (params.limit)      query.set('limit',      params.limit);
+    return api.get(`/appointments?${query.toString()}`);
+  },
+  getToday:    ()                 => api.get('/appointments/today'),
+  getUpcoming: ()                 => api.get('/appointments/upcoming'),
+  getById:     (id)               => api.get(`/appointments/${id}`),
+  create:      (data)             => api.post('/appointments', data),
+  update:      (id, data)         => api.put(`/appointments/${id}`, data),
+  cancel:      (id, reason = '')  => api.patch(`/appointments/${id}/cancel`, { reason }),
+  complete:    (id)               => api.patch(`/appointments/${id}/complete`, {}),
 };
 
 export default api;

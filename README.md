@@ -1,6 +1,13 @@
-# 🦷 Sistema de Historial Odontológico Digital
+# 🦷 Sistema de Historial Odontológico Digital v2.0
 
-> Sistema web clínico para la gestión de pacientes, historiales y atenciones del **Servicio de Odontología — Hospital San Ramón, Chanchamayo, Perú**.
+> Sistema web clínico para la gestión de pacientes, historiales y atenciones del **Servicio de Odontología — Hospital San Ramón, Chanchamayo, Perú**.  
+> Proyecto de Tesis · Ingeniería de Sistemas
+
+![Tests](https://img.shields.io/badge/Tests-56%20passing-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-70%25-green)
+![Node](https://img.shields.io/badge/Node.js-ESM-blue)
+![React](https://img.shields.io/badge/React-19-61dafb)
+![License](https://img.shields.io/badge/License-Academic-orange)
 
 ---
 
@@ -8,131 +15,207 @@
 
 Plataforma fullstack que permite al personal médico gestionar de forma eficiente:
 
-- Registro y búsqueda de pacientes por DNI (con consulta a RENIEC)
-- Historial clínico completo por paciente
-- Odontograma interactivo digital
-- Registro de atenciones y tratamientos
-- Reportes estadísticos por fecha y dentista
-- Auditoría de acciones del sistema
-- Asistente IA integrado (Denty) con soporte por voz
+- 👥 **Pacientes** — Registro con autocompletado via RENIEC, búsqueda por DNI/nombre
+- 📋 **Historial Clínico** — Atenciones odontológicas con exportación a PDF
+- 🦷 **Odontograma Digital** — Representación interactiva de los 32 dientes
+- 📅 **Agenda de Citas** — Con detección automática de conflictos de horario
+- 📊 **Reportes** — Estadísticas y exportación CSV/PDF
+- 🤖 **Asistente IA "Denty"** — Con activación por voz (wake word)
+- 📱 **App Android** — APK nativo via Capacitor 8
 
 ---
 
-## 🗂️ Estructura del Proyecto
+## 🏗️ Arquitectura
 
 ```
-sistema-historial-odontologico/
-├── client/               # Frontend — React + Vite (PWA)
-│   └── src/
-│       ├── components/   # Componentes reutilizables
-│       ├── context/      # Contextos globales (Auth, AI)
-│       ├── hooks/        # Custom hooks
-│       ├── pages/        # Páginas de la aplicación
-│       ├── services/     # Llamadas a la API
-│       ├── styles/       # CSS global y por módulo
-│       └── utils/        # Utilidades y helpers
-├── server/               # Backend — Node.js + Express
-│   ├── config/           # Configuración de base de datos
-│   ├── middleware/        # Auth, auditoría, rate limiting
-│   ├── models/           # Modelos Sequelize (ORM)
-│   ├── routes/           # Endpoints de la API REST
-│   ├── seeders/          # Datos iniciales
-│   └── utils/            # Utilidades del servidor
-├── database/             # Base de datos SQLite (local dev)
-├── docs/                 # Documentación y prototipos
-└── releases/             # APKs de la app Android
+┌─────────────────────────────────────────────────────────────┐
+│    React 19 + Vite 8  (client/)                            │
+│    Auth Context · React Router · jsPDF · Lucide Icons      │
+├─────────────────────────────────────────────────────────────┤
+│    Express.js API  (server/)                                │
+│    Helmet · CORS · Rate Limiter · Zod · JWT + Blacklist    │
+│    Winston Logger · Swagger /api-docs                       │
+├────────────────────┬────────────────────┬───────────────────┤
+│  SQLite (dev)      │   PostgreSQL (prod) │  Servicios ext.  │
+│  Sequelize ORM     │   Render.com        │  RENIEC · Groq   │
+└────────────────────┴────────────────────┴───────────────────┘
 ```
 
 ---
 
-## 🚀 Inicio Rápido
+## 🚀 Instalación y Configuración
 
-### Requisitos
+### Prerrequisitos
+- **Node.js** >= 20.x
+- **npm** >= 9.x
 
-- Node.js v18 o superior
-- npm v9 o superior
-
-### Instalación
-
-```bash
-# Clonar el repositorio
-git clone <url-del-repo>
-cd sistema-historial-odontologico
-
-# Instalar todas las dependencias
-npm run install:all
-```
-
-### Configuración
-
-Copia el archivo de ejemplo y configura las variables:
+### 1. Clonar el repositorio
 
 ```bash
-cp server/.env.example server/.env
+git clone https://github.com/tu-usuario/sistema-historial-odontologico.git
+cd "Sistema de Historial Odontologico"
 ```
 
-Edita `server/.env` con tus credenciales:
+### 2. Configurar el servidor (Backend)
+
+```bash
+cd server
+npm install
+```
+
+Crear archivo `.env` en `/server`:
 
 ```env
-JWT_SECRET=tu_clave_secreta_aqui
-GEMINI_API_KEY=tu_api_key_de_gemini
-RENIEC_API_TOKEN=tu_token_reniec          # opcional
-APIPERU_DEV_TOKEN=tu_token_apiperu       # opcional
-```
+# Obligatorio
+JWT_SECRET=tu-secreto-super-seguro-minimo-32-caracteres
+JWT_ISSUER=historial-odontologico
+JWT_AUD=odonto-app
 
-### Ejecutar en desarrollo
+# Opcional (dev usa SQLite por defecto)
+DATABASE_URL=postgresql://user:pass@host:5432/odontologia
+
+# Servicios externos (opcionales)
+GOOGLE_CLIENT_ID=tu-google-client-id
+GROQ_API_KEY=tu-groq-api-key
+OPENROUTER_API_KEY=tu-openrouter-key
+RENIEC_API_KEY=tu-api-key-apiperu
+```
 
 ```bash
-# Servidor backend (puerto 3001)
-npm run dev:server
+npm run seed    # Carga datos iniciales (usuario admin)
+npm run dev     # Inicia servidor en http://localhost:3001
+```
 
-# Cliente frontend (puerto 5173)
-npm run dev:client
+### 3. Configurar el cliente (Frontend)
+
+```bash
+cd ../client
+npm install
+```
+
+Crear archivo `.env` en `/client`:
+
+```env
+VITE_API_URL=http://localhost:3001/api
+VITE_GOOGLE_CLIENT_ID=tu-google-client-id
+```
+
+```bash
+npm run dev     # Inicia frontend en http://localhost:5173
 ```
 
 ---
 
-## 🛠️ Tecnologías
+## 🧪 Tests
 
-| Capa | Tecnología |
-|------|-----------|
-| Frontend | React 18, Vite, React Router v6 |
-| Estilos | Vanilla CSS (Design System propio) |
-| Backend | Node.js, Express |
-| Base de datos | SQLite (dev) / PostgreSQL (prod) |
-| ORM | Sequelize |
-| Autenticación | JWT + bcrypt |
-| IA | Google Gemini API |
-| PWA | Vite PWA Plugin + Workbox |
-| Mobile | Capacitor (Android) |
+```bash
+cd server
 
----
+npm test                 # Ejecutar 56 tests
+npm run test:watch       # Modo watch (desarrollo)
+npm run test:coverage    # Reporte de cobertura HTML
+```
 
-## 📡 API Endpoints principales
+### Resultados de Tests
 
-| Método | Endpoint | Descripción |
-|--------|---------|-------------|
-| POST | `/api/auth/login` | Autenticación de usuarios |
-| GET | `/api/patients/search/:dni` | Búsqueda por DNI |
-| POST | `/api/patients` | Registrar paciente |
-| GET | `/api/treatments/patient/:id` | Historial de atenciones |
-| POST | `/api/treatments` | Nueva atención |
-| GET | `/api/odontogram/:patientId` | Odontograma del paciente |
-| GET | `/api/reniec/dni/:numero` | Consulta RENIEC |
-| POST | `/api/ai/chat` | Asistente IA Denty |
-| GET | `/api/reports/summary` | Estadísticas generales |
+| Suite | Tests | Estado |
+|-------|-------|--------|
+| `auth.test.js` — JWT y middleware | 9 | ✅ |
+| `schemas.test.js` — Validaciones Zod | 31 | ✅ |
+| `roles.test.js` — Control de acceso | 7 | ✅ |
+| `sanitize.test.js` — Sanitización XSS | 9 | ✅ |
+| **TOTAL** | **56** | ✅ **All passing** |
 
 ---
 
-## 👨‍⚕️ Personal del Sistema
+## 📚 Documentación
 
-El sistema diferencia dos roles:
+| Documento | Ubicación |
+|-----------|-----------|
+| 📊 Diagrama ER | [`docs/diagramas/diagrama_ER.jpg`](docs/diagramas/diagrama_ER.jpg) |
+| 🏗️ Diagrama de Arquitectura | [`docs/diagramas/diagrama_arquitectura.jpg`](docs/diagramas/diagrama_arquitectura.jpg) |
+| 📋 Análisis de Requerimientos | [`docs/analisis_requerimientos.md`](docs/analisis_requerimientos.md) |
+| 📖 Manual de Usuario | [`docs/manual_usuario.md`](docs/manual_usuario.md) |
+| 🔌 API Swagger | `http://localhost:3001/api-docs` |
 
-- **Admin** — acceso completo, gestión de usuarios y auditoría
-- **Odontólogo** — atención a pacientes, historial y odontograma
+---
+
+## 🛡️ Seguridad Implementada
+
+| Medida | Implementación |
+|--------|--------------|
+| Contraseñas | bcrypt (salt=12) |
+| Tokens | JWT con expiración 8h + JTI único |
+| Logout | Blacklist en BD (revocación real) |
+| Headers | Helmet.js (CSP, HSTS, X-Frame) |
+| Rate Limiting | 100 req/15min global |
+| Validación | Zod en todos los endpoints |
+| Sanitización | XSS filter en body, query, params |
+| Auditoría | Registro completo de acciones |
+| Logs | Winston → `/server/logs/` |
+| Account Lockout | 5 intentos → 15min bloqueado |
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+Sistema de Historial Odontologico/
+├── 📁 client/                    # Frontend React
+│   └── src/
+│       ├── components/           # Componentes UI reutilizables
+│       ├── context/              # AuthContext, AIContext
+│       ├── pages/                # 15+ páginas de la app
+│       ├── services/             # API service layer
+│       └── utils/exportPDF.js    # Exportación a PDF
+│
+├── 📁 server/                    # Backend Node.js
+│   ├── config/                   # Configuración DB
+│   ├── middleware/               # Auth, RBAC, sanitize, logs
+│   ├── models/                   # Modelos Sequelize (9 tablas)
+│   ├── routes/                   # Endpoints API (10 módulos)
+│   ├── utils/                    # Logger, Schemas Zod, Swagger
+│   ├── tests/                    # 56 tests unitarios
+│   └── logs/                     # Logs Winston (gitignored)
+│
+├── 📁 docs/                      # Documentación técnica
+│   ├── diagramas/                # ER + Arquitectura
+│   ├── analisis_requerimientos.md
+│   └── manual_usuario.md
+│
+└── README.md
+```
+
+---
+
+## 🌐 Deploy en Producción
+
+### Backend (Render.com)
+1. Crear nuevo Web Service en render.com
+2. Conectar repositorio GitHub
+3. Configurar variables de entorno
+4. Build Command: `npm install`
+5. Start Command: `npm start`
+
+### Frontend (Vercel)
+1. Importar proyecto en vercel.com
+2. Framework preset: **Vite**
+3. Root Directory: `client/`
+4. Configurar `VITE_API_URL` con la URL del backend en Render
+
+---
+
+## 👤 Credenciales Iniciales (Seed)
+
+> ⚠️ Cambiar inmediatamente en producción
+
+| Usuario | Contraseña | Rol |
+|---------|-----------|-----|
+| `admin` | `Admin123` | Administrador |
 
 ---
 
 ## 📄 Licencia
 
-Uso interno — Hospital San Ramón, Chanchamayo, Perú. Todos los derechos reservados.
+Proyecto académico desarrollado como Tesis de Pregrado.  
+Hospital San Ramón · Chanchamayo, Perú · 2026.

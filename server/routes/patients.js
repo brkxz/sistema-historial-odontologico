@@ -2,50 +2,52 @@ import { Router } from 'express';
 import { Op } from 'sequelize';
 import { Patient, User, Treatment, sequelize } from '../models/index.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { requireDentistOrAdmin } from '../middleware/roles.js';
 import { logAudit } from '../middleware/audit.js';
+import { createPatientSchema, updatePatientSchema, paginationSchema, validate } from '../utils/schemas.js';
+import logger from '../utils/logger.js';
 
 const router = Router();
 
 // Todas las rutas requieren autenticación
 router.use(authenticateToken);
 
-// GET /api/patients - Listar pacientes
+// GET /api/patients — Listar pacientes con paginación segura
 router.get('/', async (req, res) => {
   try {
-    const { search, page = 1, limit = 20 } = req.query;
+    const { search } = req.query;
+    const { page, limit } = paginationSchema.parse(req.query);
     const offset = (page - 1) * limit;
 
-    let where = {};
+    let where = { deleted_at: null }; // Solo pacientes activos (soft delete)
     if (search) {
-      // iLike es case-insensitive en PostgreSQL; like para SQLite
       const likeOp = sequelize.getDialect() === 'postgres' ? Op.iLike : Op.like;
       where = {
+        deleted_at: null,
         [Op.or]: [
-          { dni: { [likeOp]: `%${search}%` } },
+          { dni:        { [likeOp]: `%${search}%` } },
           { first_name: { [likeOp]: `%${search}%` } },
-          { last_name: { [likeOp]: `%${search}%` } },
+          { last_name:  { [likeOp]: `%${search}%` } },
         ],
       };
     }
 
     const { rows: patients, count: total } = await Patient.findAndCountAll({
       where,
-      include: [
-        { model: User, as: 'registeredByUser', attributes: ['full_name'] },
-      ],
+      include: [{ model: User, as: 'registeredByUser', attributes: ['full_name'] }],
       order: [['created_at', 'DESC']],
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+      limit,
+      offset,
     });
 
     res.json({
       patients,
       total,
-      page: parseInt(page),
+      page,
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error('Error al listar pacientes:', error);
+    logger.error('Error al listar pacientes', { error: error.message });
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -102,46 +104,35 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/patients - Crear paciente
-router.post('/', async (req, res) => {
+// POST /api/patients — Crear paciente (validado con Zod)
+router.post('/', requireDentistOrAdmin, validate(createPatientSchema), async (req, res) => {
   try {
-    const { dni, first_name, last_name, birth_date, age, gender, phone, address, email, medical_history, allergies, medications, blood_type } = req.body;
+    const data = req.body;
 
-    // Validaciones
-    if (!dni || !first_name || !last_name) {
-      return res.status(400).json({ error: 'DNI, nombres y apellidos son requeridos' });
-    }
-
-    // Verificar DNI único
-    const existing = await Patient.findOne({ where: { dni } });
+    // Verificar DNI único (incluyendo eliminados lógicamente)
+    const existing = await Patient.findOne({ where: { dni: data.dni } });
     if (existing) {
+      if (existing.deleted_at) {
+        return res.status(409).json({
+          error: 'Ya existe un paciente con este DNI (fue eliminado). Contacte al administrador para restaurarlo.',
+        });
+      }
       return res.status(409).json({ error: 'Ya existe un paciente con este DNI' });
     }
 
     const patient = await Patient.create({
-      dni,
-      first_name,
-      last_name,
-      birth_date: birth_date || null,
-      age: age || null,
-      gender: gender || null,
-      phone: phone || null,
-      address: address || null,
-      email: email && email.trim() !== '' ? email.trim() : null,
-      medical_history: medical_history || null,
-      allergies: allergies || null,
-      medications: medications || null,
-      blood_type: blood_type || null,
+      ...data,
+      email:             data.email && data.email.trim() !== '' ? data.email.trim() : null,
       registration_date: new Date().toISOString().split('T')[0],
-      registered_by: req.user.id,
+      registered_by:     req.user.id,
     });
 
-    // Auditoría
     await logAudit(req.user.id, 'CREATE', 'patient', patient.id, null, patient.toJSON(), req.ip);
+    logger.info('Paciente creado', { patientId: patient.id, dni: data.dni, by: req.user.username });
 
     res.status(201).json({ patient });
   } catch (error) {
-    console.error('Error al crear paciente:', error);
+    logger.error('Error al crear paciente', { error: error.message });
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({ error: 'Ya existe un paciente con este DNI' });
     }
@@ -149,48 +140,49 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/patients/:id - Actualizar paciente
-router.put('/:id', async (req, res) => {
+// PUT /api/patients/:id — Actualizar paciente (validado con Zod)
+router.put('/:id', requireDentistOrAdmin, validate(updatePatientSchema), async (req, res) => {
   try {
-    const patient = await Patient.findByPk(req.params.id);
-
-    if (!patient) {
-      return res.status(404).json({ error: 'Paciente no encontrado' });
-    }
+    const patient = await Patient.findOne({
+      where: { id: req.params.id, deleted_at: null },
+    });
+    if (!patient) return res.status(404).json({ error: 'Paciente no encontrado' });
 
     const oldValues = patient.toJSON();
-    const { dni, first_name, last_name, birth_date, age, gender, phone, address, email, medical_history, allergies, medications, blood_type } = req.body;
+    const data = req.body;
 
     // Verificar DNI único si se cambia
-    if (dni && dni !== patient.dni) {
-      const existing = await Patient.findOne({ where: { dni } });
-      if (existing) {
-        return res.status(409).json({ error: 'Ya existe un paciente con este DNI' });
-      }
+    if (data.dni && data.dni !== patient.dni) {
+      const existing = await Patient.findOne({ where: { dni: data.dni } });
+      if (existing) return res.status(409).json({ error: 'Ya existe un paciente con este DNI' });
     }
 
-    await patient.update({
-      dni: dni || patient.dni,
-      first_name: first_name || patient.first_name,
-      last_name: last_name || patient.last_name,
-      birth_date: birth_date !== undefined ? (birth_date || null) : patient.birth_date,
-      age: age !== undefined ? (age || null) : patient.age,
-      gender: gender !== undefined ? (gender || null) : patient.gender,
-      phone: phone !== undefined ? (phone || null) : patient.phone,
-      address: address !== undefined ? (address || null) : patient.address,
-      email: email !== undefined ? (email && email.trim() !== '' ? email.trim() : null) : patient.email,
-      medical_history: medical_history !== undefined ? (medical_history || null) : patient.medical_history,
-      allergies: allergies !== undefined ? (allergies || null) : patient.allergies,
-      medications: medications !== undefined ? (medications || null) : patient.medications,
-      blood_type: blood_type !== undefined ? (blood_type || null) : patient.blood_type,
-    });
-
-    // Auditoría
+    await patient.update(data);
     await logAudit(req.user.id, 'UPDATE', 'patient', patient.id, oldValues, patient.toJSON(), req.ip);
 
     res.json({ patient });
   } catch (error) {
-    console.error('Error al actualizar paciente:', error);
+    logger.error('Error al actualizar paciente', { error: error.message });
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// DELETE /api/patients/:id — Eliminación lógica (soft delete)
+router.delete('/:id', requireDentistOrAdmin, async (req, res) => {
+  try {
+    const patient = await Patient.findOne({
+      where: { id: req.params.id, deleted_at: null },
+    });
+    if (!patient) return res.status(404).json({ error: 'Paciente no encontrado' });
+
+    const oldValues = patient.toJSON();
+    await patient.update({ deleted_at: new Date() });
+    await logAudit(req.user.id, 'DELETE', 'patient', patient.id, oldValues, null, req.ip);
+    logger.info('Paciente eliminado (soft delete)', { patientId: patient.id, by: req.user.username });
+
+    res.json({ message: 'Paciente eliminado correctamente' });
+  } catch (error) {
+    logger.error('Error al eliminar paciente', { error: error.message });
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

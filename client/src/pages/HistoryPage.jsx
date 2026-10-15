@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { treatmentService, patientService, reportService } from '../services/api';
 import { useToast } from '../components/UI/Toast';
+import { exportPatientHistoryPDF } from '../utils/exportPDF';
 import {
-  Calendar, User, Printer, ArrowLeft, Search,
-  ChevronRight, Clock, Filter, X, FileText,
+  Calendar, User, ArrowLeft, Search,
+  ChevronRight, Clock, Filter, X, FileText, Download,
 } from 'lucide-react';
 
 const fmtDate = (d) =>
@@ -168,12 +169,21 @@ export default function HistoryPage() {
               <p className="page-subtitle">DNI: {patient?.dni} &bull; {treatments.length} atenciones registradas</p>
             </div>
           </div>
-          <button
-            className="btn btn-success"
-            onClick={() => navigate(`/panel/nueva-atencion?patient_id=${patientId}`)}
-          >
-            Nueva Atenci&oacute;n
-          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              className="btn btn-ghost"
+              title="Exportar historial completo a PDF"
+              onClick={() => exportPatientHistoryPDF(patient, treatments)}
+            >
+              <Download size={16} /> Exportar PDF
+            </button>
+            <button
+              className="btn btn-success"
+              onClick={() => navigate(`/panel/nueva-atencion?patient_id=${patientId}`)}
+            >
+              Nueva Atención
+            </button>
+          </div>
         </div>
 
         {treatments.length === 0 ? (

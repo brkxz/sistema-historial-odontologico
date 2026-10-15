@@ -22,17 +22,18 @@ const NosotrosPage = lazy(() => import('./pages/NosotrosPage'));
 const EquipoPage = lazy(() => import('./pages/EquipoPage'));
 const ContactoPage = lazy(() => import('./pages/ContactoPage'));
 
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const SearchPage = lazy(() => import('./pages/SearchPage'));
-const PatientsPage = lazy(() => import('./pages/PatientsPage'));
-const TreatmentPage = lazy(() => import('./pages/TreatmentPage'));
-const HistoryPage = lazy(() => import('./pages/HistoryPage'));
-const OdontogramPage = lazy(() => import('./pages/OdontogramPage'));
-const ReportsPage = lazy(() => import('./pages/ReportsPage'));
-const UsersPage = lazy(() => import('./pages/UsersPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const AuditPage = lazy(() => import('./pages/AuditPage'));
+const DashboardPage    = lazy(() => import('./pages/DashboardPage'));
+const SearchPage       = lazy(() => import('./pages/SearchPage'));
+const PatientsPage     = lazy(() => import('./pages/PatientsPage'));
+const TreatmentPage    = lazy(() => import('./pages/TreatmentPage'));
+const HistoryPage      = lazy(() => import('./pages/HistoryPage'));
+const OdontogramPage   = lazy(() => import('./pages/OdontogramPage'));
+const ReportsPage      = lazy(() => import('./pages/ReportsPage'));
+const UsersPage        = lazy(() => import('./pages/UsersPage'));
+const ProfilePage      = lazy(() => import('./pages/ProfilePage'));
+const NotFoundPage     = lazy(() => import('./pages/NotFoundPage'));
+const AuditPage        = lazy(() => import('./pages/AuditPage'));
+const AppointmentsPage = lazy(() => import('./pages/AppointmentsPage'));
 
 // Fallback mínimo para Suspense (dentro de Layout ya hay estructura)
 function PageLoader() {
@@ -135,17 +136,18 @@ function App() {
               }
             >
               <Route index element={<Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>} />
-              <Route path="buscar" element={<Suspense fallback={<PageLoader />}><SearchPage /></Suspense>} />
-              <Route path="pacientes" element={<Suspense fallback={<PageLoader />}><PatientsPage /></Suspense>} />
+              <Route path="buscar"       element={<Suspense fallback={<PageLoader />}><SearchPage /></Suspense>} />
+              <Route path="pacientes"    element={<Suspense fallback={<PageLoader />}><PatientsPage /></Suspense>} />
               <Route path="pacientes/nuevo" element={<Suspense fallback={<PageLoader />}><PatientsPage /></Suspense>} />
-              <Route path="nueva-atencion" element={<Suspense fallback={<PageLoader />}><TreatmentPage /></Suspense>} />
-              <Route path="historial" element={<Suspense fallback={<PageLoader />}><HistoryPage /></Suspense>} />
+              <Route path="nueva-atencion"  element={<Suspense fallback={<PageLoader />}><TreatmentPage /></Suspense>} />
+              <Route path="historial"    element={<Suspense fallback={<PageLoader />}><HistoryPage /></Suspense>} />
               <Route path="historial/:patientId" element={<Suspense fallback={<PageLoader />}><HistoryPage /></Suspense>} />
-              <Route path="odontograma" element={<Suspense fallback={<PageLoader />}><OdontogramPage /></Suspense>} />
-              <Route path="reportes" element={<Suspense fallback={<PageLoader />}><ReportsPage /></Suspense>} />
-              <Route path="usuarios" element={<Suspense fallback={<PageLoader />}><UsersPage /></Suspense>} />
-              <Route path="perfil" element={<Suspense fallback={<PageLoader />}><ProfilePage /></Suspense>} />
-              <Route path="auditoria" element={<Suspense fallback={<PageLoader />}><AuditPage /></Suspense>} />
+              <Route path="odontograma"  element={<Suspense fallback={<PageLoader />}><OdontogramPage /></Suspense>} />
+              <Route path="reportes"     element={<Suspense fallback={<PageLoader />}><ReportsPage /></Suspense>} />
+              <Route path="citas"        element={<Suspense fallback={<PageLoader />}><AppointmentsPage /></Suspense>} />
+              <Route path="usuarios"     element={<Suspense fallback={<PageLoader />}><UsersPage /></Suspense>} />
+              <Route path="perfil"       element={<Suspense fallback={<PageLoader />}><ProfilePage /></Suspense>} />
+              <Route path="auditoria"    element={<Suspense fallback={<PageLoader />}><AuditPage /></Suspense>} />
             </Route>
 
             {/* Ruta 404 */}

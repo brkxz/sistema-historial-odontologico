@@ -6,6 +6,8 @@ import Tooth from './Tooth.js';
 import TreatmentTeeth from './TreatmentTeeth.js';
 import Odontogram from './Odontogram.js';
 import AuditLog from './AuditLog.js';
+import RevokedToken from './RevokedToken.js';
+import Appointment from './Appointment.js';
 
 // =============================================
 // RELACIONES
@@ -63,6 +65,15 @@ Odontogram.belongsTo(User, { foreignKey: 'dentist_id', as: 'dentist' });
 User.hasMany(AuditLog, { foreignKey: 'user_id', as: 'auditLogs' });
 AuditLog.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// ─── Appointments ──────────────────────────────────────────────
+// Patient -> Appointments
+Patient.hasMany(Appointment, { foreignKey: 'patient_id', as: 'appointments' });
+Appointment.belongsTo(Patient, { foreignKey: 'patient_id', as: 'patient' });
+
+// User (dentist) -> Appointments
+User.hasMany(Appointment, { foreignKey: 'dentist_id', as: 'appointments' });
+Appointment.belongsTo(User, { foreignKey: 'dentist_id', as: 'dentist' });
+
 export {
   sequelize,
   User,
@@ -72,4 +83,6 @@ export {
   TreatmentTeeth,
   Odontogram,
   AuditLog,
+  RevokedToken,
+  Appointment,
 };

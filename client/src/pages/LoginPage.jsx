@@ -104,10 +104,12 @@ export default function LoginPage() {
   return (
     <div className="lp-page">
 
-      {/* Botón volver */}
-      <button className="lp-back" onClick={() => navigate('/')}>
-        <ChevronLeft size={16} /> Volver al sitio
-      </button>
+      {/* Boton volver — solo en web, no en APK */}
+      {!isNative && (
+        <button className="lp-back" onClick={() => navigate('/')}>
+          <ChevronLeft size={16} /> Volver al sitio
+        </button>
+      )}
 
       {/* Tarjeta central */}
       <div className="lp-card">

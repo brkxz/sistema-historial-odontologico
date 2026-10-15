@@ -13,6 +13,7 @@ const Patient = sequelize.define('Patient', {
     unique: true,
     validate: {
       notEmpty: true,
+      is: /^\d{8}$/,  // Exactamente 8 dígitos numéricos
     },
   },
   first_name: {
@@ -88,6 +89,12 @@ const Patient = sequelize.define('Patient', {
       model: 'users',
       key: 'id',
     },
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Eliminación lógica — NULL = activo, fecha = eliminado',
   },
 }, {
   tableName: 'patients',

@@ -661,3 +661,62 @@
     margin-left: 300px;
   }
 }
+
+/* =============================================
+   FIX MOVIL — Sidebar cerrar sesion visible
+   y responsive general mejorado
+   ============================================= */
+@media (max-width: 1024px) {
+  /* El sidebar se cierra sobre el contenido
+     — el boton de logout debe quedar sobre la nav bar */
+  .sidebar-user {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Menu toggle visible en movil */
+  .menu-toggle {
+    display: flex !important;
+  }
+
+  /* Sidebar ocupa todo el alto disponible */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* El sidebar-user queda fijo al fondo */
+  .sidebar-user {
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+
+  /* Page-content con padding inferior para la barra movil */
+  .page-content {
+    padding: 16px 14px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 8px));
+  }
+}
+
+/* Pantallas muy pequenas < 400px */
+@media (max-width: 400px) {
+  .page-content {
+    padding: 12px 10px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 8px));
+  }
+
+  .header {
+    padding: 0 10px;
+  }
+
+  .header-title {
+    font-size: 0.95rem;
+  }
+}
