@@ -1,8 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Timeout en ms para cada intento (15s para aguantar cold-start de Render)
-const TIMEOUT_MS = 15000;
-const MAX_RETRIES = 2;
+// Timeout en ms para cada intento (30s para aguantar cold-start de Render Free Tier)
+const TIMEOUT_MS = 30000;
+const MAX_RETRIES = 3;
+
+// Warm-up: despertar el servidor apenas carga la app (sin bloquear nada)
+fetch(`${API_URL.replace('/api', '')}/api/health`, { method: 'GET', mode: 'cors' }).catch(() => {});
 
 // Helper para obtener headers con token
 const getHeaders = () => {
@@ -23,14 +26,16 @@ const fetchWithRetry = async (url, options = {}, attempt = 1) => {
     return response;
   } catch (err) {
     clearTimeout(timer);
-    const isTimeout = err.name === 'AbortError' || err.message?.includes('fetch');
+    const isTimeout = err.name === 'AbortError' || err.message?.includes('fetch') || err.message?.includes('Failed');
     if (isTimeout && attempt < MAX_RETRIES) {
-      // Esperar 2s antes del siguiente intento
-      await new Promise(r => setTimeout(r, 2000));
+      // Esperar progresivamente mas antes del siguiente intento (3s, 5s, 8s)
+      const delay = attempt === 1 ? 3000 : attempt === 2 ? 5000 : 8000;
+      console.log(`⏳ Reintentando conexión al servidor (intento ${attempt + 1}/${MAX_RETRIES})...`);
+      await new Promise(r => setTimeout(r, delay));
       return fetchWithRetry(url, options, attempt + 1);
     }
     if (isTimeout) {
-      throw new Error('El servidor esta iniciando, espera unos segundos y vuelve a intentar.');
+      throw new Error('El servidor esta iniciando. Esto puede tomar hasta 30 segundos en el primer acceso. Recarga la pagina e intenta de nuevo.');
     }
     throw new Error('Sin conexion. Verifica tu internet e intenta de nuevo.');
   }
