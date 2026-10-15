@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [loading, setLoading]             = useState(false);
   const [socialLoading, setSocialLoading] = useState('');
   const [error, setError]                 = useState('');
+  const [retryMsg, setRetryMsg]           = useState('');
   const navigate                          = useNavigate();
   const { login, loginWithGoogle }        = useAuth();
   const toast                             = useToast();
@@ -39,24 +40,52 @@ export default function LoginPage() {
     return () => { if (document.head.contains(script)) document.head.removeChild(script); };
   }, [GOOGLE_CLIENT_ID, isNative]);
 
+  const MAX_LOGIN_RETRIES = 4;
+
+  const isConnectionError = (msg) =>
+    msg.includes('iniciando') || msg.includes('servidor') ||
+    msg.includes('conexion') || msg.includes('fetch') ||
+    msg.includes('Failed') || msg.includes('network') ||
+    msg.includes('AbortError') || msg.includes('timeout');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setRetryMsg('');
     if (!username || !password) { setError('Por favor ingrese usuario y contraseña'); return; }
     setLoading(true);
-    try {
-      await login(username, password);
-      toast.success('¡Bienvenido al sistema!');
-      navigate('/panel');
-    } catch (err) {
-      const msg = err.message || '';
-      // Si es error de cold-start, mostrar mensaje mas amigable
-      if (msg.includes('iniciando') || msg.includes('servidor') || msg.includes('conexion') || msg.includes('fetch')) {
-        setError('El servidor tardó en responder. Haz clic en "Entrar" nuevamente para conectar.');
-      } else {
-        setError(msg || 'Credenciales incorrectas');
+
+    for (let attempt = 1; attempt <= MAX_LOGIN_RETRIES; attempt++) {
+      try {
+        await login(username, password);
+        toast.success('¡Bienvenido al sistema!');
+        setRetryMsg('');
+        navigate('/panel');
+        return;
+      } catch (err) {
+        const msg = err.message || '';
+
+        // Error de credenciales — no reintentar
+        if (!isConnectionError(msg)) {
+          setError(msg || 'Usuario o contraseña incorrectos');
+          setLoading(false);
+          setRetryMsg('');
+          return;
+        }
+
+        // Error de conexion — reintentar si hay intentos restantes
+        if (attempt < MAX_LOGIN_RETRIES) {
+          const delay = attempt === 1 ? 3000 : attempt === 2 ? 5000 : 8000;
+          setRetryMsg(`Servidor iniciando... intento ${attempt + 1} de ${MAX_LOGIN_RETRIES}`);
+          await new Promise(r => setTimeout(r, delay));
+        } else {
+          setError('No se pudo conectar al servidor después de varios intentos. Espera unos segundos y vuelve a intentar.');
+          setRetryMsg('');
+        }
       }
-    } finally { setLoading(false); }
+    }
+
+    setLoading(false);
   };
 
   const handleGoogleLoginNative = useCallback(async () => {
@@ -192,9 +221,12 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <button id="login-submit" type="submit" className="lp-btn-primary" disabled={loading || socialLoading}>
+            <button id="login-submit" type="submit" className="lp-btn-primary" disabled={loading || !!socialLoading}>
               {loading
-                ? <div className="spinner" style={{ width: 18, height: 18, borderWidth: 2, borderColor: '#fff transparent #fff #fff' }} />
+                ? <>
+                    <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderColor: '#fff transparent #fff #fff', flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.82rem' }}>{retryMsg || 'Conectando...'}</span>
+                  </>
                 : <><LogIn size={16} /> Entrar</>
               }
             </button>
