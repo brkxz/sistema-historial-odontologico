@@ -71,7 +71,7 @@ async function consultarApiPeruDev(numero) {
   }
 
   try {
-    const response = await fetch('https://api.apiperu.dev/dni', {
+    const response = await fetch('https://apiperu.dev/api/dni', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
