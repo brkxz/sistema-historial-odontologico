@@ -57,19 +57,11 @@ router.get('/search/:dni', async (req, res) => {
   try {
     const { dni } = req.params;
 
+    // Buscar paciente sin incluir treatments directamente (limit en include no es compatible con PostgreSQL)
     const patient = await Patient.findOne({
       where: { dni },
       include: [
         { model: User, as: 'registeredByUser', attributes: ['full_name'] },
-        {
-          model: Treatment,
-          as: 'treatments',
-          limit: 5,
-          order: [['treatment_date', 'DESC']],
-          include: [
-            { model: User, as: 'dentist', attributes: ['full_name'] },
-          ],
-        },
       ],
     });
 
@@ -77,9 +69,22 @@ router.get('/search/:dni', async (req, res) => {
       return res.status(404).json({ error: 'Paciente no encontrado' });
     }
 
-    res.json({ patient });
+    // Obtener los últimos 5 tratamientos en query separada para compatibilidad con PostgreSQL
+    const treatments = await Treatment.findAll({
+      where: { patient_id: patient.id },
+      order: [['treatment_date', 'DESC']],
+      limit: 5,
+      include: [
+        { model: User, as: 'dentist', attributes: ['full_name'] },
+      ],
+    });
+
+    const result = patient.toJSON();
+    result.treatments = treatments;
+
+    res.json({ patient: result });
   } catch (error) {
-    console.error('Error al buscar paciente:', error);
+    logger.error('Error al buscar paciente por DNI', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
