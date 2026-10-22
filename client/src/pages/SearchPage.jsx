@@ -14,6 +14,10 @@ export default function SearchPage() {
   const [loadingReniec, setLoadingReniec] = useState(false);
   const [listening, setListening] = useState(false);
   const [voiceHeardText, setVoiceHeardText] = useState('');
+  const [serverWaking, setServerWaking] = useState(false); // Cold-start de Render
+  const [retryCountdown, setRetryCountdown] = useState(0);
+  const retryTimerRef = useRef(null);
+  const countdownRef = useRef(null);
   const recognitionRef = useRef(null);
   const navigate = useNavigate();
   const toast = useToast();
@@ -47,6 +51,12 @@ export default function SearchPage() {
       return;
     }
 
+    // Limpiar timers de reintento previos
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    setServerWaking(false);
+    setRetryCountdown(0);
+
     setLoading(true);
     setPatient(null);
     setNotFound(false);
@@ -55,12 +65,34 @@ export default function SearchPage() {
     try {
       const data = await patientService.searchByDni(dniToSearch.trim());
       setPatient(data.patient);
+      setServerWaking(false);
     } catch (error) {
+      const isWaking = error.message.includes('iniciando') ||
+                       error.message.includes('servidor') ||
+                       error.message.includes('conexion') ||
+                       error.message.includes('Sin conexi') ||
+                       error.message.includes('Error interno');
+
       if (error.message.includes('no encontrado')) {
         setNotFound(true);
         if (/^\d{8}$/.test(dniToSearch.trim())) {
           consultarReniec(dniToSearch.trim());
         }
+      } else if (isWaking) {
+        // El servidor está en cold-start: mostrar banner amigable y reintentar
+        setServerWaking(true);
+        let secs = 20;
+        setRetryCountdown(secs);
+        countdownRef.current = setInterval(() => {
+          secs--;
+          setRetryCountdown(secs);
+          if (secs <= 0) clearInterval(countdownRef.current);
+        }, 1000);
+        retryTimerRef.current = setTimeout(() => {
+          setServerWaking(false);
+          setRetryCountdown(0);
+          searchPatientRef.current(dniToSearch);
+        }, 20000);
       } else {
         toast.error(error.message);
       }
@@ -215,6 +247,44 @@ export default function SearchPage() {
             )}
           </button>
         </div>
+
+        {/* Banner de cold-start: servidor iniciando */}
+        {serverWaking && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '14px 18px',
+            marginTop: '16px',
+            background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(245, 158, 11, 0.08))',
+            border: '1px solid rgba(251, 191, 36, 0.35)',
+            borderRadius: 'var(--radius-md)',
+            animation: 'fadeIn 0.4s ease',
+          }}>
+            <div className="spinner" style={{ width: 22, height: 22, borderWidth: 3, borderTopColor: '#f59e0b', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontWeight: 600, color: '#f59e0b', marginBottom: '2px', fontSize: 'var(--font-size-sm)' }}>
+                ⚡ Servidor iniciando...
+              </div>
+              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>
+                El servidor gratuito estaba inactivo. Reintentando en {retryCountdown}s automáticamente...
+              </div>
+            </div>
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+                if (countdownRef.current) clearInterval(countdownRef.current);
+                setServerWaking(false);
+                setRetryCountdown(0);
+                searchPatient();
+              }}
+              style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 'var(--font-size-xs)', padding: '6px 12px' }}
+            >
+              Reintentar ya
+            </button>
+          </div>
+        )}
 
         {/* Voice overlay removed */}
         {false && (
