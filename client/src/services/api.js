@@ -16,25 +16,27 @@ const getHeaders = () => {
   };
 };
 
-// Fetch con timeout y retry automatico (sobrevive cold-start de Render)
+// Fetch con timeout y retry automatico (solo en errores de red/timeout, NO en HTTP 4xx/5xx)
 const fetchWithRetry = async (url, options = {}, attempt = 1) => {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const response = await fetch(url, { ...options, signal: controller.signal });
     clearTimeout(timer);
+    // Si el servidor respondió (aunque sea con error HTTP), NO reintentar
     return response;
   } catch (err) {
     clearTimeout(timer);
-    const isTimeout = err.name === 'AbortError' || err.message?.includes('fetch') || err.message?.includes('Failed');
-    if (isTimeout && attempt < MAX_RETRIES) {
+    // Solo reintentar en fallas de red puras (sin respuesta del servidor)
+    const isNetworkError = err.name === 'AbortError' || err.message?.includes('fetch') || err.message?.includes('Failed') || err.message?.includes('NetworkError');
+    if (isNetworkError && attempt < MAX_RETRIES) {
       // Esperar progresivamente mas antes del siguiente intento (3s, 5s, 8s)
       const delay = attempt === 1 ? 3000 : attempt === 2 ? 5000 : 8000;
       console.log(`⏳ Reintentando conexión al servidor (intento ${attempt + 1}/${MAX_RETRIES})...`);
       await new Promise(r => setTimeout(r, delay));
       return fetchWithRetry(url, options, attempt + 1);
     }
-    if (isTimeout) {
+    if (err.name === 'AbortError') {
       throw new Error('El servidor esta iniciando. Esto puede tomar hasta 30 segundos en el primer acceso. Recarga la pagina e intenta de nuevo.');
     }
     throw new Error('Sin conexion. Verifica tu internet e intenta de nuevo.');
