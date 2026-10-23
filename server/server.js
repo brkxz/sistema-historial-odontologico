@@ -163,6 +163,40 @@ app.use((err, req, res, next) => {
 });
 
 // =============================================
+// MIGRACIONES AUTOMÁTICAS — columnas faltantes en producción
+// =============================================
+async function runMigrations() {
+  try {
+    const dialect = sequelize.getDialect();
+
+    if (dialect === 'postgres') {
+      // Agregar deleted_at a patients si no existe
+      await sequelize.query(`
+        ALTER TABLE patients
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+      `);
+      logger.info('Migración: deleted_at en patients — OK');
+
+      // Agregar campos médicos opcionales si no existen
+      const medicalCols = [
+        { col: 'medical_history', type: 'TEXT' },
+        { col: 'allergies',       type: 'TEXT' },
+        { col: 'medications',     type: 'TEXT' },
+        { col: 'blood_type',      type: 'VARCHAR(5)' },
+      ];
+      for (const { col, type } of medicalCols) {
+        await sequelize.query(
+          `ALTER TABLE patients ADD COLUMN IF NOT EXISTS ${col} ${type};`
+        );
+      }
+      logger.info('Migración: columnas médicas en patients — OK');
+    }
+  } catch (err) {
+    logger.warn('Migración automática falló (no crítico):', { error: err.message });
+  }
+}
+
+// =============================================
 // INICIAR SERVIDOR
 // =============================================
 async function startServer() {
@@ -173,6 +207,11 @@ async function startServer() {
     const isDev = process.env.NODE_ENV !== 'production';
     await sequelize.sync(isDev ? { alter: true } : {});
     logger.info(`Modelos sincronizados (${isDev ? 'desarrollo - alter' : 'producción - safe'}).`);
+
+    // Ejecutar migraciones de columnas faltantes (solo en producción)
+    if (!isDev) {
+      await runMigrations();
+    }
 
     // Limpiar tokens JWT revocados expirados (cada hora)
     setInterval(cleanExpiredTokens, 60 * 60 * 1000);
@@ -198,3 +237,4 @@ async function startServer() {
 }
 
 startServer();
+
