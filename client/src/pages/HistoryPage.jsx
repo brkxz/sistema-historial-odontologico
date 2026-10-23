@@ -4,7 +4,7 @@ import { treatmentService, patientService, reportService } from '../services/api
 import { useToast } from '../components/UI/Toast';
 import { exportPatientHistoryPDF } from '../utils/exportPDF';
 import {
-  Calendar, User, ArrowLeft, Search,
+  Calendar, User, ArrowLeft, Search, Printer,
   ChevronRight, Clock, Filter, X, FileText, Download,
 } from 'lucide-react';
 

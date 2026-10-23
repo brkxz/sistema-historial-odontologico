@@ -4223,3 +4223,236 @@ input[type="search"]::-webkit-search-cancel-button {
   .db-item-name { max-width: 120px !important; }
   .db-item-meta { max-width: 120px !important; }
 }
+
+/* =============================================
+   RESPONSIVE — HISTORIAL (hist-*)
+   ============================================= */
+@media (max-width: 768px) {
+  .hist-toolbar {
+    gap: 10px;
+  }
+
+  .hist-filters {
+    gap: 6px;
+  }
+
+  .hist-select {
+    flex: 1;
+    min-width: 90px;
+    font-size: 0.8rem;
+    padding: 6px 8px;
+  }
+
+  .hist-row {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .hist-info {
+    min-width: 120px;
+    flex: 1;
+  }
+
+  .hist-detail {
+    flex: 1 1 100%;
+    order: 3;
+  }
+
+  .hist-meta {
+    min-width: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    order: 4;
+    flex: 1 1 100%;
+  }
+
+  .hist-action {
+    order: 2;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .hist-search-box {
+    padding: 8px 10px;
+  }
+
+  .hist-search-input {
+    font-size: 0.85rem;
+  }
+
+  .hist-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 0.7rem;
+  }
+
+  .hist-name {
+    font-size: 0.85rem;
+  }
+
+  .hist-meta {
+    display: none;
+  }
+
+  .hist-reason {
+    font-size: 0.82rem;
+  }
+}
+
+/* =============================================
+   RESPONSIVE — CITAS / APPOINTMENTS
+   ============================================= */
+@media (max-width: 768px) {
+  /* Tabla de citas: scroll horizontal */
+  .table-container {
+    border-radius: var(--radius-md);
+    margin: 0;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 10px;
+    font-size: 0.82rem;
+  }
+
+  /* Ocultar columnas menos importantes en tablet */
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .table th,
+  .table td {
+    padding: 8px 8px;
+    font-size: 0.78rem;
+  }
+
+  /* Ocultar odontologo y motivo en móvil */
+  .table th:nth-child(4),
+  .table td:nth-child(4),
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
+    display: none;
+  }
+}
+
+/* =============================================
+   RESPONSIVE — PAGE HEADER GENERAL
+   ============================================= */
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .page-header > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .page-header > div:last-child .btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  .page-title {
+    font-size: 1.2rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .page-title {
+    font-size: 1.1rem;
+  }
+
+  .page-header > div:last-child .btn {
+    font-size: 0.82rem;
+    padding: 8px 12px;
+  }
+}
+
+/* =============================================
+   RESPONSIVE — TREATMENT FORM
+   ============================================= */
+@media (max-width: 768px) {
+  .treatment-section-header {
+    font-size: 0.9rem !important;
+  }
+
+  .treatment-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =============================================
+   RESPONSIVE — SEARCH PAGE
+   ============================================= */
+@media (max-width: 640px) {
+  .search-section {
+    padding: 16px;
+  }
+
+  .reniec-card,
+  .patient-found-card {
+    padding: 16px;
+  }
+}
+
+/* =============================================
+   RESPONSIVE — REPORTS PAGE
+   ============================================= */
+@media (max-width: 640px) {
+  .stat-card {
+    padding: 14px 12px;
+  }
+
+  .stat-card-info .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =============================================
+   GENERAL — Overflow fix para pantallas pequeñas
+   ============================================= */
+@media (max-width: 640px) {
+  /* Prevenir overflow horizontal global */
+  .page-content > * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Cards sin overflow */
+  .card {
+    overflow: hidden;
+  }
+
+  /* Grids adaptativos */
+  [class*="-grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Inputs full-width en formularios */
+  .form-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+}
