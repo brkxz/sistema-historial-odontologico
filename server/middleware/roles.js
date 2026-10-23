@@ -1,3 +1,4 @@
+
 // Middleware para verificar roles de usuario
 export const requireRole = (...roles) => {
   return (req, res, next) => {

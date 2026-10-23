@@ -67,11 +67,11 @@ export default function SearchPage() {
       setPatient(data.patient);
       setServerWaking(false);
     } catch (error) {
+      // Solo errores de red/cold-start activan el banner — errores reales del servidor NO
       const isWaking = error.message.includes('iniciando') ||
-                       error.message.includes('servidor') ||
-                       error.message.includes('conexion') ||
                        error.message.includes('Sin conexi') ||
-                       error.message.includes('Error interno');
+                       error.message.includes('conexion') ||
+                       (error.message.includes('servidor') && !error.message.includes('Error interno'));
 
       if (error.message.includes('no encontrado')) {
         setNotFound(true);

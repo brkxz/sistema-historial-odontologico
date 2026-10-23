@@ -47,8 +47,14 @@ export default function OdontogramPage() {
       const data = await patientService.searchByDni(searchDni.trim());
       setPatient(data.patient);
       await loadOdontogram(data.patient.id);
-    } catch {
-      toast.error('Paciente no encontrado');
+    } catch (error) {
+      if (error.message.includes('no encontrado')) {
+        toast.error('Paciente no encontrado con ese DNI');
+      } else if (error.message.includes('iniciando') || error.message.includes('conexion') || error.message.includes('Sin conexi')) {
+        toast.error('El servidor está iniciando. Espere un momento e intente de nuevo.');
+      } else {
+        toast.error('Error al buscar el paciente: ' + error.message);
+      }
     } finally {
       setLoading(false);
     }

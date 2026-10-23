@@ -57,15 +57,20 @@ router.get('/search/:dni', async (req, res) => {
   try {
     const { dni } = req.params;
 
-    // Buscar paciente sin incluir treatments directamente (limit en include no es compatible con PostgreSQL)
+    // Buscar paciente activo por DNI (excluir eliminados lógicamente)
     const patient = await Patient.findOne({
-      where: { dni },
+      where: { dni, deleted_at: null },
       include: [
         { model: User, as: 'registeredByUser', attributes: ['full_name'] },
       ],
     });
 
     if (!patient) {
+      // Verificar si existe pero fue eliminado (para dar mensaje más claro)
+      const deleted = await Patient.findOne({ where: { dni } });
+      if (deleted && deleted.deleted_at) {
+        return res.status(404).json({ error: 'Paciente no encontrado (fue eliminado del sistema)' });
+      }
       return res.status(404).json({ error: 'Paciente no encontrado' });
     }
 
