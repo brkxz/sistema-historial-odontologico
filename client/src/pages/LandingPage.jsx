@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import heroImg from '../assets/ChatGPT Image 5 mar 2026, 11_34_30.png';
 
 export default function LandingPage() {
@@ -63,9 +64,9 @@ export default function LandingPage() {
               Brindamos tratamientos de primer nivel para niños y adultos en un entorno de confort absoluto.
             </p>
             <div className="landing-hero-cta">
-              <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" className="landing-btn-primary">
+              <Link to="/agenda" className="landing-btn-primary" id="btn-agenda-cita">
                 <i className="fa-brands fa-whatsapp" /> Agenda tu cita
-              </a>
+              </Link>
               <a href="/servicios" className="landing-btn-secondary">
                 <i className="fa-solid fa-stethoscope" /> Ver Servicios
               </a>

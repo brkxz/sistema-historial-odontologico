@@ -21,6 +21,7 @@ const ServiciosPage = lazy(() => import('./pages/ServiciosPage'));
 const NosotrosPage = lazy(() => import('./pages/NosotrosPage'));
 const EquipoPage = lazy(() => import('./pages/EquipoPage'));
 const ContactoPage = lazy(() => import('./pages/ContactoPage'));
+const AgendaPage   = lazy(() => import('./pages/AgendaPage'));
 
 const DashboardPage    = lazy(() => import('./pages/DashboardPage'));
 const SearchPage       = lazy(() => import('./pages/SearchPage'));
@@ -113,6 +114,7 @@ function App() {
                 <Route path="/nosotros" element={<Suspense fallback={<PageLoader />}><NosotrosPage /></Suspense>} />
                 <Route path="/equipo" element={<Suspense fallback={<PageLoader />}><EquipoPage /></Suspense>} />
                 <Route path="/contacto" element={<Suspense fallback={<PageLoader />}><ContactoPage /></Suspense>} />
+                <Route path="/agenda"   element={<Suspense fallback={<PageLoader />}><AgendaPage />  </Suspense>} />
               </Route>
             )}
 
