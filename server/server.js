@@ -19,6 +19,7 @@ import userRoutes        from './routes/users.js';
 import reportRoutes      from './routes/reports.js';
 import reniecRoutes      from './routes/reniec.js';
 import aiRoutes          from './routes/ai.js';
+import aiKnowledgeRoutes from './routes/ai-knowledge.js';
 import auditRoutes       from './routes/audit.js';
 import appointmentRoutes from './routes/appointments.js';
 
@@ -125,6 +126,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/reniec', reniecRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/ai-knowledge', aiKnowledgeRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/appointments', appointmentRoutes);
 
@@ -190,6 +192,38 @@ async function runMigrations() {
         );
       }
       logger.info('Migración: columnas médicas en patients — OK');
+    }
+
+    // Tablas IA (aplica en todos los entornos vía sync)
+    try {
+      await sequelize.query(`
+        CREATE TABLE IF NOT EXISTS ai_conversations (
+          id SERIAL PRIMARY KEY,
+          session_id VARCHAR(64) NOT NULL,
+          user_message TEXT NOT NULL,
+          ai_response TEXT NOT NULL,
+          provider VARCHAR(30),
+          rating SMALLINT,
+          ip_hash VARCHAR(64),
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+      `);
+      await sequelize.query(`
+        CREATE TABLE IF NOT EXISTS ai_knowledge (
+          id SERIAL PRIMARY KEY,
+          category VARCHAR(80) NOT NULL,
+          question TEXT NOT NULL,
+          answer TEXT NOT NULL,
+          is_active BOOLEAN DEFAULT TRUE,
+          priority INTEGER DEFAULT 0,
+          created_by INTEGER,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+      `);
+      logger.info('Migración: tablas IA — OK');
+    } catch (e) {
+      logger.warn('Migración tablas IA (no crítico):', { error: e.message });
     }
   } catch (err) {
     logger.warn('Migración automática falló (no crítico):', { error: err.message });

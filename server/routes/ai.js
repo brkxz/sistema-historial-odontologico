@@ -1,10 +1,13 @@
 import { Router } from 'express';
+import { createHash } from 'crypto';
 import { authenticateToken } from '../middleware/auth.js';
+import AIConversation from '../models/AIConversation.js';
+import AIKnowledge from '../models/AIKnowledge.js';
 
 const router = Router();
 
 // ============================================================
-// CONFIGURACIÓN DE PROVEEDORES (Fallback: Groq → Gemini → OpenRouter)
+// CONFIGURACIÓN DE PROVEEDORES (Fallback: Groq → OpenRouter)
 // ============================================================
 
 const PROVIDERS = [
@@ -89,6 +92,48 @@ const PROVIDERS = [
 ];
 
 // ============================================================
+// UTILIDADES
+// ============================================================
+
+// Obtener conocimiento activo de la DB y convertirlo en texto para el prompt
+async function buildKnowledgeSection() {
+  try {
+    const entries = await AIKnowledge.findAll({
+      where: { is_active: true },
+      order: [['priority', 'DESC'], ['created_at', 'ASC']],
+      attributes: ['category', 'question', 'answer'],
+    });
+
+    if (entries.length === 0) return '';
+
+    const byCategory = {};
+    for (const e of entries) {
+      const cat = e.category || 'General';
+      if (!byCategory[cat]) byCategory[cat] = [];
+      byCategory[cat].push(`P: ${e.question}\nR: ${e.answer}`);
+    }
+
+    let section = '\n\n📚 BASE DE CONOCIMIENTO ADICIONAL (información específica del consultorio):\n';
+    for (const [cat, items] of Object.entries(byCategory)) {
+      section += `\n[${cat.toUpperCase()}]\n${items.join('\n\n')}\n`;
+    }
+    return section;
+  } catch (err) {
+    console.warn('[AI] No se pudo cargar base de conocimiento:', err.message);
+    return '';
+  }
+}
+
+// Hash de IP para privacidad
+function hashIP(ip) {
+  try {
+    return createHash('sha256').update(ip + (process.env.IP_HASH_SALT || 'denty-salt')).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================
 // POST /api/ai/public-chat - Chat PÚBLICO para pacientes (sin auth)
 // Rate limit más estricto para evitar abuso
 // ============================================================
@@ -115,7 +160,7 @@ router.post('/public-chat', async (req, res) => {
       });
     }
 
-    const { contents } = req.body;
+    const { contents, session_id } = req.body;
     if (!contents || !Array.isArray(contents)) {
       return res.status(400).json({ error: 'Formato de mensaje inválido' });
     }
@@ -123,11 +168,21 @@ router.post('/public-chat', async (req, res) => {
     // Limitar la longitud de los mensajes para el endpoint público
     const truncatedContents = contents.slice(0, 14); // Max 14 mensajes (system + greeting + 6 pares)
 
+    // Extraer el mensaje del usuario (último mensaje)
+    const userMessage = truncatedContents
+      .filter(c => c.role === 'user')
+      .slice(-1)[0]?.parts?.[0]?.text || '';
+
+    // Cargar conocimiento adicional de la DB
+    const knowledgeSection = await buildKnowledgeSection();
+
     // Convertir formato Gemini → OpenAI
     const messages = truncatedContents.map((c, i) => {
       const role = c.role === 'model' ? 'assistant' : c.role;
-      const content = (c.parts?.[0]?.text || '').slice(0, 4000); // Limitar longitud
+      let content = (c.parts?.[0]?.text || '').slice(0, 4000); // Limitar longitud
+      // Inyectar conocimiento dinámico al system prompt (primer mensaje)
       if (i === 0 && role === 'user') {
+        content = content + knowledgeSection;
         return { role: 'system', content };
       }
       return { role, content };
@@ -140,6 +195,8 @@ router.post('/public-chat', async (req, res) => {
     }
 
     let lastError = null;
+    let usedProvider = null;
+    let aiResponseText = null;
 
     for (const provider of activeProviders) {
       try {
@@ -148,26 +205,45 @@ router.post('/public-chat', async (req, res) => {
 
         if (!text) throw new Error('Respuesta vacía');
 
+        usedProvider = provider.name;
+        aiResponseText = text;
         console.log(`[AI-Public] Respuesta obtenida de: ${provider.name}`);
-
-        return res.json({
-          candidates: [{
-            content: {
-              parts: [{ text }],
-              role: 'model',
-            },
-          }],
-        });
+        break;
       } catch (err) {
         console.warn(`[AI-Public] Falló ${provider.name}: ${err.message}`);
         lastError = err;
       }
     }
 
-    console.error('[AI-Public] Todos los proveedores fallaron:', lastError?.message);
-    res.status(503).json({
-      error: 'El asistente no está disponible en este momento. Intenta de nuevo más tarde.',
+    if (!aiResponseText) {
+      console.error('[AI-Public] Todos los proveedores fallaron:', lastError?.message);
+      return res.status(503).json({
+        error: 'El asistente no está disponible en este momento. Intenta de nuevo más tarde.',
+      });
+    }
+
+    // Guardar conversación en DB (en segundo plano, no bloquea la respuesta)
+    const sid = (session_id || 'anon').slice(0, 64);
+    const ipHash = hashIP(clientIP);
+
+    AIConversation.create({
+      session_id: sid,
+      user_message: userMessage.slice(0, 2000),
+      ai_response: aiResponseText.slice(0, 5000),
+      provider: usedProvider,
+      ip_hash: ipHash,
+      created_at: new Date(),
+    }).catch(err => console.warn('[AI-Public] No se pudo guardar conversación:', err.message));
+
+    return res.json({
+      candidates: [{
+        content: {
+          parts: [{ text: aiResponseText }],
+          role: 'model',
+        },
+      }],
     });
+
   } catch (error) {
     console.error('Error en chat público:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -183,8 +259,57 @@ setInterval(() => {
 }, 5 * 60 * 1000); // Cada 5 minutos
 
 // ============================================================
+// POST /api/ai/rate-conversation — Calificar respuesta (sin auth)
+// ============================================================
+router.post('/rate-conversation', async (req, res) => {
+  try {
+    const { conversation_id, rating } = req.body;
+    if (!conversation_id || ![1, -1].includes(rating)) {
+      return res.status(400).json({ error: 'conversation_id y rating (1 o -1) requeridos' });
+    }
+
+    const conv = await AIConversation.findByPk(conversation_id);
+    if (!conv) return res.status(404).json({ error: 'Conversación no encontrada' });
+
+    await conv.update({ rating });
+    res.json({ message: 'Calificación guardada' });
+  } catch (error) {
+    console.error('Error al calificar:', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+// ============================================================
 // RUTAS AUTENTICADAS (requieren token)
 // ============================================================
+
+// ============================================================
+// GET /api/ai/conversations — Ver conversaciones guardadas (requiere auth)
+// ============================================================
+router.get('/conversations', authenticateToken, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const offset = parseInt(req.query.offset) || 0;
+    const rating = req.query.rating; // 'positive', 'negative', 'unrated'
+
+    const where = {};
+    if (rating === 'positive') where.rating = 1;
+    else if (rating === 'negative') where.rating = -1;
+    else if (rating === 'unrated') where.rating = null;
+
+    const { count, rows } = await AIConversation.findAndCountAll({
+      where,
+      order: [['created_at', 'DESC']],
+      limit,
+      offset,
+    });
+
+    res.json({ total: count, conversations: rows });
+  } catch (error) {
+    console.error('Error al obtener conversaciones:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 
 // ============================================================
 // POST /api/ai/chat - Proxy con fallback automático (requiere auth)
@@ -270,4 +395,3 @@ router.get('/status', authenticateToken, (req, res) => {
 });
 
 export default router;
-

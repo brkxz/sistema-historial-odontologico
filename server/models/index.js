@@ -8,6 +8,8 @@ import Odontogram from './Odontogram.js';
 import AuditLog from './AuditLog.js';
 import RevokedToken from './RevokedToken.js';
 import Appointment from './Appointment.js';
+import AIConversation from './AIConversation.js';
+import AIKnowledge from './AIKnowledge.js';
 
 // =============================================
 // RELACIONES
@@ -85,4 +87,6 @@ export {
   AuditLog,
   RevokedToken,
   Appointment,
+  AIConversation,
+  AIKnowledge,
 };

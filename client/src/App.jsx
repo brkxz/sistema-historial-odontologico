@@ -35,6 +35,7 @@ const ProfilePage      = lazy(() => import('./pages/ProfilePage'));
 const NotFoundPage     = lazy(() => import('./pages/NotFoundPage'));
 const AuditPage        = lazy(() => import('./pages/AuditPage'));
 const AppointmentsPage = lazy(() => import('./pages/AppointmentsPage'));
+const AIKnowledgePage  = lazy(() => import('./pages/AIKnowledgePage'));
 
 // Fallback mínimo para Suspense (dentro de Layout ya hay estructura)
 function PageLoader() {
@@ -150,6 +151,7 @@ function App() {
               <Route path="usuarios"     element={<Suspense fallback={<PageLoader />}><UsersPage /></Suspense>} />
               <Route path="perfil"       element={<Suspense fallback={<PageLoader />}><ProfilePage /></Suspense>} />
               <Route path="auditoria"    element={<Suspense fallback={<PageLoader />}><AuditPage /></Suspense>} />
+              <Route path="ia-conocimiento" element={<Suspense fallback={<PageLoader />}><AIKnowledgePage /></Suspense>} />
             </Route>
 
             {/* Ruta 404 */}

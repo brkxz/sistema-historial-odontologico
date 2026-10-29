@@ -786,22 +786,24 @@
   background: #fff;
 }
 
-.landing-chatbot-input input {
+.landing-chatbot-input textarea {
   flex: 1;
-  padding: 10px 16px;
+  padding: 10px 14px;
   background: var(--l-bg-soft);
   border: 1px solid var(--l-border);
-  border-radius: 100px;
+  border-radius: 12px;
   color: var(--l-text);
   font-size: 0.87rem;
   font-family: var(--l-font);
   outline: none;
   transition: border-color 0.18s;
+  line-height: 1.45;
+  min-height: 40px;
 }
 
-.landing-chatbot-input input::placeholder { color: var(--l-text-muted); }
+.landing-chatbot-input textarea::placeholder { color: var(--l-text-muted); }
 
-.landing-chatbot-input input:focus {
+.landing-chatbot-input textarea:focus {
   border-color: var(--l-blue);
 }
 
@@ -848,6 +850,82 @@
   background: var(--l-blue-light);
   border-color: var(--l-blue);
   color: var(--l-blue);
+}
+
+/* ─── Rating de respuestas ─── */
+.landing-chat-msg-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.landing-chat-msg-rating {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.landing-chat-msg.assistant:hover .landing-chat-msg-rating {
+  opacity: 1;
+}
+
+.landing-chat-rating-btn {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--l-border);
+  background: transparent;
+  color: var(--l-text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+}
+
+.landing-chat-rating-btn:hover {
+  border-color: var(--l-blue);
+  color: var(--l-blue);
+  background: var(--l-blue-light);
+}
+
+.landing-chat-rating-btn.active-pos {
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.landing-chat-rating-btn.active-neg {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.landing-chat-rating-btn:disabled {
+  cursor: default;
+}
+
+/* ─── Footer hint del chat ─── */
+.landing-chatbot-footer-hint {
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--l-text-muted);
+  padding: 6px 16px 10px;
+  background: #fff;
+  border-top: 1px solid var(--l-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.landing-chat-msg-bubble.error {
+  background: #fff1f1;
+  border: 1px solid #fecaca;
+  color: #dc2626;
 }
 
 /* ═══════════════════════════════

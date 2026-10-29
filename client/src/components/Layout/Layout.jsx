@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Search, UserPlus,
   History, Users, BarChart3, LogOut, Menu, X,
-  Stethoscope, Home, FilePlus, User, ScrollText, UserCog, CalendarCheck
+  Stethoscope, Home, FilePlus, User, ScrollText, UserCog, CalendarCheck, Brain
 } from 'lucide-react';
 import logoDental from '../../assets/logo-dental.jpg';
 
@@ -19,6 +19,7 @@ const navItems = [
   { path: '/panel/reportes',      icon: BarChart3,       label: 'Reportes',         section: 'admin', adminOnly: true },
   { path: '/panel/usuarios',      icon: UserCog,         label: 'Panel de Doctores',section: 'admin', adminOnly: true },
   { path: '/panel/auditoria',     icon: ScrollText,      label: 'Auditoría',        section: 'admin', adminOnly: true },
+  { path: '/panel/ia-conocimiento', icon: Brain,         label: 'IA — Denty',       section: 'admin', adminOnly: true },
 ];
 
 
