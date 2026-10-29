@@ -107,20 +107,26 @@ export default function EquipoPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ padding: '60px 0', textAlign: 'center' }} className="landing-reveal">
+      {/* FRASE CIERRE */}
+      <section style={{ padding: '72px 0' }} className="landing-reveal">
         <div className="landing-container">
-          <p className="landing-section-subtitle" style={{ marginBottom: '24px' }}>
-            ¿Quieres agendar una cita con uno de nuestros especialistas?
-          </p>
-          <a
-            href="https://wa.me/51936205023"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="landing-btn-primary"
-          >
-            <i className="fa-brands fa-whatsapp" /> Contactar por WhatsApp
-          </a>
+          <div className="equipo-values-grid">
+            <div className="equipo-value-item">
+              <span className="equipo-value-num">01</span>
+              <h4>Compromiso clínico</h4>
+              <p>Cada diagnóstico se basa en evidencia y protocolos actualizados. No improvisamos con tu salud.</p>
+            </div>
+            <div className="equipo-value-item">
+              <span className="equipo-value-num">02</span>
+              <h4>Trato humano</h4>
+              <p>Entendemos que una visita dental puede generar ansiedad. Trabajamos para que tu experiencia sea cómoda.</p>
+            </div>
+            <div className="equipo-value-item">
+              <span className="equipo-value-num">03</span>
+              <h4>Formación continua</h4>
+              <p>Nuestro equipo se actualiza constantemente en técnicas y materiales de última generación.</p>
+            </div>
+          </div>
         </div>
       </section>
     </>

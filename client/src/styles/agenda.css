@@ -317,43 +317,85 @@
 }
 
 /* ================================================================
-   STATS BAND
+   TICKER ANIMADO
    ================================================================ */
-.ag-stats-row {
+.ag-ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: #0F172A;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 0;
+  position: relative;
+}
+
+.ag-ticker-wrap::before,
+.ag-ticker-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 80px;
+  z-index: 2;
+}
+.ag-ticker-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, #0F172A, transparent);
+}
+.ag-ticker-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, #0F172A, transparent);
+}
+
+.ag-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ag-ticker-scroll 30s linear infinite;
+}
+
+.ag-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes ag-ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ag-ticker-inner {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0;
-  background: #fff;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.08);
-  padding: 28px 0;
+  flex-shrink: 0;
 }
-.ag-stat {
-  display: flex;
-  flex-direction: column;
+
+.ag-ticker-item {
+  display: inline-flex;
   align-items: center;
-  padding: 0 48px;
+  gap: 8px;
+  padding: 0 28px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: color 0.2s;
 }
-.ag-stat strong {
-  font-size: 1.8rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #1e3a8a, #3B82F6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+
+.ag-ticker-item i {
+  color: #60A5FA;
+  font-size: 0.78rem;
 }
-.ag-stat span {
-  font-size: 0.8rem;
-  color: #64748b;
-  font-weight: 500;
-  margin-top: 2px;
-  text-align: center;
+
+.ag-ticker-track:hover .ag-ticker-item {
+  color: rgba(255,255,255,0.9);
 }
-.ag-stat-divider {
-  width: 1px;
-  height: 40px;
-  background: #e2e8f0;
+
+.ag-ticker-dot {
+  color: #1E40AF;
+  font-size: 0.6rem;
+  flex-shrink: 0;
 }
+
 
 /* ================================================================
    PASOS — TIMELINE
@@ -719,8 +761,6 @@
 @media (max-width: 640px) {
   .ag-timeline   { grid-template-columns: 1fr; }
   .ag-notes-grid { grid-template-columns: 1fr; }
-  .ag-stats-row  { flex-wrap: wrap; gap: 24px; padding: 28px 20px; }
-  .ag-stat-divider { display: none; }
   .ag-urgency-glass { padding: 28px 20px; }
   .ag-ug-left    { flex-direction: column; align-items: center; }
 }

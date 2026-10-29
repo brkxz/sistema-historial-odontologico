@@ -9,11 +9,11 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [stats, setStats]             = useState(null);
+  const [stats, setStats] = useState(null);
   const [recentTreatments, setRecent] = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const { user }                      = useAuth();
-  const navigate                      = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const loadData = useCallback(async () => {
     try {
@@ -54,10 +54,10 @@ export default function DashboardPage() {
   });
 
   const metrics = [
-    { label: 'Pacientes',  value: stats?.totalPatients          || 0, icon: Users,        color: '#0D9488' },
-    { label: 'Hoy',        value: stats?.todayTreatments        || 0, icon: Activity,      color: '#3B82F6' },
-    { label: 'Este mes',   value: stats?.monthTreatments        || 0, icon: CalendarCheck, color: '#8B5CF6' },
-    { label: 'Proximas',   value: stats?.upcomingAppointments   || 0, icon: CalendarClock, color: '#F59E0B' },
+    { label: 'Pacientes', value: stats?.totalPatients || 0, icon: Users, color: '#0D9488' },
+    { label: 'Hoy', value: stats?.todayTreatments || 0, icon: Activity, color: '#3B82F6' },
+    { label: 'Este mes', value: stats?.monthTreatments || 0, icon: CalendarCheck, color: '#8B5CF6' },
+    { label: 'Proximas', value: stats?.upcomingAppointments || 0, icon: CalendarClock, color: '#F59E0B' },
   ];
 
   return (
@@ -90,8 +90,8 @@ export default function DashboardPage() {
       {/* Metricas */}
       <div className="db-metrics">
         {metrics.map((m, i) => (
-          <div key={i} className="db-metric-card">
-            <div className="db-metric-icon" style={{ background: m.color + '18', color: m.color }}>
+          <div key={i} className="db-metric-card" style={{ '--mc': m.bg }}>
+            <div className="db-metric-icon" style={{ background: m.bg, color: m.color }}>
               <m.icon size={26} />
             </div>
             <div>

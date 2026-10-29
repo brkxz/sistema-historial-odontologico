@@ -60,8 +60,8 @@ export default function LandingPage() {
               El arte de una<br /><em>sonrisa</em> perfecta.
             </h1>
             <p className="landing-subtitle">
-              Servicio de Odontología especializada en estética dental y salud bucal integral.
-              Brindamos tratamientos de primer nivel para niños y adultos en un entorno de confort absoluto.
+              Servicio de Odontología del Hospital San Ramón — Red Integrada de Salud Chanchamayo.
+              Atención gratuita con SIS: curaciones, limpiezas, extracciones y odontopediatría para toda la familia.
             </p>
             <div className="landing-hero-cta">
               <Link to="/agenda" className="landing-btn-primary" id="btn-agenda-cita">
@@ -83,19 +83,19 @@ export default function LandingPage() {
         <div className="landing-container landing-stats-grid landing-reveal">
           <div className="landing-stat-block">
             <span className="number">500+</span>
-            <span className="label">Pacientes Satisfechos</span>
+            <span className="label">Pacientes Atendidos</span>
           </div>
           <div className="landing-stat-block">
-            <span className="number">98%</span>
-            <span className="label">Resultados Garantizados</span>
-          </div>
-          <div className="landing-stat-block">
-            <span className="number">10+</span>
-            <span className="label">Años de Experiencia</span>
-          </div>
-          <div className="landing-stat-block">
-            <span className="number">6</span>
+            <span className="number">4</span>
             <span className="label">Especialidades</span>
+          </div>
+          <div className="landing-stat-block">
+            <span className="number">100%</span>
+            <span className="label">Gratuito con SIS</span>
+          </div>
+          <div className="landing-stat-block">
+            <span className="number">1</span>
+            <span className="label">Red Integrada de Salud</span>
           </div>
         </div>
       </section>

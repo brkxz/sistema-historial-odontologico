@@ -206,7 +206,7 @@ export default function AgendaPage() {
         {/* Derecha */}
         <div className="ag-hero-right">
           <div className="ag-hero-img-wrap">
-            <img src={heroImg} alt="Agenda tu cita dental por WhatsApp" className="ag-hero-img" />
+            <img src={heroImg} alt="Agenda tu cita dental" className="ag-hero-img" />
             <div className="ag-float-badge ag-float-badge--tl">
               <i className="fa-solid fa-calendar-check" />
               <span>¡Es muy fácil!</span>
@@ -219,26 +219,23 @@ export default function AgendaPage() {
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <div className="ag-stats-row">
-        <div className="ag-stat">
-          <strong>{statsVisible ? <Counter target={500} suffix="+" /> : '0+'}</strong>
-          <span>Pacientes atendidos</span>
-        </div>
-        <div className="ag-stat-divider" />
-        <div className="ag-stat">
-          <strong>{statsVisible ? <Counter target={7} suffix=" años" /> : '0 años'}</strong>
-          <span>De servicio continuo</span>
-        </div>
-        <div className="ag-stat-divider" />
-        <div className="ag-stat">
-          <strong>100%</strong>
-          <span>Gratuito · CSSR</span>
-        </div>
-        <div className="ag-stat-divider" />
-        <div className="ag-stat">
-          <strong>Viernes</strong>
-          <span>7:30 a.m. · Citas</span>
+      {/* ── TICKER ANIMADO ── */}
+      <div className="ag-ticker-wrap">
+        <div className="ag-ticker-track">
+          {[...Array(2)].map((_, i) => (
+            <div className="ag-ticker-inner" key={i} aria-hidden={i === 1}>
+              <span className="ag-ticker-item"><i className="fa-solid fa-tooth" /> 500+ pacientes atendidos</span>
+              <span className="ag-ticker-dot">✦</span>
+              <span className="ag-ticker-item"><i className="fa-solid fa-calendar-check" /> Citas solo los viernes</span>
+              <span className="ag-ticker-dot">✦</span>
+              <span className="ag-ticker-item"><i className="fa-solid fa-shield-heart" /> 100% gratuito · CSSR</span>
+              <span className="ag-ticker-dot">✦</span>
+              <span className="ag-ticker-item"><i className="fa-solid fa-clock" /> 7:30 a.m. · Sé puntual</span>
+              <span className="ag-ticker-dot">✦</span>
+              <span className="ag-ticker-item"><i className="fa-solid fa-location-dot" /> Hospital San Ramón · Chanchamayo</span>
+              <span className="ag-ticker-dot">✦</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -268,15 +265,22 @@ export default function AgendaPage() {
             ))}
           </div>
           <div className="ag-steps-cta ag-reveal">
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-              className="ag-btn-wa ag-btn-wa--lg" id="btn-agenda-steps">
-              <i className="fa-brands fa-whatsapp" />
-              Comenzar · Enviar "CITA"
-            </a>
-            <p className="ag-steps-cta-note">
-              <i className="fa-solid fa-circle-info" />
-              &nbsp;Chatbot activo <strong>solo los viernes</strong> hasta agotar cupos
-            </p>
+            <div className="ag-steps-reminder">
+              <div className="ag-steps-reminder-left">
+                <div className="ag-steps-reminder-icon">
+                  <i className="fa-solid fa-calendar-check" />
+                </div>
+                <div className="ag-steps-reminder-text">
+                  <span className="ag-steps-reminder-label">Recuerda</span>
+                  <span className="ag-steps-reminder-value">Viernes · 7:30 a.m.</span>
+                </div>
+              </div>
+              <div className="ag-steps-reminder-divider" />
+              <div className="ag-steps-reminder-right">
+                <i className="fa-solid fa-circle-info" />
+                <span>Las citas se asignan <strong>solo los viernes</strong> hasta agotar cupos disponibles.</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -323,7 +327,7 @@ export default function AgendaPage() {
             <div className="ag-note ag-reveal" style={{ '--nc': '#EF4444', '--nb': 'rgba(239,68,68,0.08)' }}>
               <div className="ag-note-icon-wrap"><i className="fa-solid fa-phone-slash" /></div>
               <h4>Sin llamadas</h4>
-              <p>Solo comunicación por <strong>WhatsApp.</strong></p>
+              <p>Solo comunicación por <strong>mensaje de texto.</strong></p>
             </div>
             <div className="ag-note ag-reveal" style={{ '--nc': '#F59E0B', '--nb': 'rgba(245,158,11,0.08)' }}>
               <div className="ag-note-icon-wrap"><i className="fa-regular fa-calendar" /></div>
@@ -345,12 +349,33 @@ export default function AgendaPage() {
         <div className="ag-container ag-footer-inner">
           <div className="ag-footer-tooth">🦷</div>
           <h2>¿Listo para sonreír mejor?</h2>
-          <p>Envía <strong>"CITA"</strong> los viernes y el chatbot hará el resto.</p>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-            className="ag-btn-wa ag-btn-wa--xl" id="btn-agenda-footer">
-            <i className="fa-brands fa-whatsapp" />
-            Agendar · 936 205 023
-          </a>
+          <p>Preséntate el <strong>día viernes a las 7:30 a.m.</strong> en el consultorio.<br />
+          Primera atención sin costo de valoración.</p>
+          <div className="ag-footer-info-strip">
+            <div className="ag-footer-info-item">
+              <i className="fa-solid fa-location-dot" />
+              <div>
+                <span className="ag-footer-info-label">Ubicación</span>
+                <span className="ag-footer-info-val">Hospital San Ramón · Chanchamayo</span>
+              </div>
+            </div>
+            <div className="ag-footer-info-sep" />
+            <div className="ag-footer-info-item">
+              <i className="fa-solid fa-clock" />
+              <div>
+                <span className="ag-footer-info-label">Horario de citas</span>
+                <span className="ag-footer-info-val">Viernes · 7:30 a.m.</span>
+              </div>
+            </div>
+            <div className="ag-footer-info-sep" />
+            <div className="ag-footer-info-item">
+              <i className="fa-solid fa-phone" />
+              <div>
+                <span className="ag-footer-info-label">Teléfono</span>
+                <span className="ag-footer-info-val">+51 936 205 023</span>
+              </div>
+            </div>
+          </div>
           <p className="ag-footer-legal">Centro de Salud San Ramón · CSSR</p>
         </div>
       </section>

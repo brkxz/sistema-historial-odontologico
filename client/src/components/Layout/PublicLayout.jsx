@@ -332,16 +332,17 @@ export default function PublicLayout() {
         </div>
       </footer>
 
-      {/* WHATSAPP FLOAT */}
-      <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" className="landing-whatsapp-float" aria-label="Contactar por WhatsApp">
-        <span className="landing-wa-tooltip">¡Escríbenos!</span>
-        <div className="landing-wa-btn"><i className="fa-brands fa-whatsapp" /></div>
-      </a>
-
+      
       {/* DENTY FLOATING CHAT FAB */}
       {!showFloatingChat && (
         <button className="landing-denty-fab" onClick={() => setShowFloatingChat(true)} aria-label="Abrir chat con Denty">
-          <i className="fa-solid fa-tooth" />
+          <span className="landing-denty-fab-ring" />
+          <span className="landing-denty-fab-ring landing-denty-fab-ring--2" />
+          <span className="landing-denty-fab-label">Asistente IA</span>
+          <span className="landing-denty-fab-inner">
+            <span className="landing-denty-fab-emoji">🦷</span>
+            <span className="landing-denty-fab-pulse" />
+          </span>
         </button>
       )}
 

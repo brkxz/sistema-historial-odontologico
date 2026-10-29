@@ -48,17 +48,4 @@ export function sanitizeInputs(req, res, next) {
   next();
 }
 
-/**
- * Valida que un campo no exceda cierta longitud
- */
-export function validateLength(field, maxLength) {
-  return (req, res, next) => {
-    const value = req.body?.[field];
-    if (value && typeof value === 'string' && value.length > maxLength) {
-      return res.status(400).json({
-        error: `El campo ${field} excede el límite de ${maxLength} caracteres`,
-      });
-    }
-    next();
-  };
-}
+

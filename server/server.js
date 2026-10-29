@@ -205,8 +205,9 @@ async function startServer() {
     logger.info('Conexión a la base de datos establecida.');
 
     const isDev = process.env.NODE_ENV !== 'production';
-    await sequelize.sync(isDev ? { alter: true } : {});
-    logger.info(`Modelos sincronizados (${isDev ? 'desarrollo - alter' : 'producción - safe'}).`);
+    // alter:true causa conflictos con ENUMs en PostgreSQL — usamos sync seguro
+    await sequelize.sync({ force: false });
+    logger.info(`Modelos sincronizados (modo seguro — sin alter).`);
 
     // Ejecutar migraciones de columnas faltantes (solo en producción)
     if (!isDev) {
@@ -232,6 +233,8 @@ async function startServer() {
     });
   } catch (error) {
     logger.error('Error al iniciar el servidor', { error: error.message });
+    console.error('=== ERROR COMPLETO ===');
+    console.error(error);
     process.exit(1);
   }
 }

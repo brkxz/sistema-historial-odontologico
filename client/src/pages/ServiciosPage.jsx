@@ -2,48 +2,36 @@ import { useEffect } from 'react';
 
 const SERVICES = [
   {
-    icon: 'fa-solid fa-teeth-open',
-    title: 'Odontología General',
-    desc: 'Diagnóstico, profilaxis y tratamiento de caries con equipamiento de alta precisión. Cuidado preventivo para preservar tus piezas dentales a largo plazo.',
-    tag: 'Preventivo',
+    icon: 'fa-solid fa-tooth',
+    title: 'Odontología Curativa',
+    desc: 'Restauraciones y curaciones dentales definitivas utilizando resinas estéticas de alta calidad. Devolvemos la función y estética de tus piezas dentales.',
+    tag: 'Curativa',
   },
   {
-    icon: 'fa-solid fa-child-reaching',
-    title: 'Odontopediatría',
-    desc: 'Atención especializada para niños con enfoque en psicología infantil. Creamos experiencias positivas para construir hábitos saludables desde temprana edad.',
-    tag: 'Infantil',
-  },
-  {
-    icon: 'fa-solid fa-wand-magic-sparkles',
-    title: 'Estética Dental',
-    desc: 'Blanqueamiento dental, carillas de porcelana y diseño de sonrisa personalizado. Transformamos tu sonrisa con tecnología de última generación.',
-    tag: 'Estético',
-  },
-  {
-    icon: 'fa-solid fa-microscope',
-    title: 'Endodoncia',
-    desc: 'Tratamiento de conductos con anestesia local efectiva y mínima invasión. Preservamos tus piezas dentales naturales con el máximo confort.',
-    tag: 'Especializado',
-  },
-  {
-    icon: 'fa-solid fa-align-center',
-    title: 'Ortodoncia',
-    desc: 'Brackets metálicos y cerámicos de alta calidad para la alineación ideal de tu dentadura. Mejoramos tu mordida y estética facial de forma gradual.',
-    tag: 'Corrección',
+    icon: 'fa-solid fa-shield-heart',
+    title: 'Odontología Preventiva',
+    desc: 'Eliminación de sarro (tartrectomía), limpiezas profundas (profilaxis) y aplicación tópica de flúor para proteger el esmalte y prevenir enfermedades bucales.',
+    tag: 'Preventiva',
   },
   {
     icon: 'fa-solid fa-scissors',
     title: 'Cirugía Oral',
-    desc: 'Extracciones simples y complejas, incluyendo terceros molares. Procedimientos seguros con anestesia local y protocolos postoperatorios precisos.',
+    desc: 'Extracciones dentales simples y manejo farmacológico para controlar el dolor y las infecciones bucales. Procedimientos seguros con anestesia local.',
     tag: 'Cirugía',
+  },
+  {
+    icon: 'fa-solid fa-child-reaching',
+    title: 'Odontopediatría',
+    desc: 'Tratamientos especializados en niños: terapias del nervio en dientes de leche (pulpotomías y pulpactomías) y medidas preventivas de ortopedia maxilar.',
+    tag: 'Infantil',
   },
 ];
 
 const STATS = [
-  { value: '5+', label: 'Años de experiencia' },
-  { value: '2,000+', label: 'Pacientes atendidos' },
-  { value: '6', label: 'Especialidades' },
-  { value: '98%', label: 'Satisfacción' },
+  { value: '500+', label: 'Pacientes atendidos' },
+  { value: '4', label: 'Especialidades' },
+  { value: '100%', label: 'Gratuito con SIS' },
+  { value: 'CSSR', label: 'Red Integrada de Salud' },
 ];
 
 export default function ServiciosPage() {
@@ -72,7 +60,7 @@ export default function ServiciosPage() {
           </div>
           <h1 className="landing-title-main">Nuestros Servicios</h1>
           <p className="landing-subtitle" style={{ margin: '0 auto 40px' }}>
-            Atención odontológica integral con tecnología de vanguardia y un equipo comprometido con tu salud bucal.
+            Atención odontológica integral y gratuita para usuarios con SIS activo. Consultas, curaciones, limpiezas, extracciones y más — sin costo para ti.
           </p>
 
           {/* Stats strip */}
@@ -111,26 +99,42 @@ export default function ServiciosPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="landing-cta-section landing-reveal" style={{ padding: '80px 0' }}>
-        <div className="landing-container" style={{ textAlign: 'center' }}>
-          <div className="landing-label-text" style={{ justifyContent: 'center' }}>
-            <i className="fa-brands fa-whatsapp" /> Agenda tu cita
+      {/* COBERTURA SIS */}
+      <section className="svc-sis-section landing-reveal">
+        <div className="landing-container">
+          <div className="svc-sis-inner">
+            <div className="svc-sis-badge">
+              <i className="fa-solid fa-shield-heart" />
+              <span>SIS</span>
+            </div>
+            <div className="svc-sis-body">
+              <h3 className="svc-sis-title">Cobertura del Seguro Integral de Salud</h3>
+              <p className="svc-sis-desc">
+                Si cuentas con tu <strong>SIS activo y adscrito</strong> a esta red de salud, todos los servicios son
+                completamente <strong>gratuitos</strong>: consultas, evaluaciones, limpiezas, curaciones, extracciones
+                y medicamentos indicados por el odontólogo.
+              </p>
+            </div>
+            <div className="svc-sis-tag">100% gratuito</div>
           </div>
-          <h2 className="landing-section-title" style={{ marginTop: '12px', marginBottom: '16px' }}>
-            ¿Listo para cuidar tu sonrisa?
-          </h2>
-          <p className="landing-section-subtitle" style={{ marginBottom: '32px' }}>
-            Contáctanos y agenda tu consulta sin costo de valoración inicial.
-          </p>
-          <a
-            href="https://wa.me/51936205023"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="landing-btn-primary"
-          >
-            <i className="fa-brands fa-whatsapp" /> Escribir por WhatsApp
-          </a>
+        </div>
+      </section>
+
+      {/* FRASE CIERRE */}
+      <section className="svc-quote-section landing-reveal">
+        <div className="landing-container">
+          <div className="svc-quote-inner">
+            <div className="svc-quote-line" />
+            <blockquote className="svc-quote-text">
+              "La salud bucal es el reflejo de tu bienestar general.<br />
+              <em>Cada tratamiento que ofrecemos parte de ese principio.</em>"
+            </blockquote>
+            <div className="svc-quote-meta">
+              <span className="svc-quote-org">Hospital San Ramón · Chanchamayo</span>
+              <span className="svc-quote-sep">—</span>
+              <span className="svc-quote-dept">Servicio de Odontología</span>
+            </div>
+          </div>
         </div>
       </section>
     </>
