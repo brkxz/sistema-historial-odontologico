@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createHash } from 'crypto';
+import { Op } from 'sequelize';
 import { authenticateToken } from '../middleware/auth.js';
 import AIConversation from '../models/AIConversation.js';
 import AIKnowledge from '../models/AIKnowledge.js';
@@ -222,18 +223,24 @@ router.post('/public-chat', async (req, res) => {
       });
     }
 
-    // Guardar conversación en DB (en segundo plano, no bloquea la respuesta)
+    // Guardar conversación en DB y devolver el ID para el rating
     const sid = (session_id || 'anon').slice(0, 64);
     const ipHash = hashIP(clientIP);
 
-    AIConversation.create({
-      session_id: sid,
-      user_message: userMessage.slice(0, 2000),
-      ai_response: aiResponseText.slice(0, 5000),
-      provider: usedProvider,
-      ip_hash: ipHash,
-      created_at: new Date(),
-    }).catch(err => console.warn('[AI-Public] No se pudo guardar conversación:', err.message));
+    let savedConvId = null;
+    try {
+      const saved = await AIConversation.create({
+        session_id: sid,
+        user_message: userMessage.slice(0, 2000),
+        ai_response: aiResponseText.slice(0, 5000),
+        provider: usedProvider,
+        ip_hash: ipHash,
+        created_at: new Date(),
+      });
+      savedConvId = saved.id;
+    } catch (err) {
+      console.warn('[AI-Public] No se pudo guardar conversación:', err.message);
+    }
 
     return res.json({
       candidates: [{
@@ -242,6 +249,7 @@ router.post('/public-chat', async (req, res) => {
           role: 'model',
         },
       }],
+      conversation_id: savedConvId,
     });
 
   } catch (error) {
@@ -377,6 +385,90 @@ router.post('/chat', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error en proxy de IA:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ============================================================
+// GET /api/ai/stats — Estadísticas de entrenamiento (requiere auth)
+// ============================================================
+router.get('/stats', authenticateToken, async (req, res) => {
+  try {
+    const [total, positive, negative, unrated, knowledge] = await Promise.all([
+      AIConversation.count(),
+      AIConversation.count({ where: { rating: 1 } }),
+      AIConversation.count({ where: { rating: -1 } }),
+      AIConversation.count({ where: { rating: null } }),
+      AIKnowledge.count({ where: { is_active: true } }),
+    ]);
+
+    // Últimas 7 sesiones únicas
+    const recentSessions = await AIConversation.count({
+      distinct: true,
+      col: 'session_id',
+      where: {
+        created_at: {
+          [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        },
+      },
+    }).catch(() => 0);
+
+    // Top preguntas más frecuentes (palabras clave simples)
+    const recentMsgs = await AIConversation.findAll({
+      attributes: ['user_message'],
+      order: [['created_at', 'DESC']],
+      limit: 100,
+    });
+
+    res.json({
+      total_conversations: total,
+      positive_ratings: positive,
+      negative_ratings: negative,
+      unrated: unrated,
+      active_knowledge: knowledge,
+      recent_sessions_7d: recentSessions,
+      recent_messages: recentMsgs.map(m => m.user_message),
+    });
+  } catch (error) {
+    console.error('[AI-Stats] Error:', error);
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+});
+
+// ============================================================
+// POST /api/ai/promote — Promover conversación a base de conocimiento (requiere auth)
+// ============================================================
+router.post('/promote', authenticateToken, async (req, res) => {
+  try {
+    const { conversation_id, category, question_override, answer_override } = req.body;
+
+    if (!conversation_id) {
+      return res.status(400).json({ error: 'conversation_id requerido' });
+    }
+
+    const conv = await AIConversation.findByPk(conversation_id);
+    if (!conv) return res.status(404).json({ error: 'Conversación no encontrada' });
+
+    const entry = await AIKnowledge.create({
+      category: (category || 'General').slice(0, 80),
+      question: (question_override || conv.user_message).slice(0, 500),
+      answer: (answer_override || conv.ai_response).slice(0, 5000),
+      is_active: true,
+      priority: 10, // Prioridad media por defecto
+      created_by: req.user?.id || null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    // Marcar la conversación como "promovida" con rating positivo
+    await conv.update({ rating: 1 });
+
+    res.status(201).json({
+      message: '✅ Conversación agregada a la base de conocimiento. Denty ya aprenderá de esto.',
+      entry,
+    });
+  } catch (error) {
+    console.error('[AI-Promote] Error:', error);
+    res.status(500).json({ error: 'Error al promover conversación' });
   }
 });
 
