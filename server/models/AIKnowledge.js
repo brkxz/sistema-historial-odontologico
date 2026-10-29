@@ -61,3 +61,4 @@ const AIKnowledge = sequelize.define('AIKnowledge', {
 });
 
 export default AIKnowledge;
+

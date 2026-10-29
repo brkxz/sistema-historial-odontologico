@@ -516,18 +516,32 @@ export default function PublicLayout() {
       {/* FOOTER */}
       <footer className="landing-footer">
         <div className="landing-container landing-footer-inner">
-          <div className="landing-footer-logo">
-            <i className="fa-solid fa-tooth" /> Servicio de Odontología
-          </div>
+          {/* Logo + subtítulo */}
+          <NavLink className="landing-footer-logo" to="/">
+            <i className="fa-solid fa-tooth" />
+            <span>
+              Servicio de Odontología
+              <span className="footer-logo-sub">Hospital San Ramón · Chanchamayo</span>
+            </span>
+          </NavLink>
+
+          {/* Redes sociales — solo TikTok, Facebook, WhatsApp */}
           <div className="landing-social-links">
-            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fa-brands fa-instagram" /></a>
-            <a href="https://www.facebook.com/share/1DysHEgQix/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i className="fa-brands fa-facebook-f" /></a>
-            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i className="fa-brands fa-tiktok" /></a>
-            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i className="fa-brands fa-youtube" /></a>
-            <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i className="fa-brands fa-whatsapp" /></a>
+            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="tt">
+              <i className="fa-brands fa-tiktok" />
+            </a>
+            <a href="https://www.facebook.com/share/1DysHEgQix/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="fb">
+              <i className="fa-brands fa-facebook-f" />
+            </a>
+            <a href="https://wa.me/51936205023" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="wa">
+              <i className="fa-brands fa-whatsapp" />
+            </a>
           </div>
+
+          {/* Copyright */}
           <div className="landing-footer-bottom">
-            © 2025 Servicio de Odontología — Hospital San Ramón, Chanchamayo. Todos los derechos reservados.
+            © 2025 <strong>Servicio de Odontología</strong><br />
+            Todos los derechos reservados.
           </div>
         </div>
       </footer>
