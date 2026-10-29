@@ -1,6 +1,5 @@
 // ============================================================
 // AIKnowledgePage — Panel de Entrenamiento de Denty IA
-// Pestañas: Dashboard · Conversaciones · Base de Conocimiento
 // ============================================================
 
 import { useState, useEffect, useCallback } from 'react';
@@ -20,25 +19,39 @@ function getHeaders() {
   return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 }
 
-function fmt(dateStr) {
-  if (!dateStr) return '—';
-  try {
-    return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(dateStr));
-  } catch { return dateStr; }
+function fmtDate(d) {
+  if (!d) return '—';
+  try { return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(d)); }
+  catch { return d; }
 }
 
-// ─── Componente: Badge de rating ───
+// ─── Stat card ───
+function StatCard({ icon, iconColor, value, label }) {
+  return (
+    <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '18px 20px' }}>
+      <div style={{
+        width: '44px', height: '44px', borderRadius: '10px',
+        background: `${iconColor}18`, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', flexShrink: 0,
+      }}>
+        <i className={icon} style={{ color: iconColor, fontSize: '1.1rem' }} />
+      </div>
+      <div>
+        <div style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '3px' }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Badge rating ───
 function RatingBadge({ rating }) {
-  if (rating === 1)  return <span style={badgeStyle('#d1fae5','#065f46')}>👍 Útil</span>;
-  if (rating === -1) return <span style={badgeStyle('#fee2e2','#991b1b')}>👎 No útil</span>;
-  return <span style={badgeStyle('#f3f4f6','#6b7280')}>⏳ Sin calificar</span>;
+  if (rating === 1)  return <span className="badge badge-success"><i className="fa-solid fa-thumbs-up" /> Útil</span>;
+  if (rating === -1) return <span className="badge badge-danger"><i className="fa-solid fa-thumbs-down" /> No útil</span>;
+  return <span className="badge badge-secondary"><i className="fa-regular fa-clock" /> Sin calificar</span>;
 }
-const badgeStyle = (bg, color) => ({
-  padding: '2px 10px', borderRadius: '100px', fontSize: '0.72rem',
-  fontWeight: 600, background: bg, color,
-});
 
-// ─── Componente: Modal Promover ───
+// ─── Modal: Promover conversación a conocimiento ───
 function PromoteModal({ conv, onClose, onSave }) {
   const [category, setCategory] = useState('General');
   const [question, setQuestion] = useState(conv.user_message || '');
@@ -56,42 +69,49 @@ function PromoteModal({ conv, onClose, onSave }) {
       });
       if (!res.ok) throw new Error();
       onSave();
-    } catch {
-      alert('Error al guardar. Intenta de nuevo.');
-    } finally { setSaving(false); }
+    } catch { alert('Error al guardar. Intenta de nuevo.'); }
+    finally { setSaving(false); }
   }
 
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px' }}>
-      <div style={{ background:'#fff', borderRadius:'16px', width:'100%', maxWidth:'560px', padding:'28px', boxShadow:'0 20px 60px rgba(0,0,0,0.2)' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px' }}>
-          <h3 style={{ margin:0, fontSize:'1.05rem' }}>
-            🧠 Agregar al conocimiento de Denty
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+    }}>
+      <div className="card" style={{ width: '100%', maxWidth: '560px', padding: '28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <h3 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i className="fa-solid fa-brain" style={{ color: '#6366f1' }} />
+            Agregar al conocimiento de Denty
           </h3>
-          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'1.2rem', color:'#888' }}>✕</button>
+          <button className="btn btn-ghost btn-icon btn-sm" onClick={onClose}>
+            <i className="fa-solid fa-xmark" />
+          </button>
         </div>
-        <p style={{ fontSize:'0.82rem', color:'#888', marginBottom:'16px' }}>
-          Edita si es necesario antes de guardar. Denty usará esto en futuras conversaciones.
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '20px', marginTop: '4px' }}>
+          Edita si es necesario. Denty usará esto en conversaciones futuras.
         </p>
-        <div style={{ marginBottom:'12px' }}>
-          <label style={{ fontSize:'0.8rem', fontWeight:600, display:'block', marginBottom:'4px' }}>Categoría</label>
-          <select value={category} onChange={e => setCategory(e.target.value)} style={{ width:'100%', padding:'8px 12px', borderRadius:'8px', border:'1px solid #e5e7eb', fontSize:'0.87rem' }}>
+        <div className="form-group" style={{ marginBottom: '14px' }}>
+          <label className="form-label">Categoría</label>
+          <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        <div style={{ marginBottom:'12px' }}>
-          <label style={{ fontSize:'0.8rem', fontWeight:600, display:'block', marginBottom:'4px' }}>Pregunta (lo que dijo el paciente)</label>
-          <textarea value={question} onChange={e => setQuestion(e.target.value)} rows={2} maxLength={500} style={{ width:'100%', padding:'10px 12px', borderRadius:'8px', border:'1px solid #e5e7eb', fontSize:'0.85rem', resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' }} />
+        <div className="form-group" style={{ marginBottom: '14px' }}>
+          <label className="form-label">Pregunta del paciente</label>
+          <input className="form-input" type="text" value={question} onChange={e => setQuestion(e.target.value)} maxLength={500} />
         </div>
-        <div style={{ marginBottom:'20px' }}>
-          <label style={{ fontSize:'0.8rem', fontWeight:600, display:'block', marginBottom:'4px' }}>Respuesta que dará Denty</label>
-          <textarea value={answer} onChange={e => setAnswer(e.target.value)} rows={5} maxLength={3000} style={{ width:'100%', padding:'10px 12px', borderRadius:'8px', border:'1px solid #e5e7eb', fontSize:'0.85rem', resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' }} />
-          <span style={{ fontSize:'0.72rem', color:'#aaa' }}>{answer.length}/3000</span>
+        <div className="form-group" style={{ marginBottom: '22px' }}>
+          <label className="form-label">Respuesta que dará Denty</label>
+          <textarea className="form-textarea" value={answer} onChange={e => setAnswer(e.target.value)} rows={5} maxLength={3000} />
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{answer.length}/3000</span>
         </div>
-        <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end' }}>
-          <button onClick={onClose} style={{ padding:'9px 20px', borderRadius:'8px', border:'1px solid #e5e7eb', background:'#fff', cursor:'pointer', fontSize:'0.87rem' }}>Cancelar</button>
-          <button onClick={handleSave} disabled={saving || !question.trim() || !answer.trim()} style={{ padding:'9px 20px', borderRadius:'8px', border:'none', background:'#6366f1', color:'#fff', cursor:'pointer', fontSize:'0.87rem', fontWeight:600 }}>
-            {saving ? '⏳ Guardando...' : '🧠 Guardar en conocimiento'}
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving || !question.trim() || !answer.trim()}>
+            {saving
+              ? <><i className="fa-solid fa-spinner fa-spin" /> Guardando...</>
+              : <><i className="fa-solid fa-brain" /> Guardar en conocimiento</>}
           </button>
         </div>
       </div>
@@ -100,75 +120,96 @@ function PromoteModal({ conv, onClose, onSave }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// PESTAÑA 1: DASHBOARD DE ENTRENAMIENTO
+// TAB 1: DASHBOARD
 // ═══════════════════════════════════════════════════════════
-function TabDashboard({ stats, loadingStats }) {
-  if (loadingStats) return <div style={{ textAlign:'center', padding:'60px', color:'#888' }}><i className="fa-solid fa-spinner fa-spin" /> Cargando estadísticas...</div>;
+function TabDashboard({ stats, loading }) {
+  if (loading) return (
+    <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
+      <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }} /> Cargando estadísticas...
+    </div>
+  );
   if (!stats) return null;
 
   const ratingPct = stats.total_conversations > 0
-    ? Math.round((stats.positive_ratings / stats.total_conversations) * 100)
-    : 0;
+    ? Math.round((stats.positive_ratings / stats.total_conversations) * 100) : 0;
 
-  const trainingScore = Math.min(
-    Math.round((stats.active_knowledge * 3) + (stats.positive_ratings * 2) + (stats.total_conversations * 0.5)),
-    100
+  const score = Math.min(
+    Math.round((stats.active_knowledge * 3) + (stats.positive_ratings * 2) + (stats.total_conversations * 0.5)), 100
   );
+  const level = score < 20 ? 'Principiante' : score < 50 ? 'En desarrollo' : score < 80 ? 'Avanzado' : 'Experto';
 
   return (
-    <div>
-      {/* Progreso general */}
-      <div style={{ background:'linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)', borderRadius:'16px', padding:'24px', color:'#fff', marginBottom:'20px', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', right:'-20px', top:'-20px', fontSize:'8rem', opacity:0.08 }}>🧠</div>
-        <h2 style={{ margin:'0 0 6px', fontSize:'1.1rem', fontWeight:700 }}>Nivel de Entrenamiento de Denty</h2>
-        <p style={{ margin:'0 0 16px', opacity:0.8, fontSize:'0.85rem' }}>
-          Mientras más conversaciones revises y más conocimiento agregues, mejor responderá Denty.
-        </p>
-        <div style={{ background:'rgba(255,255,255,0.2)', borderRadius:'100px', height:'10px', marginBottom:'8px' }}>
-          <div style={{ background:'#fff', borderRadius:'100px', height:'10px', width:`${trainingScore}%`, transition:'width 1s ease' }} />
-        </div>
-        <div style={{ display:'flex', justifyContent:'space-between', fontSize:'0.78rem', opacity:0.85 }}>
-          <span>Principiante</span>
-          <span style={{ fontWeight:700 }}>{trainingScore}/100 puntos</span>
-          <span>Experto</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Progreso */}
+      <div className="card" style={{
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)',
+        border: 'none', padding: '24px', position: 'relative', overflow: 'hidden',
+      }}>
+        <i className="fa-solid fa-brain" style={{
+          position: 'absolute', right: '-10px', top: '-10px',
+          fontSize: '7rem', opacity: 0.07, color: '#fff',
+        }} />
+        <div style={{ color: '#fff' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+            <div>
+              <div style={{ fontSize: '1rem', fontWeight: 700 }}>Nivel de entrenamiento de Denty</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.75, marginTop: '3px' }}>
+                Agrega conocimiento y revisa conversaciones para mejorar las respuestas.
+              </div>
+            </div>
+            <div style={{
+              background: 'rgba(255,255,255,0.15)', borderRadius: '8px',
+              padding: '6px 14px', fontSize: '0.85rem', fontWeight: 700, flexShrink: 0,
+            }}>
+              {level}
+            </div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '100px', height: '8px', marginBottom: '6px' }}>
+            <div style={{ background: '#fff', borderRadius: '100px', height: '8px', width: `${score}%`, transition: 'width 1s ease' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', opacity: 0.7 }}>
+            <span>0 pts</span>
+            <span style={{ fontWeight: 700, opacity: 1 }}>{score} / 100 puntos</span>
+            <span>100 pts</span>
+          </div>
         </div>
       </div>
 
       {/* Stats cards */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))', gap:'12px', marginBottom:'20px' }}>
-        {[
-          { icon:'💬', value: stats.total_conversations, label:'Conversaciones guardadas', color:'#3b82f6' },
-          { icon:'👍', value: stats.positive_ratings, label:'Respuestas útiles', color:'#10b981' },
-          { icon:'👎', value: stats.negative_ratings, label:'Respuestas a mejorar', color:'#ef4444' },
-          { icon:'🧠', value: stats.active_knowledge, label:'Conocimientos activos', color:'#6366f1' },
-          { icon:'📅', value: stats.recent_sessions_7d, label:'Usuarios (7 días)', color:'#f59e0b' },
-          { icon:'✅', value: `${ratingPct}%`, label:'Tasa de satisfacción', color:'#10b981' },
-        ].map((s, i) => (
-          <div key={i} style={{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:'12px', padding:'16px', display:'flex', gap:'12px', alignItems:'flex-start' }}>
-            <span style={{ fontSize:'1.6rem' }}>{s.icon}</span>
-            <div>
-              <div style={{ fontSize:'1.5rem', fontWeight:800, color: s.color, lineHeight:1 }}>{s.value}</div>
-              <div style={{ fontSize:'0.73rem', color:'#888', marginTop:'2px' }}>{s.label}</div>
-            </div>
-          </div>
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+        <StatCard icon="fa-solid fa-comments"    iconColor="#3b82f6" value={stats.total_conversations}  label="Conversaciones guardadas" />
+        <StatCard icon="fa-solid fa-thumbs-up"   iconColor="#10b981" value={stats.positive_ratings}     label="Respuestas útiles" />
+        <StatCard icon="fa-solid fa-thumbs-down" iconColor="#ef4444" value={stats.negative_ratings}     label="A mejorar" />
+        <StatCard icon="fa-solid fa-brain"       iconColor="#6366f1" value={stats.active_knowledge}     label="Conocimientos activos" />
+        <StatCard icon="fa-solid fa-users"       iconColor="#f59e0b" value={stats.recent_sessions_7d || 0} label="Usuarios (7 días)" />
+        <StatCard icon="fa-solid fa-chart-line"  iconColor="#10b981" value={`${ratingPct}%`}            label="Tasa de satisfacción" />
       </div>
 
-      {/* Guía de cómo entrenar */}
-      <div style={{ background:'#f8fafc', border:'1px solid #e5e7eb', borderRadius:'12px', padding:'20px' }}>
-        <h3 style={{ margin:'0 0 16px', fontSize:'0.95rem', color:'#374151' }}>🎯 Cómo entrenar a Denty paso a paso</h3>
-        <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
+      {/* Guía */}
+      <div className="card" style={{ padding: '22px' }}>
+        <h3 style={{ margin: '0 0 18px', fontSize: '0.95rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="fa-solid fa-route" style={{ color: '#6366f1' }} /> Cómo entrenar a Denty paso a paso
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {[
-            { step:'1', color:'#3b82f6', title:'Los pacientes chatean con Denty', desc:'Cada conversación se guarda automáticamente en la pestaña "Conversaciones".' },
-            { step:'2', color:'#6366f1', title:'Revisa las conversaciones', desc:'Ve a la pestaña "Conversaciones", lee los intercambios y encuentra preguntas comunes o respuestas que se pueden mejorar.' },
-            { step:'3', color:'#10b981', title:'Agrega al conocimiento', desc:'Cuando veas una buena pregunta-respuesta, haz clic en "🧠 Entrenar con esto" para guardarla en la base de conocimiento.' },
-            { step:'4', color:'#f59e0b', title:'Denty mejora automáticamente', desc:'A partir de ese momento, Denty usará ese conocimiento en TODAS las conversaciones futuras.' },
-          ].map(({ step, color, title, desc }) => (
-            <div key={step} style={{ display:'flex', gap:'14px', alignItems:'flex-start' }}>
-              <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:color, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:'0.85rem', flexShrink:0 }}>{step}</div>
+            { n: '1', color: '#3b82f6', icon: 'fa-solid fa-comments',         title: 'Los pacientes chatean con Denty',   desc: 'Cada conversación del chat público se guarda automáticamente en la base de datos.' },
+            { n: '2', color: '#6366f1', icon: 'fa-solid fa-magnifying-glass',  title: 'Revisa las conversaciones',          desc: 'En la pestaña "Conversaciones" puedes leer las preguntas de los pacientes y las respuestas de Denty.' },
+            { n: '3', color: '#10b981', icon: 'fa-solid fa-brain',             title: 'Entrena con las mejores respuestas', desc: 'Haz clic en "Entrenar con esto" para guardar una buena conversación en la base de conocimiento.' },
+            { n: '4', color: '#f59e0b', icon: 'fa-solid fa-bolt',              title: 'Denty mejora automáticamente',       desc: 'Desde ese momento, Denty usa ese conocimiento en todas las conversaciones futuras.' },
+          ].map(({ n, color, icon, title, desc }) => (
+            <div key={n} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+              <div style={{
+                width: '30px', height: '30px', borderRadius: '50%', background: color,
+                color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 700, fontSize: '0.85rem', flexShrink: 0,
+              }}>
+                {n}
+              </div>
               <div>
-                <div style={{ fontWeight:600, fontSize:'0.87rem', color:'#1f2937' }}>{title}</div>
-                <div style={{ fontSize:'0.8rem', color:'#6b7280', marginTop:'2px' }}>{desc}</div>
+                <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <i className={icon} style={{ color }} /> {title}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{desc}</div>
               </div>
             </div>
           ))}
@@ -179,22 +220,22 @@ function TabDashboard({ stats, loadingStats }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// PESTAÑA 2: CONVERSACIONES
+// TAB 2: CONVERSACIONES
 // ═══════════════════════════════════════════════════════════
 function TabConversations({ onPromote }) {
   const [convs, setConvs] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all | positive | negative | unrated
+  const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(0);
   const [expanded, setExpanded] = useState(null);
   const LIMIT = 20;
 
-  const fetchConvs = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const ratingParam = filter !== 'all' ? `&rating=${filter}` : '';
-      const res = await fetch(`${API_BASE}/ai/conversations?limit=${LIMIT}&offset=${page * LIMIT}${ratingParam}`, { headers: getHeaders() });
+      const q = filter !== 'all' ? `&rating=${filter}` : '';
+      const res = await fetch(`${API_BASE}/ai/conversations?limit=${LIMIT}&offset=${page * LIMIT}${q}`, { headers: getHeaders() });
       const data = await res.json();
       setConvs(data.conversations || []);
       setTotal(data.total || 0);
@@ -202,73 +243,92 @@ function TabConversations({ onPromote }) {
     finally { setLoading(false); }
   }, [filter, page]);
 
-  useEffect(() => { fetchConvs(); }, [fetchConvs]);
+  useEffect(() => { load(); }, [load]);
+
+  const filters = [
+    { val: 'all',      label: 'Todas' },
+    { val: 'unrated',  label: 'Sin calificar' },
+    { val: 'positive', label: 'Útiles' },
+    { val: 'negative', label: 'A mejorar' },
+  ];
 
   return (
     <div>
-      {/* Filtros */}
-      <div style={{ display:'flex', gap:'8px', marginBottom:'16px', flexWrap:'wrap', alignItems:'center' }}>
-        {[['all','Todas'], ['unrated','Sin calificar'], ['positive','Útiles 👍'], ['negative','A mejorar 👎']].map(([val, label]) => (
-          <button key={val} onClick={() => { setFilter(val); setPage(0); }} style={{
-            padding:'6px 14px', borderRadius:'100px', border:'1px solid', cursor:'pointer', fontSize:'0.8rem', fontWeight:500,
-            borderColor: filter === val ? '#6366f1' : '#e5e7eb',
-            background: filter === val ? '#6366f1' : '#fff',
-            color: filter === val ? '#fff' : '#374151',
-          }}>{label}</button>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+        {filters.map(f => (
+          <button
+            key={f.val}
+            className={`btn btn-sm ${filter === f.val ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => { setFilter(f.val); setPage(0); }}
+            style={{ borderRadius: '100px' }}
+          >
+            {f.label}
+          </button>
         ))}
-        <span style={{ marginLeft:'auto', fontSize:'0.8rem', color:'#888' }}>{total} conversación{total !== 1 ? 'es' : ''}</span>
+        <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          {total} resultado{total !== 1 ? 's' : ''}
+        </span>
       </div>
 
       {loading ? (
-        <div style={{ textAlign:'center', padding:'40px', color:'#888' }}><i className="fa-solid fa-spinner fa-spin" /> Cargando...</div>
+        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }} /> Cargando...
+        </div>
       ) : convs.length === 0 ? (
-        <div style={{ textAlign:'center', padding:'60px', color:'#aaa' }}>
-          <div style={{ fontSize:'3rem', marginBottom:'12px' }}>💬</div>
-          <p>No hay conversaciones {filter !== 'all' ? 'con este filtro' : 'aún'}.</p>
-          {filter === 'all' && <p style={{ fontSize:'0.82rem' }}>Las conversaciones del chat público de Denty aparecerán aquí automáticamente.</p>}
+        <div className="card" style={{ textAlign: 'center', padding: '60px' }}>
+          <i className="fa-solid fa-comments" style={{ fontSize: '2.5rem', color: 'var(--border)', display: 'block', marginBottom: '12px' }} />
+          <p style={{ color: 'var(--text-secondary)', margin: '0 0 6px' }}>
+            {filter === 'all' ? 'Aún no hay conversaciones.' : 'No hay conversaciones con este filtro.'}
+          </p>
+          {filter === 'all' && (
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
+              Las conversaciones del chat de Denty aparecerán aquí automáticamente.
+            </p>
+          )}
         </div>
       ) : (
         <>
-          <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {convs.map(conv => (
-              <div key={conv.id} style={{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:'10px', overflow:'hidden' }}>
-                {/* Header de la conversación */}
+              <div key={conv.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <div
                   onClick={() => setExpanded(expanded === conv.id ? null : conv.id)}
-                  style={{ padding:'12px 16px', cursor:'pointer', display:'flex', gap:'12px', alignItems:'flex-start' }}
+                  style={{ padding: '14px 18px', cursor: 'pointer', display: 'flex', gap: '12px', alignItems: 'flex-start' }}
                 >
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:'4px', flexWrap:'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '5px' }}>
                       <RatingBadge rating={conv.rating} />
-                      <span style={{ fontSize:'0.72rem', color:'#aaa' }}>{fmt(conv.created_at)}</span>
-                      {conv.provider && <span style={{ fontSize:'0.7rem', color:'#c4b5fd', background:'#f5f3ff', padding:'1px 7px', borderRadius:'100px' }}>{conv.provider}</span>}
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{fmtDate(conv.created_at)}</span>
+                      {conv.provider && <span className="badge badge-primary">{conv.provider}</span>}
                     </div>
-                    <div style={{ fontWeight:600, fontSize:'0.87rem', color:'#1f2937', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                      👤 {conv.user_message?.slice(0, 100)}{conv.user_message?.length > 100 ? '...' : ''}
+                    <div style={{ fontWeight: 500, fontSize: '0.87rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <i className="fa-solid fa-user" style={{ color: 'var(--text-muted)', marginRight: '6px', fontSize: '0.75rem' }} />
+                      {conv.user_message?.slice(0, 120)}{(conv.user_message?.length || 0) > 120 ? '…' : ''}
                     </div>
                   </div>
-                  <i className={`fa-solid fa-chevron-${expanded === conv.id ? 'up' : 'down'}`} style={{ color:'#aaa', flexShrink:0, marginTop:'2px' }} />
+                  <i className={`fa-solid fa-chevron-${expanded === conv.id ? 'up' : 'down'}`}
+                    style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: '4px', fontSize: '0.8rem' }} />
                 </div>
 
-                {/* Contenido expandido */}
                 {expanded === conv.id && (
-                  <div style={{ padding:'0 16px 16px', borderTop:'1px solid #f3f4f6' }}>
-                    <div style={{ background:'#f9fafb', borderRadius:'8px', padding:'12px', marginBottom:'10px', marginTop:'10px' }}>
-                      <div style={{ fontSize:'0.73rem', fontWeight:700, color:'#9ca3af', marginBottom:'6px' }}>PREGUNTA DEL PACIENTE</div>
-                      <div style={{ fontSize:'0.87rem', color:'#374151' }}>{conv.user_message}</div>
+                  <div style={{ borderTop: '1px solid var(--border)', padding: '16px 18px' }}>
+                    <div style={{ background: 'var(--bg-tertiary)', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em', marginBottom: '6px', textTransform: 'uppercase' }}>
+                        Pregunta del paciente
+                      </div>
+                      <div style={{ fontSize: '0.87rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>{conv.user_message}</div>
                     </div>
-                    <div style={{ background:'#eff6ff', borderRadius:'8px', padding:'12px', marginBottom:'12px' }}>
-                      <div style={{ fontSize:'0.73rem', fontWeight:700, color:'#3b82f6', marginBottom:'6px' }}>🦷 RESPUESTA DE DENTY</div>
-                      <div style={{ fontSize:'0.87rem', color:'#1e3a5f', lineHeight:1.6 }}>{conv.ai_response}</div>
+                    <div style={{ background: 'var(--primary-50, #eff6ff)', borderRadius: '8px', padding: '12px 14px', marginBottom: '14px' }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#1d4ed8', letterSpacing: '0.06em', marginBottom: '6px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <i className="fa-solid fa-tooth" /> Respuesta de Denty
+                      </div>
+                      <div style={{ fontSize: '0.87rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>{conv.ai_response}</div>
                     </div>
-                    <div style={{ display:'flex', gap:'8px' }}>
-                      <button
-                        onClick={() => onPromote(conv)}
-                        style={{ padding:'7px 16px', borderRadius:'8px', border:'none', background:'#6366f1', color:'#fff', cursor:'pointer', fontSize:'0.82rem', fontWeight:600 }}
-                      >
-                        🧠 Entrenar con esto
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <button className="btn btn-primary btn-sm" onClick={() => onPromote(conv)}>
+                        <i className="fa-solid fa-brain" /> Entrenar con esto
                       </button>
-                      <span style={{ fontSize:'0.75rem', color:'#aaa', alignSelf:'center' }}>ID #{conv.id} · Sesión: {conv.session_id?.slice(0, 14)}...</span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>ID #{conv.id}</span>
                     </div>
                   </div>
                 )}
@@ -276,12 +336,17 @@ function TabConversations({ onPromote }) {
             ))}
           </div>
 
-          {/* Paginación */}
           {total > LIMIT && (
-            <div style={{ display:'flex', gap:'8px', justifyContent:'center', marginTop:'16px' }}>
-              <button disabled={page === 0} onClick={() => setPage(p => p - 1)} style={{ padding:'6px 16px', borderRadius:'8px', border:'1px solid #e5e7eb', background: page === 0 ? '#f9fafb' : '#fff', cursor: page === 0 ? 'default' : 'pointer' }}>← Anterior</button>
-              <span style={{ alignSelf:'center', fontSize:'0.82rem', color:'#888' }}>Pág. {page + 1} de {Math.ceil(total / LIMIT)}</span>
-              <button disabled={(page + 1) * LIMIT >= total} onClick={() => setPage(p => p + 1)} style={{ padding:'6px 16px', borderRadius:'8px', border:'1px solid #e5e7eb', background:(page + 1) * LIMIT >= total ? '#f9fafb' : '#fff', cursor:(page + 1) * LIMIT >= total ? 'default' : 'pointer' }}>Siguiente →</button>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px', alignItems: 'center' }}>
+              <button className="btn btn-secondary btn-sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+                <i className="fa-solid fa-arrow-left" /> Anterior
+              </button>
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                {page + 1} / {Math.ceil(total / LIMIT)}
+              </span>
+              <button className="btn btn-secondary btn-sm" disabled={(page + 1) * LIMIT >= total} onClick={() => setPage(p => p + 1)}>
+                Siguiente <i className="fa-solid fa-arrow-right" />
+              </button>
             </div>
           )}
         </>
@@ -291,7 +356,7 @@ function TabConversations({ onPromote }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// PESTAÑA 3: BASE DE CONOCIMIENTO
+// TAB 3: BASE DE CONOCIMIENTO
 // ═══════════════════════════════════════════════════════════
 function TabKnowledge({ refreshTrigger }) {
   const [entries, setEntries] = useState([]);
@@ -301,159 +366,209 @@ function TabKnowledge({ refreshTrigger }) {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
   const [filterCat, setFilterCat] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-  const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
 
-  const fetchEntries = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/ai-knowledge`, { headers: getHeaders() });
-      const data = await res.json();
-      setEntries(data.knowledge || []);
-    } catch { setError('Error al cargar'); }
-    finally { setLoading(false); }
+      setEntries((await res.json()).knowledge || []);
+    } catch { } finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchEntries(); }, [fetchEntries, refreshTrigger]);
+  useEffect(() => { load(); }, [load, refreshTrigger]);
 
-  function showSuccess(msg) { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(''), 3000); }
+  function showToast(msg) { setToast(msg); setTimeout(() => setToast(''), 3000); }
   function openNew() { setEditingId(null); setForm(DEFAULT_FORM); setShowForm(true); }
-  function openEdit(e) { setEditingId(e.id); setForm({ category:e.category, question:e.question, answer:e.answer, priority:e.priority||0, is_active:e.is_active }); setShowForm(true); }
+  function openEdit(e) {
+    setEditingId(e.id);
+    setForm({ category: e.category, question: e.question, answer: e.answer, priority: e.priority || 0, is_active: e.is_active });
+    setShowForm(true);
+  }
 
-  async function handleSave(evt) {
-    evt.preventDefault();
+  async function handleSave(ev) {
+    ev.preventDefault();
     if (!form.question.trim() || !form.answer.trim()) return;
     setSaving(true);
     try {
       const url = editingId ? `${API_BASE}/ai-knowledge/${editingId}` : `${API_BASE}/ai-knowledge`;
       const res = await fetch(url, { method: editingId ? 'PUT' : 'POST', headers: getHeaders(), body: JSON.stringify(form) });
       if (!res.ok) throw new Error();
-      showSuccess(editingId ? '✅ Actualizado' : '✅ Conocimiento agregado — Denty ya puede usarlo');
-      setShowForm(false);
-      fetchEntries();
-    } catch { setError('Error al guardar'); }
+      showToast(editingId ? 'Entrada actualizada correctamente' : 'Conocimiento guardado — Denty ya puede usarlo');
+      setShowForm(false); load();
+    } catch { showToast('Error al guardar. Intenta de nuevo.'); }
     finally { setSaving(false); }
   }
 
   async function handleToggle(entry) {
     try {
-      await fetch(`${API_BASE}/ai-knowledge/${entry.id}`, { method:'PUT', headers:getHeaders(), body:JSON.stringify({ is_active:!entry.is_active }) });
-      fetchEntries();
-    } catch { setError('Error al actualizar'); }
+      await fetch(`${API_BASE}/ai-knowledge/${entry.id}`, {
+        method: 'PUT', headers: getHeaders(),
+        body: JSON.stringify({ is_active: !entry.is_active }),
+      });
+      load();
+    } catch { }
   }
 
   async function handleDelete(id) {
-    if (!window.confirm('¿Eliminar esta entrada?')) return;
+    if (!confirm('¿Eliminar esta entrada?')) return;
     try {
-      await fetch(`${API_BASE}/ai-knowledge/${id}`, { method:'DELETE', headers:getHeaders() });
-      showSuccess('🗑️ Eliminada');
-      fetchEntries();
-    } catch { setError('Error al eliminar'); }
+      await fetch(`${API_BASE}/ai-knowledge/${id}`, { method: 'DELETE', headers: getHeaders() });
+      showToast('Entrada eliminada'); load();
+    } catch { }
   }
 
   const filtered = filterCat ? entries.filter(e => e.category === filterCat) : entries;
-  const activeCount = entries.filter(e => e.is_active).length;
+  const active = entries.filter(e => e.is_active).length;
 
   return (
     <div>
-      {/* Stats bar */}
-      <div style={{ display:'flex', gap:'10px', marginBottom:'16px', flexWrap:'wrap', alignItems:'center' }}>
-        <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'8px', padding:'8px 14px', fontSize:'0.82rem', color:'#1d4ed8' }}>
-          🧠 <strong>{activeCount}</strong> entradas activas que Denty usa ahora mismo
+      {toast && (
+        <div className="card" style={{
+          background: '#d1fae5', border: '1px solid #6ee7b7', color: '#065f46',
+          padding: '12px 16px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          <i className="fa-solid fa-circle-check" /> {toast}
         </div>
-        <div style={{ background:'#f5f3ff', border:'1px solid #ddd6fe', borderRadius:'8px', padding:'8px 14px', fontSize:'0.82rem', color:'#6d28d9' }}>
-          📦 <strong>{entries.length}</strong> entradas totales
-        </div>
-        <button className="btn-primary" onClick={openNew} style={{ marginLeft:'auto' }}>
+      )}
+
+      {/* Toolbar */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <span className="badge badge-primary">
+          <i className="fa-solid fa-brain" /> {active} activas
+        </span>
+        <span className="badge badge-secondary">{entries.length} totales</span>
+        <select
+          className="form-select"
+          style={{ width: 'auto', minWidth: '180px' }}
+          value={filterCat}
+          onChange={e => setFilterCat(e.target.value)}
+        >
+          <option value="">Todas las categorías</option>
+          {CATEGORIES.map(c => {
+            const n = entries.filter(e => e.category === c).length;
+            return n > 0 ? <option key={c} value={c}>{c} ({n})</option> : null;
+          })}
+        </select>
+        <button className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }} onClick={openNew}>
           <i className="fa-solid fa-plus" /> Nueva entrada
         </button>
       </div>
 
-      {/* Mensajes */}
-      {successMsg && <div style={{ padding:'10px 14px', borderRadius:'8px', background:'#d1fae5', color:'#065f46', marginBottom:'12px', fontSize:'0.87rem' }}>{successMsg}</div>}
-      {error && <div style={{ padding:'10px 14px', borderRadius:'8px', background:'#fee2e2', color:'#991b1b', marginBottom:'12px', fontSize:'0.87rem' }}>{error} <button onClick={() => setError('')} style={{ marginLeft:'8px', background:'none', border:'none', cursor:'pointer', fontWeight:700 }}>✕</button></div>}
-
       {/* Formulario */}
       {showForm && (
-        <div style={{ background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:'12px', padding:'20px', marginBottom:'16px' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'14px' }}>
-            <strong style={{ fontSize:'0.95rem' }}>{editingId ? '✏️ Editar entrada' : '➕ Nueva entrada de conocimiento'}</strong>
-            <button onClick={() => setShowForm(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'#888', fontSize:'1.1rem' }}>✕</button>
+        <div className="card" style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <i className="fa-solid fa-pen-to-square" style={{ color: '#6366f1' }} />
+              {editingId ? 'Editar entrada' : 'Nueva entrada de conocimiento'}
+            </h3>
+            <button className="btn btn-ghost btn-icon btn-sm" onClick={() => setShowForm(false)}>
+              <i className="fa-solid fa-xmark" />
+            </button>
           </div>
           <form onSubmit={handleSave}>
-            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'10px' }}>
-              <div style={{ flex:'1', minWidth:'160px' }}>
-                <label style={{ fontSize:'0.78rem', fontWeight:600, display:'block', marginBottom:'3px' }}>Categoría</label>
-                <select className="form-control" value={form.category} onChange={e => setForm(f => ({ ...f, category:e.target.value }))}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px 130px', gap: '12px', marginBottom: '14px' }}>
+              <div className="form-group">
+                <label className="form-label">Categoría</label>
+                <select className="form-select" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <div style={{ width:'100px' }}>
-                <label style={{ fontSize:'0.78rem', fontWeight:600, display:'block', marginBottom:'3px' }}>Prioridad</label>
-                <input className="form-control" type="number" min="0" max="100" value={form.priority} onChange={e => setForm(f => ({ ...f, priority:parseInt(e.target.value)||0 }))} />
+              <div className="form-group">
+                <label className="form-label">Prioridad</label>
+                <input className="form-input" type="number" min="0" max="100" value={form.priority}
+                  onChange={e => setForm(f => ({ ...f, priority: parseInt(e.target.value) || 0 }))} />
               </div>
-              <div style={{ width:'120px' }}>
-                <label style={{ fontSize:'0.78rem', fontWeight:600, display:'block', marginBottom:'3px' }}>Estado</label>
-                <select className="form-control" value={form.is_active ? 'true' : 'false'} onChange={e => setForm(f => ({ ...f, is_active:e.target.value === 'true' }))}>
-                  <option value="true">✅ Activa</option>
-                  <option value="false">⏸ Inactiva</option>
+              <div className="form-group">
+                <label className="form-label">Estado</label>
+                <select className="form-select" value={form.is_active ? 'true' : 'false'}
+                  onChange={e => setForm(f => ({ ...f, is_active: e.target.value === 'true' }))}>
+                  <option value="true">Activa</option>
+                  <option value="false">Inactiva</option>
                 </select>
               </div>
             </div>
-            <div style={{ marginBottom:'10px' }}>
-              <label style={{ fontSize:'0.78rem', fontWeight:600, display:'block', marginBottom:'3px' }}>Pregunta / Tema</label>
-              <input className="form-control" type="text" placeholder="¿Cuánto cuesta una limpieza dental?" value={form.question} onChange={e => setForm(f => ({ ...f, question:e.target.value }))} required maxLength={500} />
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label className="form-label">Pregunta / Tema</label>
+              <input className="form-input" type="text" placeholder="Ej: Cuanto cuesta una limpieza dental"
+                value={form.question} onChange={e => setForm(f => ({ ...f, question: e.target.value }))} required maxLength={500} />
             </div>
-            <div style={{ marginBottom:'14px' }}>
-              <label style={{ fontSize:'0.78rem', fontWeight:600, display:'block', marginBottom:'3px' }}>Respuesta que dará Denty</label>
-              <textarea className="form-control" placeholder="Escribe aquí la respuesta ideal..." value={form.answer} onChange={e => setForm(f => ({ ...f, answer:e.target.value }))} required rows={4} maxLength={3000} style={{ resize:'vertical' }} />
-              <span style={{ fontSize:'0.72rem', color:'#aaa' }}>{form.answer.length}/3000</span>
+            <div className="form-group" style={{ marginBottom: '18px' }}>
+              <label className="form-label">Respuesta que dará Denty</label>
+              <textarea className="form-textarea" placeholder="Escribe la respuesta ideal que Denty debe dar a los pacientes..."
+                value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))}
+                required rows={4} maxLength={3000} />
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{form.answer.length}/3000</span>
             </div>
-            <div style={{ display:'flex', gap:'8px', justifyContent:'flex-end' }}>
-              <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancelar</button>
-              <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? '⏳ Guardando...' : <><i className="fa-solid fa-floppy-disk" /> {editingId ? 'Actualizar' : 'Guardar'}</>}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancelar</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving
+                  ? <><i className="fa-solid fa-spinner fa-spin" /> Guardando...</>
+                  : <><i className="fa-solid fa-floppy-disk" /> {editingId ? 'Actualizar' : 'Guardar'}</>}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Filtro */}
-      <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:'12px', flexWrap:'wrap' }}>
-        <select className="form-control" style={{ width:'auto', minWidth:'180px' }} value={filterCat} onChange={e => setFilterCat(e.target.value)}>
-          <option value="">Todas las categorías ({entries.length})</option>
-          {CATEGORIES.map(c => { const n = entries.filter(e => e.category === c).length; return n > 0 ? <option key={c} value={c}>{c} ({n})</option> : null; })}
-        </select>
-      </div>
-
       {/* Lista */}
       {loading ? (
-        <div style={{ textAlign:'center', padding:'40px', color:'#888' }}><i className="fa-solid fa-spinner fa-spin" /> Cargando...</div>
+        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }} /> Cargando...
+        </div>
       ) : filtered.length === 0 ? (
-        <div style={{ textAlign:'center', padding:'60px', color:'#aaa' }}>
-          <div style={{ fontSize:'3rem', marginBottom:'12px' }}>🧠</div>
-          <p>{entries.length === 0 ? 'Aún no hay conocimiento guardado. Agrega entradas o usa el botón "Entrenar con esto" en las conversaciones.' : 'No hay entradas en esta categoría.'}</p>
+        <div className="card" style={{ textAlign: 'center', padding: '60px' }}>
+          <i className="fa-solid fa-brain" style={{ fontSize: '2.5rem', color: 'var(--border)', display: 'block', marginBottom: '12px' }} />
+          <p style={{ color: 'var(--text-secondary)', margin: '0 0 16px' }}>
+            {entries.length === 0
+              ? 'Aún no hay conocimiento guardado. Agrega entradas o usa "Entrenar con esto" en las conversaciones.'
+              : 'No hay entradas en esta categoría.'}
+          </p>
+          {entries.length === 0 && (
+            <button className="btn btn-primary" onClick={openNew}>
+              <i className="fa-solid fa-plus" /> Agregar primera entrada
+            </button>
+          )}
         </div>
       ) : (
-        <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {filtered.map(entry => (
-            <div key={entry.id} style={{ background: entry.is_active ? '#fff' : '#f9fafb', border:'1px solid #e5e7eb', borderRadius:'10px', padding:'14px 16px', opacity: entry.is_active ? 1 : 0.65 }}>
-              <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'6px', alignItems:'center' }}>
-                <span style={{ padding:'2px 10px', borderRadius:'100px', fontSize:'0.72rem', background:'#ede9fe', color:'#6d28d9', fontWeight:600 }}>{entry.category}</span>
-                {entry.priority > 0 && <span style={{ fontSize:'0.72rem', color:'#f59e0b' }}>★ {entry.priority}</span>}
-                <span style={{ fontSize:'0.72rem', fontWeight:600, color: entry.is_active ? '#10b981' : '#9ca3af' }}>{entry.is_active ? '● Activa' : '○ Inactiva'}</span>
+            <div key={entry.id} className="card" style={{ padding: '14px 18px', opacity: entry.is_active ? 1 : 0.55 }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '8px' }}>
+                <span className="badge badge-primary">{entry.category}</span>
+                {entry.priority > 0 && (
+                  <span className="badge badge-secondary">
+                    <i className="fa-solid fa-arrow-up" /> {entry.priority}
+                  </span>
+                )}
+                <span className={`badge ${entry.is_active ? 'badge-success' : 'badge-secondary'}`}>
+                  <i className={`fa-solid fa-circle${entry.is_active ? '-check' : ''}`} />
+                  {entry.is_active ? ' Activa' : ' Inactiva'}
+                </span>
               </div>
-              <div style={{ fontWeight:600, fontSize:'0.87rem', color:'#1f2937', marginBottom:'4px' }}>❓ {entry.question}</div>
-              <div style={{ fontSize:'0.82rem', color:'#4b5563', lineHeight:1.5, marginBottom:'10px' }}>
-                {entry.answer.length > 180 ? entry.answer.slice(0, 180) + '...' : entry.answer}
+              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                <i className="fa-solid fa-circle-question" style={{ color: '#6366f1', marginRight: '6px' }} />
+                {entry.question}
               </div>
-              <div style={{ display:'flex', gap:'8px' }}>
-                <button onClick={() => openEdit(entry)} style={{ padding:'4px 12px', borderRadius:'6px', border:'1px solid #e5e7eb', background:'#fff', cursor:'pointer', fontSize:'0.8rem' }}><i className="fa-solid fa-pen" /> Editar</button>
-                <button onClick={() => handleToggle(entry)} style={{ padding:'4px 12px', borderRadius:'6px', border:'1px solid', borderColor: entry.is_active ? '#fcd34d' : '#a7f3d0', background: entry.is_active ? '#fffbeb' : '#ecfdf5', cursor:'pointer', fontSize:'0.8rem', color: entry.is_active ? '#92400e' : '#065f46' }}>
-                  <i className={`fa-solid fa-toggle-${entry.is_active ? 'on' : 'off'}`} /> {entry.is_active ? 'Desactivar' : 'Activar'}
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '12px' }}>
+                {entry.answer.length > 200 ? entry.answer.slice(0, 200) + '…' : entry.answer}
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn btn-secondary btn-sm" onClick={() => openEdit(entry)}>
+                  <i className="fa-solid fa-pen" /> Editar
                 </button>
-                <button onClick={() => handleDelete(entry.id)} style={{ padding:'4px 12px', borderRadius:'6px', border:'1px solid #fecaca', background:'#fee2e2', cursor:'pointer', fontSize:'0.8rem', color:'#991b1b' }}><i className="fa-solid fa-trash" /></button>
+                <button
+                  className={`btn btn-sm ${entry.is_active ? 'btn-secondary' : 'btn-success'}`}
+                  onClick={() => handleToggle(entry)}
+                >
+                  <i className={`fa-solid fa-toggle-${entry.is_active ? 'off' : 'on'}`} />
+                  {entry.is_active ? ' Desactivar' : ' Activar'}
+                </button>
+                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(entry.id)}>
+                  <i className="fa-solid fa-trash" />
+                </button>
               </div>
             </div>
           ))}
@@ -475,9 +590,7 @@ export default function AIKnowledgePage() {
 
   useEffect(() => {
     fetch(`${API_BASE}/ai/stats`, { headers: getHeaders() })
-      .then(r => r.json())
-      .then(setStats)
-      .catch(() => {})
+      .then(r => r.json()).then(setStats).catch(() => {})
       .finally(() => setLoadingStats(false));
   }, [knowledgeRefresh]);
 
@@ -488,58 +601,57 @@ export default function AIKnowledgePage() {
   }
 
   const TABS = [
-    { id:'dashboard', label:'📊 Dashboard', desc:'Estado del entrenamiento' },
-    { id:'conversations', label:'💬 Conversaciones', desc:'Mensajes del chat público' },
-    { id:'knowledge', label:'🧠 Conocimiento', desc:'Base de datos de Denty' },
+    { id: 'dashboard',     icon: 'fa-solid fa-chart-bar',  label: 'Dashboard' },
+    { id: 'conversations', icon: 'fa-solid fa-comments',   label: 'Conversaciones' },
+    { id: 'knowledge',     icon: 'fa-solid fa-brain',      label: 'Conocimiento' },
   ];
 
   return (
     <div className="page-container">
-      {/* HEADER */}
-      <div className="page-header" style={{ marginBottom:'24px' }}>
+      <div className="page-header">
         <div>
           <h1 className="page-title">
-            🧠 Entrenamiento de Denty IA
+            <i className="fa-solid fa-brain" style={{ color: '#6366f1', marginRight: '10px' }} />
+            Entrenamiento de Denty IA
           </h1>
           <p className="page-subtitle">
-            Revisa las conversaciones del chat, califica las respuestas y agrega conocimiento. Denty mejora con cada entrada que guardas.
+            Revisa conversaciones del chat, califica respuestas y agrega conocimiento. Denty mejora con cada entrada que guardas.
           </p>
         </div>
       </div>
 
-      {/* TABS */}
-      <div style={{ display:'flex', gap:'4px', background:'#f1f5f9', borderRadius:'10px', padding:'4px', marginBottom:'24px' }}>
+      {/* Tabs */}
+      <div style={{
+        display: 'flex', gap: '2px', background: 'var(--bg-tertiary)',
+        borderRadius: '10px', padding: '4px', marginBottom: '24px',
+      }}>
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             style={{
-              flex:1, padding:'10px 8px', borderRadius:'8px', border:'none', cursor:'pointer',
-              background: tab === t.id ? '#fff' : 'transparent',
-              color: tab === t.id ? '#1f2937' : '#6b7280',
+              flex: 1, padding: '9px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+              background: tab === t.id ? 'var(--bg-card)' : 'transparent',
+              color: tab === t.id ? 'var(--text-primary)' : 'var(--text-muted)',
               fontWeight: tab === t.id ? 700 : 400,
-              fontSize:'0.85rem',
-              boxShadow: tab === t.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              transition:'all 0.18s',
+              fontSize: '0.86rem',
+              boxShadow: tab === t.id ? 'var(--shadow-sm)' : 'none',
+              transition: 'all 0.15s',
             }}
           >
+            <i className={t.icon} style={{ fontSize: '0.85rem', color: tab === t.id ? '#6366f1' : 'inherit' }} />
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* CONTENIDO */}
-      {tab === 'dashboard' && <TabDashboard stats={stats} loadingStats={loadingStats} />}
+      {tab === 'dashboard'     && <TabDashboard stats={stats} loading={loadingStats} />}
       {tab === 'conversations' && <TabConversations onPromote={setPromoteConv} />}
-      {tab === 'knowledge' && <TabKnowledge refreshTrigger={knowledgeRefresh} />}
+      {tab === 'knowledge'     && <TabKnowledge refreshTrigger={knowledgeRefresh} />}
 
-      {/* MODAL PROMOVER */}
       {promoteConv && (
-        <PromoteModal
-          conv={promoteConv}
-          onClose={() => setPromoteConv(null)}
-          onSave={handlePromoteSaved}
-        />
+        <PromoteModal conv={promoteConv} onClose={() => setPromoteConv(null)} onSave={handlePromoteSaved} />
       )}
     </div>
   );
