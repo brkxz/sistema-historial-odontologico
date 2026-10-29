@@ -527,7 +527,7 @@ export default function PublicLayout() {
 
           {/* Redes sociales — solo TikTok, Facebook, WhatsApp */}
           <div className="landing-social-links">
-            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="tt">
+            <a href="https://www.tiktok.com/@odontologia.c.s.sanramon" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="tt">
               <i className="fa-brands fa-tiktok" />
             </a>
             <a href="https://www.facebook.com/share/1DysHEgQix/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="fb">
