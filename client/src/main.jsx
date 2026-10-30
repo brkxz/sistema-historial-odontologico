@@ -10,6 +10,11 @@ import App from './App.jsx'
 
 // Ocultar el splash screen (#app-loader) apenas React este listo
 const hideLoader = () => {
+  // Cancelar el safety timeout del HTML (que recarga la pagina si React no monta)
+  if (window.__splashTimeout) {
+    clearTimeout(window.__splashTimeout);
+    window.__splashTimeout = null;
+  }
   const loader = document.getElementById('app-loader');
   if (loader) {
     loader.classList.add('hidden');
@@ -17,8 +22,8 @@ const hideLoader = () => {
   }
 };
 
-// Safety timeout: si algo falla, ocultar el loader igual a los 4 segundos
-setTimeout(hideLoader, 4000);
+// Safety timeout local: si algo falla en React, ocultar el loader igual a los 3s
+setTimeout(hideLoader, 3000);
 
 // Auto-reload cuando el Service Worker instala una nueva version
 if ('serviceWorker' in navigator) {

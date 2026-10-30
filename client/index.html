@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦷</text></svg>" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230369A1'/><path d='M50 18c-8 0-18 5-18 16 0 6 2 10 4 15 2 6 3 14 5 20 1 4 3 6 5 6s3-3 4-8l1-6 1 6c1 5 2 8 4 8s4-2 5-6c2-6 3-14 5-20 2-5 4-9 4-15C70 23 58 18 50 18z' fill='white'/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="description" content="Sistema de Historial Odontológico Digital - Hospital San Ramón, Chanchamayo" />
     <meta name="theme-color" content="#0D9488" />
@@ -95,30 +95,33 @@
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
-    <!-- Limpiar Service Workers viejos y despertar servidor -->
+    <!-- Despertar servidor y forzar limpieza de cache viejo -->
     <script>
-      // 1. Limpiar SW y caches viejos si hay versión nueva
+      // 1. Desregistrar Service Workers viejos para evitar que sirvan JS obsoleto
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(regs) {
-          regs.forEach(function(reg) {
-            reg.update(); // Fuerza buscar nueva versión
-          });
+          regs.forEach(function(reg) { reg.unregister(); });
         });
-        // Limpiar caches con nombres viejos
-        if ('caches' in window) {
-          caches.keys().then(function(keys) {
-            keys.forEach(function(key) {
-              if (key.indexOf('workbox-precache') !== -1) {
-                // Mantener solo el cache actual
-              }
-            });
-          });
-        }
       }
-      // 2. Ping al servidor para despertar cold start de Render
+      // 2. Limpiar caches del navegador (versiones viejas atrapan JS roto)
+      if ('caches' in window) {
+        caches.keys().then(function(keys) {
+          keys.forEach(function(key) { caches.delete(key); });
+        });
+      }
+      // 3. Ping al servidor Render para despertar cold start
       fetch('https://odontologia-api-9a6v.onrender.com/api/health', {
         method: 'GET', mode: 'no-cors'
       }).catch(function() {});
+      // 4. Safety timeout: si React no monta en 6s, recargar la pagina
+      window.__splashTimeout = setTimeout(function() {
+        var loader = document.getElementById('app-loader');
+        if (loader && loader.parentNode) {
+          // Si el loader sigue ahi a los 6s, puede haber un JS roto en cache
+          // Recargamos forzando bypass de cache
+          window.location.reload(true);
+        }
+      }, 6000);
     </script>
   </body>
 </html>
