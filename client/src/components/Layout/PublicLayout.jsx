@@ -188,7 +188,7 @@ function getSessionId() {
 const QUICK_SUGGESTIONS = [
   '¿Cuáles son sus servicios?',
   '¿Cómo saco una cita?',
-  'Me duele una muela 😣',
+  'Me duele una muela',
   '¿Atienden niños?',
   '¿El SIS cubre todo?',
   '¿Qué es una limpieza dental?',
@@ -320,7 +320,7 @@ export default function PublicLayout() {
   const [chatMessages, setChatMessages] = useState([
     {
       role: 'assistant',
-      content: '¡Hola! Soy **Denty**, tu asistente dental virtual del Centro de Salud San Ramón. Puedo ayudarte con:\n\n- Consultas sobre salud bucal\n- Citas (Viernes 7:30 AM por WhatsApp)\n- Cupos adicionales (presencial lunes a viernes 7:00 AM)\n- Urgencias dentales\n- SIS — atención gratuita\n\n¿En qué puedo ayudarte hoy?',
+      content: 'Hola, soy **Denty**, tu asistente dental virtual del Centro de Salud San Ramón. ¿En qué puedo ayudarte hoy?',
       timestamp: Date.now(),
     },
   ]);
