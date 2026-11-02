@@ -172,7 +172,7 @@ export default function AppointmentsPage() {
     setError(null);
     try {
       const fechaInicio = getLunesISO(offset);
-      const { data } = await api.get(`/agenda/semanal?fechaInicio=${fechaInicio}`);
+      const data = await api.get(`/agenda/semanal?fechaInicio=${fechaInicio}`);
       setSemana(data);
     } catch (e) {
       setError(e.response?.data?.error || 'No se pudo cargar la agenda. Verifica la conexión con Google Sheets.');

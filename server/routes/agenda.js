@@ -70,3 +70,4 @@ router.get('/semanal', authenticateToken, async (req, res) => {
 });
 
 export default router;
+

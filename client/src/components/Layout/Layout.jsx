@@ -9,18 +9,18 @@ import {
 import logoDental from '../../assets/logo-dental.jpg';
 
 const navItems = [
-  { path: '/panel',               icon: LayoutDashboard, label: 'Inicio',           section: 'general' },
-  { path: '/panel/buscar',        icon: Search,          label: 'Buscar Paciente',  section: 'general' },
-  { path: '/panel/pacientes',     icon: Users,           label: 'Pacientes',        section: 'general' },
-  { path: '/panel/nueva-atencion',icon: FilePlus,        label: 'Nueva Atención',   section: 'atenciones' },
-  { path: '/panel/historial',     icon: History,         label: 'Historial',        section: 'atenciones' },
-  { path: '/panel/odontograma',   icon: Stethoscope,     label: 'Odontograma',      section: 'atenciones' },
-  { path: '/panel/citas',         icon: CalendarCheck,   label: 'Agenda Semanal',   section: 'atenciones' },
-  { path: '/panel/reportes',      icon: BarChart3,       label: 'Reportes',         section: 'admin', adminOnly: true },
-  { path: '/panel/usuarios',      icon: UserCog,         label: 'Panel de Doctores',section: 'admin', adminOnly: true },
-  { path: '/panel/auditoria',     icon: ScrollText,      label: 'Auditoría',        section: 'admin', adminOnly: true },
-  { path: '/panel/ia-conocimiento', icon: Brain,         label: 'IA — Denty',         section: 'admin', adminOnly: true },
-  { path: '/panel/recordatorios',   icon: Bell,          label: 'Recordatorios WA',   section: 'admin', adminOnly: true },
+  { path: '/panel', icon: LayoutDashboard, label: 'Inicio', section: 'general' },
+  { path: '/panel/buscar', icon: Search, label: 'Buscar Paciente', section: 'general' },
+  { path: '/panel/pacientes', icon: Users, label: 'Pacientes', section: 'general' },
+  { path: '/panel/nueva-atencion', icon: FilePlus, label: 'Nueva Atención', section: 'atenciones' },
+  { path: '/panel/historial', icon: History, label: 'Historial', section: 'atenciones' },
+  { path: '/panel/odontograma', icon: Stethoscope, label: 'Odontograma', section: 'atenciones' },
+  { path: '/panel/citas', icon: CalendarCheck, label: 'Agenda Semanal', section: 'atenciones' },
+  { path: '/panel/reportes', icon: BarChart3, label: 'Reportes', section: 'admin', adminOnly: true },
+  { path: '/panel/usuarios', icon: UserCog, label: 'Panel de Doctores', section: 'admin', adminOnly: true },
+  { path: '/panel/auditoria', icon: ScrollText, label: 'Auditoría', section: 'admin', adminOnly: true },
+  { path: '/panel/ia-conocimiento', icon: Brain, label: 'IA — Denty', section: 'admin', adminOnly: true },
+  { path: '/panel/recordatorios', icon: Bell, label: 'Recordatorios WA', section: 'admin', adminOnly: true },
 ];
 
 
