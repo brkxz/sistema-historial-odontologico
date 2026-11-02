@@ -30,9 +30,7 @@
   top: 0; left: 0; bottom: 0;
   z-index: 100;
   transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
+  overflow: hidden;
 }
 .sidebar::-webkit-scrollbar { display: none; }
 
@@ -99,7 +97,11 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
 }
+.sidebar-nav::-webkit-scrollbar { display: none; }
 
 .sidebar-section-title {
   font-size: 9.5px;
@@ -173,6 +175,7 @@
   gap: 10px;
   background: rgba(0,0,0,0.25);
   position: relative;
+  flex-shrink: 0;
 }
 
 .sidebar-user::before {
