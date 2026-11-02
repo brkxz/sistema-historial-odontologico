@@ -86,10 +86,6 @@ export default function LandingPage() {
             <span className="label">Pacientes Atendidos</span>
           </div>
           <div className="landing-stat-block">
-            <span className="number">4</span>
-            <span className="label"></span>
-          </div>
-          <div className="landing-stat-block">
             <span className="number">100%</span>
             <span className="label">Gratuito con SIS</span>
           </div>
