@@ -405,13 +405,6 @@ export default function DashboardPage() {
               <div className="db-apt-empty">
                 <CalendarDays size={36} style={{ opacity: 0.2 }} />
                 <p>{aptTab === 'today' ? 'Sin citas para hoy' : 'Sin citas los próximos 7 días'}</p>
-                <button
-                  className="btn btn-primary btn-sm"
-                  style={{ marginTop: 10 }}
-                  onClick={() => navigate('/panel/citas')}
-                >
-                  <PlusCircle size={14} /> Nueva cita
-                </button>
               </div>
             ) : (
               displayApts.map(apt => (
