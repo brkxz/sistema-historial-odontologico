@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const TEAM_PHOTOS = [
   { src: '/equipo/manuel-romani.jpg',  alt: 'C.D. Manuel Jesus Romani Maldonado' },
@@ -9,6 +9,7 @@ const TEAM_PHOTOS = [
 
 export default function EquipoPage() {
   useEffect(() => {
+    // Animación reveal al hacer scroll
     const observer = new IntersectionObserver(
       (entries) =>
         entries.forEach((e) => {
@@ -20,6 +21,40 @@ export default function EquipoPage() {
       { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
     );
     document.querySelectorAll('.landing-reveal, .landing-reveal-scale').forEach((el) => observer.observe(el));
+
+    // Efecto 3D tilt en las tarjetas
+    const cards = document.querySelectorAll('.equipo-photo-card');
+    cards.forEach((card) => {
+      const handleMove = (e) => {
+        const rect = card.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const cx = rect.width  / 2;
+        const cy = rect.height / 2;
+        const rotateX = ((y - cy) / cy) * -14;   // inclinación vertical
+        const rotateY = ((x - cx) / cx) *  14;   // inclinación horizontal
+        card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.06)`;
+        card.style.boxShadow = `${-rotateY * 2}px ${rotateX * 2}px 40px rgba(3,105,161,0.25)`;
+      };
+      const handleLeave = () => {
+        card.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+        card.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)';
+      };
+      const handleClick = () => {
+        card.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(0.96)';
+        setTimeout(() => {
+          card.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+        }, 150);
+      };
+      card.addEventListener('mousemove',  handleMove);
+      card.addEventListener('touchmove',  handleMove, { passive: true });
+      card.addEventListener('mouseleave', handleLeave);
+      card.addEventListener('touchend',   handleLeave);
+      card.addEventListener('click',      handleClick);
+    });
+
     return () => observer.disconnect();
   }, []);
 
