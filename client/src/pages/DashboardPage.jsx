@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportService, appointmentService } from '../services/api';
+import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import {
   ResponsiveContainer,
@@ -175,8 +176,9 @@ export default function DashboardPage() {
   const [recent,      setRecent]      = useState([]);
   const [todayApts,   setTodayApts]   = useState([]);
   const [upcomingApts,setUpcomingApts]= useState([]);
-  const [aptTab,      setAptTab]      = useState('today'); // 'today' | 'upcoming'
+  const [aptTab,      setAptTab]      = useState('today');
   const [loading,     setLoading]     = useState(true);
+  const [sheetsHoy,   setSheetsHoy]   = useState(null); // datos de Google Sheets para hoy
   const { user } = useAuth();
   const navigate  = useNavigate();
 
@@ -205,6 +207,17 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Cargar citas de hoy desde Google Sheets (independiente del resto)
+  useEffect(() => {
+    const hoy = new Date().toISOString().slice(0, 10);
+    api.get(`/agenda/semanal?fechaInicio=${hoy}`)
+      .then(data => {
+        const diaHoy = data?.semana?.find(d => d.fecha === hoy) ?? null;
+        setSheetsHoy(diaHoy);
+      })
+      .catch(() => setSheetsHoy(null));
+  }, []);
 
   const handleComplete = useCallback(async (id) => {
     try {
@@ -358,65 +371,73 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* ── PANEL CITAS HOY / PRÓXIMAS ── */}
+        {/* ── PANEL CITAS HOY — Google Sheets ── */}
         <div className="db-chart-card db-apt-panel">
           <div className="db-chart-hd">
             <div>
               <span className="db-chart-title">
-                <Bell size={15} /> Recordatorio de citas
+                <CalendarCheck size={15} /> Citas de hoy
               </span>
-              <p className="db-chart-sub">Gestiona las citas del día</p>
+              <p className="db-chart-sub">Desde Google Sheets · {new Date().toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'})}</p>
             </div>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => navigate('/panel/citas')}
-            >
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/panel/citas')}>
               Ver agenda <ChevronRight size={14} />
             </button>
           </div>
 
-          {/* Tabs */}
-          <div className="db-apt-tabs">
-            <button
-              className={`db-apt-tab ${aptTab === 'today' ? 'active' : ''}`}
-              onClick={() => setAptTab('today')}
-            >
-              <Calendar size={13} /> Hoy
-              {pendingToday > 0 && (
-                <span className="db-apt-tab-badge">{pendingToday}</span>
-              )}
-            </button>
-            <button
-              className={`db-apt-tab ${aptTab === 'upcoming' ? 'active' : ''}`}
-              onClick={() => setAptTab('upcoming')}
-            >
-              <CalendarClock size={13} /> Próximas 7 días
-              {upcomingApts.filter(a => a.status !== 'cancelled').length > 0 && (
-                <span className="db-apt-tab-badge db-apt-tab-badge--muted">
-                  {upcomingApts.filter(a => a.status !== 'cancelled').length}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Lista de citas */}
-          <div className="db-apt-list">
-            {displayApts.length === 0 ? (
-              <div className="db-apt-empty">
-                <CalendarDays size={36} style={{ opacity: 0.2 }} />
-                <p>{aptTab === 'today' ? 'Sin citas para hoy' : 'Sin citas los próximos 7 días'}</p>
+          {sheetsHoy === null ? (
+            <div className="db-apt-empty">
+              <div className="spinner" style={{ width: 24, height: 24, margin: '0 auto 8px' }} />
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Cargando...</p>
+            </div>
+          ) : sheetsHoy.totalPacientes === 0 ? (
+            <div className="db-apt-empty">
+              <CalendarDays size={36} style={{ opacity: 0.2 }} />
+              <p>Sin citas registradas para hoy</p>
+            </div>
+          ) : (
+            <div style={{ padding: '0 0.25rem' }}>
+              {/* Total grande */}
+              <div style={{
+                textAlign: 'center', padding: '0.875rem 0 1rem',
+                borderBottom: '1px solid #f1f5f9', marginBottom: '0.875rem',
+              }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#2563EB', lineHeight: 1 }}>
+                  {sheetsHoy.totalPacientes}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 4 }}>
+                  {sheetsHoy.totalPacientes === 1 ? 'paciente hoy' : 'pacientes hoy'}
+                </div>
               </div>
-            ) : (
-              displayApts.map(apt => (
-                <AppointmentCard
-                  key={apt.id}
-                  apt={apt}
-                  onComplete={handleComplete}
-                  onCancel={handleCancel}
-                />
-              ))
-            )}
-          </div>
+
+              {/* Por doctor */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {sheetsHoy.doctores.map((doc, i) => {
+                  const pct = Math.round((doc.citas.length / sheetsHoy.totalPacientes) * 100);
+                  const colors = ['#2563EB','#15803D','#7C3AED','#C2410C','#BE123C','#0F766E'];
+                  const color  = colors[i % colors.length];
+                  const shortName = doc.nombre.replace(/^(C\.D\.|ESP\. C\.D\.)\s*/i,'').split(' ').slice(0,3).join(' ');
+                  return (
+                    <div key={i}>
+                      <div style={{ display:'flex', justifyContent:'space-between', marginBottom: 4 }}>
+                        <span style={{ fontSize:'0.75rem', fontWeight:600, color:'#1e293b' }}>{shortName}</span>
+                        <span style={{ fontSize:'0.75rem', fontWeight:700, color }}>
+                          {doc.citas.length} pac.
+                        </span>
+                      </div>
+                      <div style={{ height: 6, background: '#f1f5f9', borderRadius: 999, overflow:'hidden' }}>
+                        <div style={{
+                          height: '100%', width: `${pct}%`,
+                          background: color, borderRadius: 999,
+                          transition: 'width 0.6s ease',
+                        }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
       </div>
