@@ -29,6 +29,8 @@ const SERVICES = [
 
 const STATS = [
   { value: '500+', label: 'Pacientes atendidos' },
+  { value: '02',   label: 'Consultorios Odontología General' },
+  { value: '01',   label: 'Consultorio Odontopediatría' },
   { value: '100%', label: 'Gratuito con SIS' },
   { value: 'CSSR', label: 'Red Integrada de Salud' },
 ];

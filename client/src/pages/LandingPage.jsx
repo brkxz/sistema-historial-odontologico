@@ -86,6 +86,14 @@ export default function LandingPage() {
             <span className="label">Pacientes Atendidos</span>
           </div>
           <div className="landing-stat-block">
+            <span className="number">02</span>
+            <span className="label">Consultorios Odontología General</span>
+          </div>
+          <div className="landing-stat-block">
+            <span className="number">01</span>
+            <span className="label">Consultorio Odontopediatría</span>
+          </div>
+          <div className="landing-stat-block">
             <span className="number">100%</span>
             <span className="label">Gratuito con SIS</span>
           </div>
