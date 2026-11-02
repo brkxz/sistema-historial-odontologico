@@ -591,7 +591,7 @@ export default function PublicLayout() {
             </div>
             <h3>Acceso para Doctores</h3>
             <p>
-              Si eres parte del equipo médico del Servicio de Odontología,
+              Si eres parte del equipo profesional del Servicio de Odontología,
               inicia sesión para acceder al panel de administración del sistema.
             </p>
             <button

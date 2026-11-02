@@ -20,3 +20,4 @@ Write-Host ""
 Write-Host "Listo. Abre tu navegador en: http://localhost:5173" -ForegroundColor Cyan
 Write-Host "El backend corre en:         http://localhost:3001" -ForegroundColor Cyan
 Write-Host ""
+
