@@ -369,7 +369,7 @@ export default function DashboardPage() {
             </div>
             <button
               className="btn btn-ghost btn-sm"
-              onClick={() => navigate('/panel/agenda')}
+              onClick={() => navigate('/panel/citas')}
             >
               Ver agenda <ChevronRight size={14} />
             </button>
@@ -408,7 +408,7 @@ export default function DashboardPage() {
                 <button
                   className="btn btn-primary btn-sm"
                   style={{ marginTop: 10 }}
-                  onClick={() => navigate('/panel/agenda')}
+                  onClick={() => navigate('/panel/citas')}
                 >
                   <PlusCircle size={14} /> Nueva cita
                 </button>
