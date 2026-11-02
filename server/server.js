@@ -24,6 +24,7 @@ import aiRoutes          from './routes/ai.js';
 import aiKnowledgeRoutes from './routes/ai-knowledge.js';
 import auditRoutes       from './routes/audit.js';
 import appointmentRoutes from './routes/appointments.js';
+import agendaRoutes      from './routes/agenda.js';
 import { initDentalBot } from './services/dentalbot.js';
 
 // Middleware
@@ -145,6 +146,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/ai-knowledge', aiKnowledgeRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/agenda',      agendaRoutes);
 
 // Ruta protegida para obtener dientes
 app.get('/api/teeth', authenticateToken, async (req, res) => {

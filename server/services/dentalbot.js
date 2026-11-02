@@ -501,3 +501,77 @@ export async function initDentalBot(io) {
 }
 
 export { botState, botConfig };
+
+
+
+// ── Función pública: obtener pacientes para cualquier fecha ───────────────────
+export async function obtenerPacientesPorDia(date) {
+    await loadModules();
+    if (!_modulesLoaded) return [];
+    const sheets = getSheets();
+    if (!sheets) return [];
+
+    const dia       = String(date.getDate()).padStart(2, '0');
+    const mes       = MESES_ES[date.getMonth()];
+    const anio      = date.getFullYear();
+    const tabName   = `${dia} DE ${mes} ${anio}`;
+    const fechaDisplay = `${dia}/${String(date.getMonth()+1).padStart(2,'0')}/${anio}`;
+
+    try {
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: SHEET_ID,
+            range: `'${tabName}'!A6:AH60`,
+            valueRenderOption: 'FORMATTED_VALUE',
+        });
+        const filas = response.data.values;
+        if (!filas || !filas.length) return [];
+
+        const bloques = [];
+        for (let r = 0; r < filas.length; r++) {
+            const fila = filas[r] || [];
+            const docs = [];
+            for (let c = 0; c < fila.length; c++) {
+                const cell = (fila[c] || '').toString().trim().toUpperCase();
+                if (cell.startsWith('C.D.') || cell.startsWith('ESP. C.D.'))
+                    docs.push({ nombre: fila[c].toString().trim(), colInicio: c });
+            }
+            if (docs.length) bloques.push({ filaHeaderIdx: r, doctores: docs });
+        }
+        if (!bloques.length) return [];
+
+        const pacientes = [];
+        for (let b = 0; b < bloques.length; b++) {
+            const bloque   = bloques[b];
+            const dataStart = bloque.filaHeaderIdx + 2;
+            const dataEnd   = (b + 1 < bloques.length) ? bloques[b+1].filaHeaderIdx : filas.length;
+            for (let i = dataStart; i < dataEnd; i++) {
+                const fila = filas[i];
+                if (!fila || !fila[0]) continue;
+                const hora = fila[0].toString().trim();
+                if (!hora || /^(MA[ÑN]ANA|TARDE|TURNO|HORARIO)/i.test(hora)) continue;
+                if (!/^\d{1,2}:\d{2}/.test(hora)) continue;
+                for (const doc of bloque.doctores) {
+                    const nombre  = (fila[doc.colInicio]   || '').toString().trim();
+                    const dni     = (fila[doc.colInicio+1] || '').toString().trim();
+                    const edadRaw = (fila[doc.colInicio+2] || '').toString().trim();
+                    const celular = (fila[doc.colInicio+3] || '').toString().trim();
+                    if (!nombre || /ADICIONAL/i.test(nombre)) continue;
+                    let numeroWs = celular.replace(/\D/g, '');
+                    if (numeroWs.length === 9) numeroWs = '51' + numeroWs;
+                    else if (!numeroWs.startsWith('51') && numeroWs.length > 0 && numeroWs.length < 11) numeroWs = '51' + numeroWs;
+                    const edad = parseInt(edadRaw);
+                    const consultorio = (!isNaN(edad) && edad <= 11) ? 'Odontopediatría' : 'Odontología General';
+                    pacientes.push({
+                        nombre, dni, edad: edadRaw, celular: numeroWs,
+                        hora, consultorio, doctor: doc.nombre, fecha: fechaDisplay,
+                    });
+                }
+            }
+        }
+        return pacientes;
+    } catch (e) {
+        if (!e.message?.includes('Unable to parse range'))
+            console.error('[DentalBot] Error Sheets para', fechaDisplay, ':', e.message);
+        return [];
+    }
+}

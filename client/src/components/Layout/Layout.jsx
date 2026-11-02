@@ -15,7 +15,7 @@ const navItems = [
   { path: '/panel/nueva-atencion',icon: FilePlus,        label: 'Nueva Atención',   section: 'atenciones' },
   { path: '/panel/historial',     icon: History,         label: 'Historial',        section: 'atenciones' },
   { path: '/panel/odontograma',   icon: Stethoscope,     label: 'Odontograma',      section: 'atenciones' },
-  { path: '/panel/citas',         icon: CalendarCheck,   label: 'Agenda de Citas',  section: 'atenciones' },
+  { path: '/panel/citas',         icon: CalendarCheck,   label: 'Agenda Semanal',   section: 'atenciones' },
   { path: '/panel/reportes',      icon: BarChart3,       label: 'Reportes',         section: 'admin', adminOnly: true },
   { path: '/panel/usuarios',      icon: UserCog,         label: 'Panel de Doctores',section: 'admin', adminOnly: true },
   { path: '/panel/auditoria',     icon: ScrollText,      label: 'Auditoría',        section: 'admin', adminOnly: true },
