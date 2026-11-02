@@ -349,8 +349,260 @@
 .dashboard-grid      { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
 .dashboard-grid-wide { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 20px; }
 
-/* ── Metric body ── */
-.db-metric-body { flex: 1; min-width: 0; }
+/* ═══════════════════════════════════════
+   PANEL DE CITAS — Recordatorio de citas
+   ═══════════════════════════════════════ */
+
+/* Contenedor del panel de citas */
+.db-apt-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.db-apt-panel .db-chart-hd {
+  padding: 0 22px 12px;
+}
+
+/* ── Tabs ── */
+.db-apt-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 22px 12px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.db-apt-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1.5px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94A3B8;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.18s;
+  font-family: inherit;
+  position: relative;
+}
+
+.db-apt-tab:hover { background: #F8FAFF; color: #475569; }
+
+.db-apt-tab.active {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1E40AF;
+}
+
+.db-apt-tab-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 100px;
+  background: #2563EB;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.db-apt-tab-badge--muted { background: #CBD5E1; }
+
+/* ── Lista de citas ── */
+.db-apt-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 310px;
+  display: flex;
+  flex-direction: column;
+}
+
+.db-apt-list::-webkit-scrollbar { width: 4px; }
+.db-apt-list::-webkit-scrollbar-track { background: transparent; }
+.db-apt-list::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 4px; }
+
+/* ── Tarjeta de cita ── */
+.db-apt-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 22px;
+  border-bottom: 1px solid #F8FAFC;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.db-apt-card:last-child { border-bottom: none; }
+.db-apt-card:hover { background: #FAFBFF; }
+
+/* Franja azul para citas de hoy */
+.db-apt-today-stripe {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #2563EB, #3B82F6);
+  border-radius: 0 2px 2px 0;
+}
+
+.db-apt-card--today { background: #FAFEFF; }
+
+/* Columna de hora */
+.db-apt-time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 44px;
+  padding-top: 2px;
+}
+
+.db-apt-time {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.db-apt-duration {
+  font-size: 0.65rem;
+  color: #CBD5E1;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* Cuerpo */
+.db-apt-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.db-apt-patient {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0F172A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-apt-reason {
+  font-size: 0.74rem;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-apt-phone {
+  font-size: 0.72rem;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-apt-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.db-apt-dentist {
+  font-size: 0.7rem;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.db-apt-date-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Columna derecha */
+.db-apt-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.db-apt-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.db-apt-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.db-apt-btn {
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  border: 1.5px solid #E2E8F0;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.db-apt-btn--ok:hover {
+  background: #ECFDF5;
+  border-color: #10B981;
+  color: #10B981;
+}
+
+.db-apt-btn--cancel:hover {
+  background: #FFF1F2;
+  border-color: #EF4444;
+  color: #EF4444;
+}
+
+/* Estado vacío de citas */
+.db-apt-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 20px;
+  color: #CBD5E1;
+  gap: 8px;
+  flex: 1;
+}
+
+.db-apt-empty p {
+  font-size: 0.84rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
 .db-metric-sub  {
   font-size: 0.7rem;
   color: #CBD5E1;
@@ -515,5 +767,55 @@
   .db-title  { font-size: 1.1rem; }
   .db-item   { padding: 12px 14px; }
   .dashboard-grid, .dashboard-grid-wide { grid-template-columns: 1fr; }
+  .db-spark { display: none; }
+}
+
+/* ── Metric body + sub ── */
+.db-metric-body { flex: 1; min-width: 0; }
+.db-metric-sub  { font-size: 0.7rem; color: #CBD5E1; margin-top: 2px; }
+
+/* ── SparkBar ── */
+.db-spark { display: flex; align-items: flex-end; gap: 2px; height: 36px; margin-left: auto; padding-left: 8px; flex-shrink: 0; }
+.db-spark-bar { width: 5px; border-radius: 3px 3px 0 0; transition: height 0.3s ease; opacity: 0.7; }
+
+/* ── Filas de gráficos ── */
+.db-charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.db-charts-row--3 { grid-template-columns: 1fr 1fr 1.4fr; }
+
+/* ── Card de gráfico ── */
+.db-chart-card { background: #FFF; border: 1px solid #E8EEFF; border-radius: 20px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+.db-chart-card--flex { overflow: hidden; padding: 0; }
+
+/* ── Chart header ── */
+.db-chart-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.db-chart-title { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #334155; }
+.db-chart-sub   { font-size: 0.72rem; color: #94A3B8; margin: 3px 0 0; }
+.db-chart-badge { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
+
+/* ── Tooltip ── */
+.db-tooltip { background: #0F172A; border-radius: 10px; padding: 10px 14px; font-size: 0.78rem; line-height: 1.6; color: #CBD5E1; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.06); }
+.db-tooltip-label { color: #fff; font-weight: 700; margin-bottom: 4px; font-size: 0.8rem; }
+.db-tooltip strong { color: #fff; }
+
+/* ── Leyenda Pie ── */
+.db-pie-legend { display: flex; flex-direction: column; gap: 6px; }
+.db-pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; }
+.db-pie-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.db-pie-name { flex: 1; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-pie-val  { font-weight: 700; color: #0F172A; }
+
+/* ── Empty gráfico ── */
+.db-chart-empty { display: flex; align-items: center; justify-content: center; height: 160px; font-size: 0.82rem; color: #CBD5E1; font-style: italic; }
+
+/* ── Responsive gráficos ── */
+@media (max-width: 1100px) {
+  .db-charts-row--3 { grid-template-columns: 1fr 1fr; }
+  .db-charts-row--3 .db-chart-card:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 900px) {
+  .db-charts-row, .db-charts-row--3 { grid-template-columns: 1fr; }
+  .db-charts-row--3 .db-chart-card:last-child { grid-column: 1; }
+}
+@media (max-width: 600px) {
   .db-spark { display: none; }
 }
