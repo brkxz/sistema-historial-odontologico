@@ -232,7 +232,7 @@ export default function AgendaPage() {
               <span className="ag-ticker-dot">✦</span>
               <span className="ag-ticker-item"><i className="fa-solid fa-clock" /> 7:30 a.m. · Sé puntual</span>
               <span className="ag-ticker-dot">✦</span>
-              <span className="ag-ticker-item"><i className="fa-solid fa-location-dot" /> Hospital San Ramón · Chanchamayo</span>
+              <span className="ag-ticker-item"><i className="fa-solid fa-location-dot" /> Centro de Salud San Ramón · Chanchamayo</span>
               <span className="ag-ticker-dot">✦</span>
             </div>
           ))}
@@ -347,16 +347,14 @@ export default function AgendaPage() {
       <section className="ag-footer-cta">
         <div className="ag-footer-glow" />
         <div className="ag-container ag-footer-inner">
-          <div className="ag-footer-tooth">🦷</div>
+          <div className="ag-footer-tooth"><i className="fa-solid fa-tooth" /></div>
           <h2>¿Listo para sonreír mejor?</h2>
-          <p>Preséntate el <strong>día viernes a las 7:30 a.m.</strong> en el consultorio.<br />
-          Primera atención sin costo de valoración.</p>
           <div className="ag-footer-info-strip">
             <div className="ag-footer-info-item">
               <i className="fa-solid fa-location-dot" />
               <div>
                 <span className="ag-footer-info-label">Ubicación</span>
-                <span className="ag-footer-info-val">Hospital San Ramón · Chanchamayo</span>
+                <span className="ag-footer-info-val">Centro de Salud San Ramón · Chanchamayo</span>
               </div>
             </div>
             <div className="ag-footer-info-sep" />
