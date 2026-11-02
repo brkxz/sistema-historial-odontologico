@@ -63,7 +63,7 @@ export default function ContactoPage() {
             <div><div className="landing-contact-social-name">Facebook</div><div className="landing-contact-social-sub">Visitar página</div></div>
             <i className="fa-solid fa-arrow-up-right-from-square landing-contact-social-arrow" />
           </a>
-          <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" className="landing-contact-social-btn cpb-tt landing-reveal" style={{ transitionDelay: '0.1s' }}>
+          <a href="https://www.tiktok.com/@odontologia.c.s.sanramon" target="_blank" rel="noopener noreferrer" className="landing-contact-social-btn cpb-tt landing-reveal" style={{ transitionDelay: '0.1s' }}>
             <div className="landing-contact-social-icon"><i className="fa-brands fa-tiktok" /></div>
             <div><div className="landing-contact-social-name">TikTok</div><div className="landing-contact-social-sub">Ver videos</div></div>
             <i className="fa-solid fa-arrow-up-right-from-square landing-contact-social-arrow" />
