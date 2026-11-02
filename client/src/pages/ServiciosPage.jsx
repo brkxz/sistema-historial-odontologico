@@ -99,6 +99,60 @@ export default function ServiciosPage() {
         </div>
       </section>
 
+      {/* CONSULTORIOS */}
+      <section className="landing-services-section landing-reveal" style={{ paddingTop: '20px', paddingBottom: '40px', background: 'var(--bg-secondary, #f8fafc)' }}>
+        <div className="landing-container">
+          <div className="landing-label-text" style={{ marginBottom: '10px' }}>
+            <i className="fa-solid fa-door-open" /> Infraestructura
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '6px', color: 'var(--text-primary, #0f172a)' }}>
+            Nuestros Consultorios
+          </h2>
+          <p style={{ color: 'var(--text-secondary, #64748b)', marginBottom: '28px', maxWidth: '520px' }}>
+            Contamos con 03 consultorios equipados para brindarte una atención segura y de calidad.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+
+            {/* Consultorio 1 */}
+            <div className="landing-service-card landing-reveal-scale" style={{ transitionDelay: '0s' }}>
+              <div className="svc-card-top">
+                <div className="landing-service-icon">
+                  <i className="fa-solid fa-tooth" />
+                </div>
+                <span className="svc-card-tag">Consultorio 01</span>
+              </div>
+              <h3>Odontología General</h3>
+              <p>Atención a adultos: curaciones, limpiezas, extracciones y tratamientos recuperativos con equipamiento moderno.</p>
+            </div>
+
+            {/* Consultorio 2 */}
+            <div className="landing-service-card landing-reveal-scale" style={{ transitionDelay: '0.07s' }}>
+              <div className="svc-card-top">
+                <div className="landing-service-icon">
+                  <i className="fa-solid fa-tooth" />
+                </div>
+                <span className="svc-card-tag">Consultorio 02</span>
+              </div>
+              <h3>Odontología General</h3>
+              <p>Segundo consultorio de atención general para reducir tiempos de espera y ampliar la cobertura diaria de pacientes.</p>
+            </div>
+
+            {/* Consultorio 3 */}
+            <div className="landing-service-card landing-reveal-scale" style={{ transitionDelay: '0.14s' }}>
+              <div className="svc-card-top">
+                <div className="landing-service-icon">
+                  <i className="fa-solid fa-child-reaching" />
+                </div>
+                <span className="svc-card-tag">Consultorio 03</span>
+              </div>
+              <h3>Odontopediatría</h3>
+              <p>Consultorio especializado en la atención de niños y adolescentes, con ambiente adecuado para una experiencia tranquila y segura.</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* COBERTURA SIS */}
       <section className="svc-sis-section landing-reveal">
         <div className="landing-container">
