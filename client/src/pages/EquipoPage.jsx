@@ -4,6 +4,7 @@ const TEAM_PHOTOS = [
   { src: '/equipo/manuel-romani.jpg',  alt: 'C.D. Manuel Jesus Romani Maldonado' },
   { src: '/equipo/elio-tamara.jpg',    alt: 'C.D. Elio Elvis Támara Trinidad' },
   { src: '/equipo/jimy-osorio.jpg',    alt: 'C.D. Jimy Aldo Osorio Rosales' },
+  { src: '/equipo/yolanda-aliaga.jpg', alt: 'C.D. Yolanda Guadalupe Aliaga Kriete' },
 ];
 
 export default function EquipoPage() {

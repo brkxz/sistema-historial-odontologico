@@ -48,7 +48,7 @@ EQUIPO MÉDICO ODONTOLÓGICO
 - C.D. Manuel Romani — Odontología General (resinas, limpiezas, extracciones)
 - C.D. Elio Támara — Odontología General
 - C.D. Jimy Osorio — Odontopediatría (niños)
-- C.D. Fernando Bustamante — Odontopediatría (niños)
+- C.D. Yolanda Aliaga Kriete — Cirujana Dentista (Odontopediatría)
 
 ═══════════════════════════════════════════
 SERVICIOS DISPONIBLES (4 especialidades)
