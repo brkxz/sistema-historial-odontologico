@@ -1,156 +1,117 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
 import {
   ChevronLeft, ChevronRight, RefreshCw, Calendar,
-  Users, Clock, User, Stethoscope, AlertCircle,
+  Users, Clock, Stethoscope, AlertCircle, User,
 } from 'lucide-react';
 import api from '../services/api';
 
-const DIAS_CORTO = { Lunes:'Lun', Martes:'Mar', 'Miércoles':'Mié', Jueves:'Jue', Viernes:'Vie', Sábado:'Sáb' };
-const COLORES_DOCTOR = [
-  { bg: '#EFF6FF', border: '#BFDBFE', header: '#2563EB', dot: '#3B82F6' },
-  { bg: '#F0FDF4', border: '#BBF7D0', header: '#15803D', dot: '#22C55E' },
-  { bg: '#FDF4FF', border: '#E9D5FF', header: '#7C3AED', dot: '#A855F7' },
-  { bg: '#FFF7ED', border: '#FED7AA', header: '#C2410C', dot: '#F97316' },
-  { bg: '#FFF1F2', border: '#FECDD3', header: '#BE123C', dot: '#F43F5E' },
-  { bg: '#F0FDFA', border: '#99F6E4', header: '#0F766E', dot: '#14B8A6' },
+/* ── Helpers ── */
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS_LARGO  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DIAS_CORTO  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+const COLORES = [
+  { bg:'#EFF6FF', border:'#BFDBFE', accent:'#2563EB', light:'#DBEAFE' },
+  { bg:'#F0FDF4', border:'#BBF7D0', accent:'#15803D', light:'#DCFCE7' },
+  { bg:'#FDF4FF', border:'#E9D5FF', accent:'#7C3AED', light:'#EDE9FE' },
+  { bg:'#FFF7ED', border:'#FED7AA', accent:'#C2410C', light:'#FFEDD5' },
+  { bg:'#FFF1F2', border:'#FECDD3', accent:'#BE123C', light:'#FFE4E6' },
+  { bg:'#F0FDFA', border:'#99F6E4', accent:'#0F766E', light:'#CCFBF1' },
 ];
 
-function getColorForDoctor(name, map) {
-  if (!map[name]) {
-    map[name] = COLORES_DOCTOR[Object.keys(map).length % COLORES_DOCTOR.length];
-  }
-  return map[name];
-}
-
-function formatShortDate(isoDate) {
-  const [, m, d] = isoDate.split('-');
-  return `${d}/${m}`;
-}
-
-function isToday(isoDate) {
-  return isoDate === new Date().toISOString().slice(0, 10);
-}
-
-function getLunesISO(offsetWeeks = 0) {
+function getLunes(offsetWeeks = 0) {
   const now = new Date();
   const dow = now.getDay();
-  const diffToMonday = dow === 0 ? -6 : 1 - dow;
-  now.setDate(now.getDate() + diffToMonday + offsetWeeks * 7);
-  return now.toISOString().slice(0, 10);
+  const diff = dow === 0 ? -6 : 1 - dow;
+  now.setDate(now.getDate() + diff + offsetWeeks * 7);
+  now.setHours(12, 0, 0, 0);
+  return now;
 }
 
-// ── Tarjeta de paciente ──────────────────────────────────────────────────────
-function CitaCard({ cita, color }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
-      padding: '0.5rem 0.625rem',
-      background: '#fff',
-      border: `1px solid ${color.border}`,
-      borderRadius: 8,
-      marginBottom: 4,
-    }}>
-      <span style={{
-        fontSize: '0.7rem', fontWeight: 700,
-        color: color.header, minWidth: 38, paddingTop: 1,
-        fontFamily: 'monospace',
-      }}>{cita.hora}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.3, wordBreak: 'break-word' }}>
-          {cita.nombre}
-        </div>
-        {cita.consultorio && (
-          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 1 }}>
-            {cita.consultorio}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+function toISO(d) { return d.toISOString().slice(0, 10); }
+
+function isoToDisplay(iso) {
+  const d = new Date(iso + 'T12:00:00');
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
-// ── Card de doctor ───────────────────────────────────────────────────────────
+function isToday(iso) { return iso === toISO(new Date()); }
+
+/* ── Tarjeta de doctor ── */
 function DoctorCard({ doctor, citas, color }) {
-  const shortName = doctor.split(' ').slice(0, 4).join(' ');
+  const shortName = doctor.replace(/^(C\.D\.|ESP\. C\.D\.)\s*/i, '').split(' ').slice(0, 3).join(' ');
   return (
     <div style={{
-      background: color.bg, border: `1px solid ${color.border}`,
-      borderRadius: 10, overflow: 'hidden', marginBottom: 8,
+      background: '#fff',
+      border: `1.5px solid ${color.border}`,
+      borderRadius: 14,
+      overflow: 'hidden',
+      boxShadow: '0 1px 6px rgba(0,0,0,0.05)',
     }}>
+      {/* Header doctor */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: '0.375rem',
-        padding: '0.5rem 0.75rem',
-        background: color.header + '15',
+        display: 'flex', alignItems: 'center', gap: '0.625rem',
+        padding: '0.75rem 1rem',
+        background: color.light,
         borderBottom: `1px solid ${color.border}`,
       }}>
-        <Stethoscope size={13} color={color.header} />
-        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: color.header, lineHeight: 1.2 }}>
-          {shortName}
-        </span>
+        <div style={{
+          width: 34, height: 34, borderRadius: '50%',
+          background: color.accent, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <Stethoscope size={16} color="#fff" />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '0.875rem', fontWeight: 700, color: color.accent, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {shortName}
+          </div>
+          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+            {citas.length} {citas.length === 1 ? 'paciente' : 'pacientes'}
+          </div>
+        </div>
         <span style={{
-          marginLeft: 'auto', fontSize: '0.65rem', fontWeight: 700,
-          background: color.header, color: '#fff',
-          borderRadius: 999, padding: '1px 7px',
+          background: color.accent, color: '#fff',
+          fontSize: '0.75rem', fontWeight: 700,
+          borderRadius: 999, padding: '2px 10px', flexShrink: 0,
         }}>{citas.length}</span>
       </div>
-      <div style={{ padding: '0.5rem 0.5rem 0.25rem' }}>
-        {citas.map((c, i) => <CitaCard key={i} cita={c} color={color} />)}
-      </div>
-    </div>
-  );
-}
 
-// ── Columna de día ────────────────────────────────────────────────────────────
-function DayColumn({ dia, doctorColorMap }) {
-  const today = isToday(dia.fecha);
-  return (
-    <div style={{
-      flex: 1, minWidth: 0,
-      border: today ? '2px solid #2563EB' : '1px solid #e2e8f0',
-      borderRadius: 12,
-      background: today ? '#EFF6FF' : '#fff',
-      overflow: 'hidden',
-      boxShadow: today ? '0 4px 12px rgba(37,99,235,0.12)' : '0 1px 4px rgba(0,0,0,0.04)',
-    }}>
-      {/* Header del día */}
-      <div style={{
-        padding: '0.625rem 0.75rem',
-        background: today ? '#2563EB' : '#f8fafc',
-        borderBottom: `1px solid ${today ? '#1D4ED8' : '#e2e8f0'}`,
-        textAlign: 'center',
-      }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: today ? '#BFDBFE' : '#94a3b8', textTransform: 'uppercase' }}>
-          {DIAS_CORTO[dia.diaNombre] || dia.diaNombre}
-        </div>
-        <div style={{ fontSize: '1rem', fontWeight: 800, color: today ? '#fff' : '#1e293b', lineHeight: 1.2 }}>
-          {formatShortDate(dia.fecha)}
-        </div>
-        <div style={{
-          marginTop: 3, display: 'inline-flex', alignItems: 'center', gap: 3,
-          fontSize: '0.65rem', fontWeight: 600,
-          color: today ? '#DBEAFE' : '#64748b',
-        }}>
-          <Users size={10} />
-          {dia.totalPacientes} pac.
-        </div>
-      </div>
-
-      {/* Contenido */}
-      <div style={{ padding: '0.5rem', maxHeight: 520, overflowY: 'auto' }}>
-        {dia.doctores.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '1.5rem 0.5rem', color: '#cbd5e1', fontSize: '0.75rem' }}>
-            <Calendar size={24} style={{ margin: '0 auto 0.5rem', display: 'block', opacity: 0.4 }} />
+      {/* Lista de citas */}
+      <div style={{ padding: '0.5rem' }}>
+        {citas.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '1rem', color: '#94a3b8', fontSize: '0.8rem' }}>
             Sin citas
           </div>
         ) : (
-          dia.doctores.map((doc, i) => (
-            <DoctorCard
-              key={i}
-              doctor={doc.nombre}
-              citas={doc.citas}
-              color={getColorForDoctor(doc.nombre, doctorColorMap)}
-            />
+          citas.map((c, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: '0.625rem',
+              padding: '0.5rem 0.625rem',
+              borderRadius: 8,
+              background: i % 2 === 0 ? '#f8fafc' : '#fff',
+              marginBottom: 2,
+            }}>
+              <span style={{
+                fontSize: '0.72rem', fontWeight: 700,
+                color: color.accent, fontFamily: 'monospace',
+                background: color.light, borderRadius: 6,
+                padding: '2px 6px', flexShrink: 0,
+              }}>{c.hora}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', lineHeight: 1.3 }}>
+                  {c.nombre}
+                </div>
+                {c.consultorio && (
+                  <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{c.consultorio}</div>
+                )}
+              </div>
+              {c.celular && (
+                <span style={{ fontSize: '0.65rem', color: '#94a3b8', fontFamily: 'monospace', flexShrink: 0 }}>
+                  {c.celular.slice(-4)}
+                </span>
+              )}
+            </div>
           ))
         )}
       </div>
@@ -158,24 +119,26 @@ function DayColumn({ dia, doctorColorMap }) {
   );
 }
 
-// ── Página principal ──────────────────────────────────────────────────────────
+/* ── Página principal ── */
 export default function AppointmentsPage() {
-  const { isAdmin } = useAuth();
-  const [weekOffset, setWeekOffset]   = useState(0);
-  const [semana,     setSemana]       = useState(null);
-  const [loading,    setLoading]      = useState(false);
-  const [error,      setError]        = useState(null);
-  const [doctorColorMap]              = useState({});
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [semana,     setSemana]     = useState(null);
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState(null);
+  const [diaSelIdx,  setDiaSelIdx]  = useState(() => {
+    const d = new Date().getDay();
+    return d === 0 || d === 7 ? 0 : d - 1; // lunes=0
+  });
 
   const fetchSemana = useCallback(async (offset) => {
     setLoading(true);
     setError(null);
     try {
-      const fechaInicio = getLunesISO(offset);
+      const fechaInicio = toISO(getLunes(offset));
       const data = await api.get(`/agenda/semanal?fechaInicio=${fechaInicio}`);
       setSemana(data);
     } catch (e) {
-      setError(e.response?.data?.error || 'No se pudo cargar la agenda. Verifica la conexión con Google Sheets.');
+      setError(e.message || 'Error al cargar la agenda.');
     } finally {
       setLoading(false);
     }
@@ -183,24 +146,27 @@ export default function AppointmentsPage() {
 
   useEffect(() => { fetchSemana(weekOffset); }, [weekOffset, fetchSemana]);
 
-  const handlePrev  = () => setWeekOffset(w => w - 1);
-  const handleNext  = () => setWeekOffset(w => w + 1);
-  const handleToday = () => setWeekOffset(0);
+  /* Día seleccionado */
+  const diaActual = semana?.semana?.[diaSelIdx] ?? null;
+  const colorMap  = {};
+  const getColor  = (name) => {
+    if (!colorMap[name]) colorMap[name] = COLORES[Object.keys(colorMap).length % COLORES.length];
+    return colorMap[name];
+  };
 
-  const totalSemana = semana?.total ?? 0;
+  /* Label de semana */
   const semanaLabel = semana
     ? (() => {
-        const d = new Date(semana.semanaInicio + 'T12:00:00');
-        const fin = new Date(d); fin.setDate(d.getDate() + 5);
-        const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-        return `${d.getDate()} ${meses[d.getMonth()]} — ${fin.getDate()} ${meses[fin.getMonth()]} ${fin.getFullYear()}`;
+        const ini = new Date(semana.semanaInicio + 'T12:00:00');
+        const fin = new Date(ini); fin.setDate(ini.getDate() + 5);
+        return `${ini.getDate()} – ${fin.getDate()} de ${MESES[fin.getMonth()]} ${fin.getFullYear()}`;
       })()
     : '—';
 
   return (
     <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="page-header">
         <div>
           <h1 className="page-title">
@@ -208,65 +174,110 @@ export default function AppointmentsPage() {
             Agenda Semanal
           </h1>
           <p className="page-subtitle">
-            Citas por doctor desde Google Sheets · {semanaLabel}
+            Citas desde Google Sheets · {semanaLabel}
           </p>
         </div>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {/* Estadística total */}
           <div style={{
             background: '#EFF6FF', border: '1px solid #BFDBFE',
-            borderRadius: 10, padding: '0.5rem 1rem',
-            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            borderRadius: 10, padding: '0.4rem 0.875rem',
+            display: 'flex', alignItems: 'center', gap: '0.375rem',
           }}>
-            <Users size={16} color="#2563EB" />
+            <Users size={15} color="#2563EB" />
             <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1D4ED8' }}>
-              {totalSemana} pacientes
+              {semana?.total ?? 0}
             </span>
             <span style={{ fontSize: '0.75rem', color: '#64748b' }}>esta semana</span>
           </div>
         </div>
       </div>
 
-      {/* Navegación de semana */}
+      {/* ── Navegación de semana ── */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: '0.75rem',
+        display: 'flex', alignItems: 'center', gap: '0.5rem',
         background: '#fff', border: '1px solid #e2e8f0',
-        borderRadius: 12, padding: '0.625rem 1rem',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        borderRadius: 12, padding: '0.5rem 0.75rem',
       }}>
-        <button className="btn btn-ghost btn-sm" onClick={handlePrev} disabled={loading}>
+        <button className="btn btn-ghost btn-sm" onClick={() => setWeekOffset(w => w - 1)} disabled={loading}>
           <ChevronLeft size={18} />
         </button>
-
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
-            {semanaLabel}
-          </span>
-        </div>
-
-        <button className="btn btn-ghost btn-sm" onClick={handleNext} disabled={loading}>
+        <span style={{ flex: 1, textAlign: 'center', fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>
+          {semanaLabel}
+        </span>
+        <button className="btn btn-ghost btn-sm" onClick={() => setWeekOffset(w => w + 1)} disabled={loading}>
           <ChevronRight size={18} />
         </button>
-
-        <div style={{ width: 1, height: 24, background: '#e2e8f0' }} />
-
-        <button
-          className={`btn btn-sm ${weekOffset === 0 ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={handleToday} disabled={loading}
-        >
+        <div style={{ width: 1, height: 20, background: '#e2e8f0' }} />
+        <button className={`btn btn-sm ${weekOffset === 0 ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => { setWeekOffset(0); setDiaSelIdx(Math.max(0, new Date().getDay() - 1)); }}
+          disabled={loading}>
           Hoy
         </button>
-
         <button className="btn btn-ghost btn-sm" onClick={() => fetchSemana(weekOffset)} disabled={loading}>
-          <RefreshCw size={15} className={loading ? 'rem-pulsing' : ''} />
+          <RefreshCw size={15} style={{ animation: loading ? 'rem-pulse 1s infinite' : 'none' }} />
         </button>
       </div>
 
-      {/* Error */}
+      {/* ── Selector de día (pills) ── */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        {(semana?.semana ?? Array.from({ length: 6 }, (_, i) => {
+          const d = getLunes(weekOffset); d.setDate(d.getDate() + i);
+          return { fecha: toISO(d), diaNombre: DIAS_LARGO[d.getDay()], totalPacientes: null };
+        })).map((dia, i) => {
+          const selected = diaSelIdx === i;
+          const today    = isToday(dia.fecha);
+          const d        = new Date(dia.fecha + 'T12:00:00');
+          return (
+            <button
+              key={i}
+              onClick={() => setDiaSelIdx(i)}
+              style={{
+                flex: 1, minWidth: 80,
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                padding: '0.625rem 0.5rem',
+                borderRadius: 12,
+                border: selected
+                  ? '2px solid #2563EB'
+                  : today
+                    ? '2px solid #BFDBFE'
+                    : '1.5px solid #e2e8f0',
+                background: selected ? '#2563EB' : today ? '#EFF6FF' : '#fff',
+                cursor: 'pointer', transition: 'all 0.15s',
+                boxShadow: selected ? '0 4px 12px rgba(37,99,235,0.2)' : '0 1px 3px rgba(0,0,0,0.05)',
+              }}
+            >
+              <span style={{
+                fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
+                color: selected ? '#BFDBFE' : today ? '#2563EB' : '#94a3b8',
+              }}>
+                {DIAS_CORTO[d.getDay()]}
+              </span>
+              <span style={{
+                fontSize: '1.25rem', fontWeight: 800, lineHeight: 1.1,
+                color: selected ? '#fff' : today ? '#1D4ED8' : '#1e293b',
+              }}>
+                {String(d.getDate()).padStart(2, '0')}
+              </span>
+              {dia.totalPacientes !== null && (
+                <span style={{
+                  marginTop: 3,
+                  fontSize: '0.65rem', fontWeight: 600,
+                  background: selected ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                  color: selected ? '#fff' : '#64748b',
+                  borderRadius: 999, padding: '1px 8px',
+                }}>
+                  {dia.totalPacientes} pac.
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Error ── */}
       {error && (
         <div style={{
-          display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+          display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
           background: '#FEF2F2', border: '1px solid #FECACA',
           borderRadius: 10, padding: '0.875rem 1rem',
           color: '#991B1B', fontSize: '0.85rem',
@@ -274,71 +285,92 @@ export default function AppointmentsPage() {
           <AlertCircle size={18} style={{ flexShrink: 0, marginTop: 1 }} />
           <div>
             <strong>Error al cargar la agenda:</strong> {error}
-            <div style={{ marginTop: '0.25rem', fontSize: '0.78rem', color: '#B91C1C' }}>
-              Verifica que el panel de Recordatorios WA esté conectado y las credenciales de Google Sheets configuradas.
+            <div style={{ marginTop: 4, fontSize: '0.78rem', color: '#B91C1C' }}>
+              Verifica que las credenciales de Google Sheets estén configuradas en Render.
             </div>
           </div>
         </div>
       )}
 
-      {/* Loading skeleton */}
-      {loading && (
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {[...Array(6)].map((_, i) => (
+      {/* ── Contenido del día seleccionado ── */}
+      {loading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+          {[...Array(4)].map((_, i) => (
             <div key={i} style={{
-              flex: 1, height: 280,
+              height: 200, borderRadius: 14,
               background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
               backgroundSize: '200% 100%',
-              borderRadius: 12, animation: 'rem-pulse 1.5s infinite',
+              animation: 'rem-pulse 1.5s infinite',
             }} />
           ))}
         </div>
-      )}
-
-      {/* Grid semanal */}
-      {!loading && semana && (
-        <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start' }}>
-          {semana.semana.map((dia, i) => (
-            <DayColumn key={i} dia={dia} doctorColorMap={doctorColorMap} />
-          ))}
-        </div>
-      )}
-
-      {/* Leyenda de doctores */}
-      {!loading && semana && (() => {
-        const allDoctors = [...new Set(
-          semana.semana.flatMap(d => d.doctores.map(doc => doc.nombre))
-        )];
-        if (!allDoctors.length) return null;
-        return (
+      ) : diaActual ? (
+        <>
+          {/* Título del día */}
           <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.75rem',
+            padding: '0.75rem 1rem',
             background: '#fff', border: '1px solid #e2e8f0',
-            borderRadius: 12, padding: '0.875rem 1rem',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+            borderRadius: 12,
           }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.625rem' }}>
-              Doctores esta semana
+            <div style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: isToday(diaActual.fecha) ? '#2563EB' : '#f1f5f9',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <Calendar size={20} color={isToday(diaActual.fecha) ? '#fff' : '#64748b'} />
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {allDoctors.map((name, i) => {
-                const color = getColorForDoctor(name, doctorColorMap);
-                const shortName = name.split(' ').slice(0, 4).join(' ');
-                return (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: '0.375rem',
-                    background: color.bg, border: `1px solid ${color.border}`,
-                    borderRadius: 999, padding: '0.25rem 0.75rem',
-                  }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color.header, flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: color.header }}>{shortName}</span>
-                  </div>
-                );
-              })}
+            <div>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
+                {diaActual.diaNombre}, {isoToDisplay(diaActual.fecha)}
+                {isToday(diaActual.fecha) && (
+                  <span style={{
+                    marginLeft: 8, fontSize: '0.7rem', fontWeight: 700,
+                    background: '#DBEAFE', color: '#1D4ED8',
+                    borderRadius: 999, padding: '2px 8px',
+                  }}>Hoy</span>
+                )}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                {diaActual.totalPacientes} {diaActual.totalPacientes === 1 ? 'paciente' : 'pacientes'} ·{' '}
+                {diaActual.doctores.length} {diaActual.doctores.length === 1 ? 'doctor' : 'doctores'}
+              </div>
             </div>
           </div>
-        );
-      })()}
 
+          {/* Grid de doctores */}
+          {diaActual.doctores.length === 0 ? (
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', gap: '0.75rem',
+              background: '#fff', border: '1.5px dashed #e2e8f0',
+              borderRadius: 14, padding: '3rem 2rem', textAlign: 'center',
+            }}>
+              <Calendar size={40} color="#cbd5e1" />
+              <div style={{ fontSize: '1rem', fontWeight: 600, color: '#475569' }}>Sin citas para este día</div>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8', maxWidth: 320 }}>
+                No hay citas registradas en Google Sheets para el {isoToDisplay(diaActual.fecha)}.
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '1rem',
+            }}>
+              {diaActual.doctores.map((doc, i) => (
+                <DoctorCard
+                  key={i}
+                  doctor={doc.nombre}
+                  citas={doc.citas}
+                  color={getColor(doc.nombre)}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      ) : null}
     </div>
   );
 }
