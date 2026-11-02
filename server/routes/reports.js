@@ -136,4 +136,113 @@ router.get('/recent-treatments', async (req, res) => {
   }
 });
 
+// GET /api/reports/dashboard-charts — datos para los gráficos del dashboard
+router.get('/dashboard-charts', async (req, res) => {
+  try {
+    const today = new Date();
+    const peruOffset = -5 * 60;
+    const utc = today.getTime() + today.getTimezoneOffset() * 60000;
+    const peruNow = new Date(utc + peruOffset * 60000);
+
+    // Últimos 30 días
+    const thirtyDaysAgo = new Date(peruNow);
+    thirtyDaysAgo.setDate(peruNow.getDate() - 29);
+    const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+    const endDate   = peruNow.toISOString().split('T')[0];
+
+    // Últimos 6 meses
+    const sixMonthsAgo = new Date(peruNow);
+    sixMonthsAgo.setMonth(peruNow.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+
+    // 1. Atenciones por día — últimos 30 días
+    const byDay = await Treatment.findAll({
+      where: { treatment_date: { [Op.between]: [startDate, endDate] } },
+      attributes: ['treatment_date', [fn('COUNT', col('Treatment.id')), 'count']],
+      group: ['treatment_date'],
+      order: [['treatment_date', 'ASC']],
+      raw: true,
+    });
+
+    // 2. Atenciones por mes — últimos 6 meses (SQLite: strftime, Postgres: to_char)
+    const byMonth = await Treatment.findAll({
+      where: { treatment_date: { [Op.gte]: sixMonthsAgo.toISOString().split('T')[0] } },
+      attributes: [
+        [fn('strftime', '%Y-%m', col('treatment_date')), 'month'],
+        [fn('COUNT', col('Treatment.id')), 'count'],
+      ],
+      group: [literal("strftime('%Y-%m', treatment_date)")],
+      order:  [[literal("strftime('%Y-%m', treatment_date)"), 'ASC']],
+      raw: true,
+    }).catch(() =>
+      // Fallback Postgres
+      Treatment.findAll({
+        where: { treatment_date: { [Op.gte]: sixMonthsAgo.toISOString().split('T')[0] } },
+        attributes: [
+          [fn('TO_CHAR', col('treatment_date'), 'YYYY-MM'), 'month'],
+          [fn('COUNT', col('Treatment.id')), 'count'],
+        ],
+        group: [literal("TO_CHAR(treatment_date, 'YYYY-MM')")],
+        order:  [[literal("TO_CHAR(treatment_date, 'YYYY-MM')"), 'ASC']],
+        raw: true,
+      })
+    );
+
+    // 3. Atenciones por odontólogo — total
+    const byDentist = await Treatment.findAll({
+      attributes: ['dentist_id', [fn('COUNT', col('Treatment.id')), 'count']],
+      include: [{ model: User, as: 'dentist', attributes: ['full_name'] }],
+      group: ['Treatment.dentist_id', 'dentist.id', 'dentist.full_name'],
+      order: [[fn('COUNT', col('Treatment.id')), 'DESC']],
+      raw: true,
+      nest: true,
+    });
+
+    // 4. Estadísticas de género de pacientes
+    const byGender = await Patient.findAll({
+      attributes: ['gender', [fn('COUNT', col('Patient.id')), 'count']],
+      group: ['gender'],
+      raw: true,
+    }).catch(() => []);
+
+    // 5. Nuevos pacientes por mes — últimos 6 meses
+    const newPatients = await Patient.findAll({
+      where: { created_at: { [Op.gte]: sixMonthsAgo } },
+      attributes: [
+        [fn('strftime', '%Y-%m', col('created_at')), 'month'],
+        [fn('COUNT', col('Patient.id')), 'count'],
+      ],
+      group: [literal("strftime('%Y-%m', created_at)")],
+      order:  [[literal("strftime('%Y-%m', created_at)"), 'ASC']],
+      raw: true,
+    }).catch(() =>
+      Patient.findAll({
+        where: { created_at: { [Op.gte]: sixMonthsAgo } },
+        attributes: [
+          [fn('TO_CHAR', col('created_at'), 'YYYY-MM'), 'month'],
+          [fn('COUNT', col('Patient.id')), 'count'],
+        ],
+        group: [literal("TO_CHAR(created_at, 'YYYY-MM')")],
+        order:  [[literal("TO_CHAR(created_at, 'YYYY-MM')"), 'ASC']],
+        raw: true,
+      })
+    );
+
+    res.json({
+      byDay,
+      byMonth,
+      byDentist: byDentist.map(d => ({
+        name: d.dentist?.full_name ? d.dentist.full_name.split(' ')[0] + ' ' + (d.dentist.full_name.split(' ')[2] || d.dentist.full_name.split(' ')[1] || '') : 'Desconocido',
+        count: parseInt(d.count, 10),
+      })),
+      byGender,
+      newPatients,
+      period: { startDate, endDate },
+    });
+  } catch (error) {
+    console.error('Error dashboard-charts:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

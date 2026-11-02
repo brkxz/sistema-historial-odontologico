@@ -349,10 +349,160 @@
 .dashboard-grid      { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
 .dashboard-grid-wide { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 20px; }
 
+/* ── Metric body ── */
+.db-metric-body { flex: 1; min-width: 0; }
+.db-metric-sub  {
+  font-size: 0.7rem;
+  color: #CBD5E1;
+  margin-top: 2px;
+}
+
+/* ── SparkBar ── */
+.db-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 36px;
+  margin-left: auto;
+  padding-left: 8px;
+  flex-shrink: 0;
+}
+.db-spark-bar {
+  width: 5px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s ease;
+  opacity: 0.7;
+}
+
+/* ── Fila de gráficos ── */
+.db-charts-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+.db-charts-row--3 {
+  grid-template-columns: 1fr 1fr 1.4fr;
+}
+
+/* ── Card de gráfico ── */
+.db-chart-card {
+  background: #FFFFFF;
+  border: 1px solid #E8EEFF;
+  border-radius: 20px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.db-chart-card--wide { /* ya hereda */ }
+.db-chart-card--flex {
+  overflow: hidden;
+  padding: 0;
+}
+
+/* ── Chart header ── */
+.db-chart-hd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.db-chart-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #334155;
+}
+.db-chart-sub {
+  font-size: 0.72rem;
+  color: #94A3B8;
+  margin: 3px 0 0;
+}
+.db-chart-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Tooltip personalizado ── */
+.db-tooltip {
+  background: #0F172A;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #CBD5E1;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.db-tooltip-label {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+}
+.db-tooltip strong { color: #fff; }
+
+/* ── Leyenda del pie ── */
+.db-pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.db-pie-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+.db-pie-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.db-pie-name {
+  flex: 1;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db-pie-val {
+  font-weight: 700;
+  color: #0F172A;
+}
+
+/* ── Empty state de gráfico ── */
+.db-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  font-size: 0.82rem;
+  color: #CBD5E1;
+  font-style: italic;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .db-charts-row--3 { grid-template-columns: 1fr 1fr; }
+  .db-charts-row--3 .db-chart-card:last-child { grid-column: 1 / -1; }
+}
+
 @media (max-width: 900px) {
   .db-metrics { grid-template-columns: repeat(2, 1fr); }
   .db-header  { padding: 22px 20px; }
   .db-title   { font-size: 1.25rem; }
+  .db-charts-row { grid-template-columns: 1fr; }
+  .db-charts-row--3 { grid-template-columns: 1fr; }
+  .db-charts-row--3 .db-chart-card:last-child { grid-column: 1; }
 }
 
 @media (max-width: 600px) {
@@ -365,4 +515,5 @@
   .db-title  { font-size: 1.1rem; }
   .db-item   { padding: 12px 14px; }
   .dashboard-grid, .dashboard-grid-wide { grid-template-columns: 1fr; }
+  .db-spark { display: none; }
 }
