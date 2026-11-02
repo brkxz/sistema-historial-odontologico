@@ -85,20 +85,24 @@ export default function EquipoPage() {
             {TEAM_PHOTOS.map((p, i) => (
               <div
                 key={i}
-                className="landing-reveal-scale equipo-photo-card"
-                style={{
-                  transitionDelay: `${i * 0.1}s`,
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-                  width: '100%',
-                }}
+                className="landing-reveal-scale"
+                style={{ transitionDelay: `${i * 0.1}s`, width: '100%' }}
               >
-                <img
-                  src={p.src}
-                  alt={p.alt}
-                  style={{ width: '100%', height: 'auto', display: 'block' }}
-                />
+                <div
+                  className="equipo-photo-card"
+                  style={{
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                    width: '100%',
+                  }}
+                >
+                  <img
+                    src={p.src}
+                    alt={p.alt}
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                  />
+                </div>
               </div>
             ))}
           </div>
