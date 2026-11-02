@@ -2,35 +2,36 @@ import { useEffect } from 'react';
 
 const TEAM = [
   {
-    initials: 'MR',
-    name: 'C.D. Manuel Romani',
-    specialty: 'Odontología General',
+    photo: '/equipo/manuel-romani.jpg',
+    name: 'C.D. Manuel Jesus Romani Maldonado',
+    specialty: 'Cirujano Dentista',
+    cop: '38633',
     color: '#4FC3F7',
-    bg: 'rgba(79, 195, 247, 0.12)',
-    detail: 'Más de 10 años de experiencia en diagnóstico y tratamiento preventivo.',
+    detail: 'Odontología general: curaciones, limpiezas, extracciones y tratamientos preventivos y recuperativos.',
   },
   {
-    initials: 'ET',
-    name: 'C.D. Elio Támara',
-    specialty: 'Odontología General',
+    photo: '/equipo/elio-tamara.jpg',
+    name: 'C.D. Elio Elvis Támara Trinidad',
+    specialty: 'Cirujano Dentista',
+    cop: '19799',
     color: '#81C784',
-    bg: 'rgba(129, 199, 132, 0.12)',
     detail: 'Especialista en odontología restauradora y tratamientos de caries complejos.',
   },
   {
-    initials: 'JO',
-    name: 'C.D. Jimy Osorio',
-    specialty: 'Odontopediatría',
+    photo: '/equipo/jimy-osorio.jpg',
+    name: 'C.D. Jimy Aldo Osorio Rosales',
+    specialty: 'Esp. Cirujano Dentista',
+    cop: '29002',
     color: '#FFB74D',
-    bg: 'rgba(255, 183, 77, 0.12)',
-    detail: 'Experto en manejo de conducta infantil y atención odontológica pediátrica.',
+    detail: 'Especialista en odontopediatría. Experto en manejo de conducta infantil y atención pediátrica.',
   },
   {
+    photo: null,
     initials: 'FB',
     name: 'C.D. Fernando Bustamante',
-    specialty: 'Odontopediatría',
+    specialty: 'Cirujano Dentista',
+    cop: null,
     color: '#CE93D8',
-    bg: 'rgba(206, 147, 216, 0.12)',
     detail: 'Dedicado al desarrollo dental infantil y la prevención temprana.',
   },
 ];
@@ -79,17 +80,35 @@ export default function EquipoPage() {
                   borderTop: `3px solid ${member.color}`,
                 }}
               >
-                {/* Avatar con iniciales */}
-                <div
-                  className="landing-member-avatar"
-                  style={{
-                    background: member.bg,
-                    border: `2px solid ${member.color}55`,
-                    color: member.color,
-                  }}
-                >
-                  {member.initials}
-                </div>
+                {/* Avatar: foto real o iniciales */}
+                {member.photo ? (
+                  <div
+                    className="landing-member-avatar"
+                    style={{
+                      background: 'transparent',
+                      border: `2px solid ${member.color}55`,
+                      padding: 0,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <img
+                      src={member.photo}
+                      alt={member.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="landing-member-avatar"
+                    style={{
+                      background: `${member.color}18`,
+                      border: `2px solid ${member.color}55`,
+                      color: member.color,
+                    }}
+                  >
+                    {member.initials}
+                  </div>
+                )}
                 <h3>{member.name}</h3>
                 <span
                   className="landing-member-badge"
@@ -100,6 +119,12 @@ export default function EquipoPage() {
                 >
                   {member.specialty}
                 </span>
+                {member.cop && (
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+                    <i className="fa-solid fa-id-badge" style={{ marginRight: '4px' }} />
+                    COP Nro: {member.cop}
+                  </p>
+                )}
                 <p className="landing-member-detail">{member.detail}</p>
               </div>
             ))}
