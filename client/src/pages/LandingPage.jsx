@@ -60,7 +60,7 @@ export default function LandingPage() {
               El arte de una<br /><em>sonrisa</em> perfecta.
             </h1>
             <p className="landing-subtitle">
-              Servicio de Odontología del Hospital San Ramón — Red Integrada de Salud Chanchamayo.
+              Servicio de Odontología del Centro de Salud de San Ramón — Red Integrada de Salud Chanchamayo.
               Atención gratuita con SIS: curaciones, limpiezas, extracciones y odontopediatría para toda la familia.
             </p>
             <div className="landing-hero-cta">
