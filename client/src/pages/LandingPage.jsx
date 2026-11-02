@@ -87,7 +87,7 @@ export default function LandingPage() {
           </div>
           <div className="landing-stat-block">
             <span className="number">4</span>
-            <span className="label">Áreas de Atención</span>
+            <span className="label"></span>
           </div>
           <div className="landing-stat-block">
             <span className="number">100%</span>

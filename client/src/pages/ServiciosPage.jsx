@@ -29,7 +29,7 @@ const SERVICES = [
 
 const STATS = [
   { value: '500+', label: 'Pacientes atendidos' },
-  { value: '4', label: 'Áreas de Atención' },
+  { value: '4', label: '' },
   { value: '100%', label: 'Gratuito con SIS' },
   { value: 'CSSR', label: 'Red Integrada de Salud' },
 ];
