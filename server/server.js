@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
+import { createServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
@@ -22,6 +24,7 @@ import aiRoutes          from './routes/ai.js';
 import aiKnowledgeRoutes from './routes/ai-knowledge.js';
 import auditRoutes       from './routes/audit.js';
 import appointmentRoutes from './routes/appointments.js';
+import { initDentalBot } from './services/dentalbot.js';
 
 // Middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -31,7 +34,20 @@ import { sanitizeInputs } from './middleware/sanitize.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
+const app  = express();
+const httpServer = createServer(app);
+const io   = new SocketIOServer(httpServer, {
+  cors: {
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (origin.includes('vercel.app') || origin.includes('localhost')) return cb(null, true);
+      cb(null, false);
+    },
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+  transports: ['websocket', 'polling'],
+});
 const PORT = process.env.PORT || 3001;
 
 // =============================================
@@ -252,7 +268,7 @@ async function startServer() {
     setInterval(cleanExpiredTokens, 60 * 60 * 1000);
     cleanExpiredTokens().catch(() => {});
 
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       logger.info(`Servidor iniciado en http://localhost:${PORT}`);
       console.log('');
       console.log('════════════════════════════════════════════════════════');
@@ -265,6 +281,10 @@ async function startServer() {
       console.log('════════════════════════════════════════════════════════');
       console.log('');
     });
+
+    // Iniciar DentalBot (WhatsApp + Google Sheets) integrado al servidor
+    initDentalBot(io).catch(e => logger.warn('DentalBot init error (no crítico):', { error: e.message }));
+
   } catch (error) {
     logger.error('Error al iniciar el servidor', { error: error.message });
     console.error('=== ERROR COMPLETO ===');
