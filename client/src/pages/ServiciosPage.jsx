@@ -2,28 +2,28 @@ import { useEffect } from 'react';
 
 const SERVICES = [
   {
-    icon: 'fa-solid fa-tooth',
-    title: 'Odontología Curativa',
-    desc: 'Restauraciones y curaciones dentales definitivas utilizando resinas estéticas de alta calidad. Devolvemos la función y estética de tus piezas dentales.',
-    tag: 'Curativa',
-  },
-  {
     icon: 'fa-solid fa-shield-heart',
-    title: 'Odontología Preventiva',
-    desc: 'Eliminación de sarro (tartrectomía), limpiezas profundas (profilaxis) y aplicación tópica de flúor para proteger el esmalte y prevenir enfermedades bucales.',
-    tag: 'Preventiva',
+    title: 'Tratamientos Preventivos',
+    desc: 'Eliminación de sarro (tartrectomía), limpiezas profundas (profilaxis), aplicación tópica de flúor y sellantes para proteger el esmalte y prevenir enfermedades bucales antes de que aparezcan.',
+    tag: 'Preventivo',
   },
   {
-    icon: 'fa-solid fa-scissors',
-    title: 'Cirugía Oral',
-    desc: 'Extracciones dentales simples y manejo farmacológico para controlar el dolor y las infecciones bucales. Procedimientos seguros con anestesia local.',
-    tag: 'Cirugía',
+    icon: 'fa-solid fa-tooth',
+    title: 'Tratamientos Recuperativos',
+    desc: 'Restauraciones y curaciones con resinas estéticas, extracciones dentales, tratamientos del nervio y manejo del dolor. Devolvemos la función y salud de tus piezas dentales.',
+    tag: 'Recuperativo',
   },
   {
     icon: 'fa-solid fa-child-reaching',
     title: 'Odontopediatría',
-    desc: 'Tratamientos especializados en niños: terapias del nervio en dientes de leche (pulpotomías y pulpactomías) y medidas preventivas de ortopedia maxilar.',
+    desc: 'Tratamientos especializados en niños: terapias del nervio en dientes de leche (pulpotomías y pulpectomías), medidas preventivas y orientación en hábitos de higiene bucal desde temprana edad.',
     tag: 'Infantil',
+  },
+  {
+    icon: 'fa-solid fa-notes-medical',
+    title: 'Consulta y Diagnóstico',
+    desc: 'Evaluación odontológica completa, diagnóstico oportuno y plan de tratamiento personalizado. Atención integral para toda la familia con cobertura SIS sin costo.',
+    tag: 'Consulta',
   },
 ];
 
@@ -130,7 +130,7 @@ export default function ServiciosPage() {
               <em>Cada tratamiento que ofrecemos parte de ese principio.</em>"
             </blockquote>
             <div className="svc-quote-meta">
-              <span className="svc-quote-org">Hospital San Ramón · Chanchamayo</span>
+              <span className="svc-quote-org">Centro de Salud de San Ramón · Chanchamayo</span>
               <span className="svc-quote-sep">—</span>
               <span className="svc-quote-dept">Servicio de Odontología</span>
             </div>
