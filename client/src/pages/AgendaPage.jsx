@@ -294,8 +294,8 @@ export default function AgendaPage() {
                 <img src={icLight} alt="Urgencias" />
               </div>
               <div>
-                <h2 className="ag-ug-title">Cupos de Urgencia</h2>
-                <p className="ag-ug-sub">Para quienes no pueden esperar</p>
+                <h2 className="ag-ug-title">Cupos Adicionales</h2>
+                <p className="ag-ug-sub">Sin cita previa — de lunes a viernes</p>
               </div>
             </div>
             <div className="ag-ug-items">
