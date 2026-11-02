@@ -43,9 +43,9 @@ export default function EquipoPage() {
         <div className="landing-container">
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '24px',
-            justifyItems: 'center',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 220px))',
+            gap: '20px',
+            justifyContent: 'center',
           }}>
             {TEAM_PHOTOS.map((p, i) => (
               <div
@@ -53,10 +53,9 @@ export default function EquipoPage() {
                 className="landing-reveal-scale"
                 style={{
                   transitionDelay: `${i * 0.1}s`,
-                  borderRadius: '16px',
+                  borderRadius: '12px',
                   overflow: 'hidden',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                  maxWidth: '320px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
                   width: '100%',
                 }}
               >
