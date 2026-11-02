@@ -309,7 +309,7 @@ export default function AgendaPage() {
               </div>
               <div className="ag-ug-item">
                 <div className="ag-ug-bullet"><i className="fa-solid fa-clipboard-list" /></div>
-                <p>Se atienden <strong>después de todos los pacientes citados.</strong></p>
+                <p>Se atienden <strong>después de todos los pacientes citados.</strong> Aproximadamente a partir de las <strong>11:30 a.m.</strong></p>
               </div>
             </div>
           </div>
