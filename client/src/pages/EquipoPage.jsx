@@ -50,7 +50,7 @@ export default function EquipoPage() {
             {TEAM_PHOTOS.map((p, i) => (
               <div
                 key={i}
-                className="landing-reveal-scale"
+                className="landing-reveal-scale equipo-photo-card"
                 style={{
                   transitionDelay: `${i * 0.1}s`,
                   borderRadius: '12px',
