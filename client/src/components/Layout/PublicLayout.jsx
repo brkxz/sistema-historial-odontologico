@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 
 // ── System prompt para modo PACIENTE — enriquecido ──
-const PATIENT_SYSTEM_PROMPT = `Eres "Denty", el asistente virtual inteligente del Servicio de Odontología del Hospital San Ramón, Chanchamayo, Perú. 🦷
+const PATIENT_SYSTEM_PROMPT = `Eres "Denty", el asistente virtual inteligente del Servicio de Odontología del Centro de Salud San Ramón, Chanchamayo, Perú.
 
 ═══════════════════════════════════════════
 PERSONALIDAD Y ESTILO DE COMUNICACIÓN
@@ -122,7 +122,7 @@ DOLOR DE MUELA (Odontalgia):
 ABSCESO DENTAL (infección con hinchazón):
 - Es una URGENCIA. Puede comprometer la vida si se extiende
 - Síntomas: hinchazón de cara/cuello, fiebre, dificultad para abrir la boca o tragar
-- Ir al servicio de emergencias del hospital o contactar al equipo de odontología urgente
+- Ir al servicio de emergencias del Centro de Salud San Ramón o contactar al equipo de odontología urgente
 
 DIENTE CAÍDO (Avulsión por trauma):
 - Recoge el diente por la corona (la parte blanca), NO toques la raíz
@@ -320,7 +320,7 @@ export default function PublicLayout() {
   const [chatMessages, setChatMessages] = useState([
     {
       role: 'assistant',
-      content: '¡Hola! 👋 Soy **Denty**, tu asistente dental virtual del Hospital San Ramón. Puedo ayudarte con:\n\n🦷 **Consultas** sobre salud bucal\n📅 **Citas** (Viernes 7:30 AM)\n💊 **Urgencias** dentales\n✅ **SIS** — atención gratuita\n\n¿En qué puedo ayudarte hoy?',
+      content: '¡Hola! Soy **Denty**, tu asistente dental virtual del Centro de Salud San Ramón. Puedo ayudarte con:\n\n- Consultas sobre salud bucal\n- Citas (Viernes 7:30 AM por WhatsApp)\n- Cupos adicionales (presencial lunes a viernes 7:00 AM)\n- Urgencias dentales\n- SIS — atención gratuita\n\n¿En qué puedo ayudarte hoy?',
       timestamp: Date.now(),
     },
   ]);
@@ -403,7 +403,7 @@ export default function PublicLayout() {
 
       const contents = [
         { role: 'user', parts: [{ text: PATIENT_SYSTEM_PROMPT }] },
-        { role: 'model', parts: [{ text: '¡Hola! 👋 Soy Denty, tu asistente dental virtual del Hospital San Ramón. ¿En qué puedo ayudarte?' }] },
+        { role: 'model', parts: [{ text: '¡Hola! Soy Denty, tu asistente dental virtual del Centro de Salud San Ramón. ¿En qué puedo ayudarte?' }] },
         ...recentMessages.map((msg) => ({
           role: msg.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: msg.content }],
@@ -537,7 +537,7 @@ export default function PublicLayout() {
             <i className="fa-solid fa-tooth" />
             <span>
               Servicio de Odontología
-              <span className="footer-logo-sub">Hospital San Ramón · Chanchamayo</span>
+              <span className="footer-logo-sub">Centro de Salud San Ramón · Chanchamayo</span>
             </span>
           </NavLink>
 
@@ -617,7 +617,7 @@ export default function PublicLayout() {
               <i className="fa-solid fa-right-to-bracket" /> Iniciar Sesión
             </button>
             <span className="landing-login-modal-hint">
-              Solo personal autorizado del hospital
+              Solo personal autorizado del Centro de Salud
             </span>
           </div>
         </div>
